@@ -1,52 +1,57 @@
+// Non-UI stuff.
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
+
+// External UI Components
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+// I have no idea how CSS frameworks like bootstrap or tailwind work.
+import NavDropdown from "react-bootstrap/NavDropdown";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import AutoGraphIcon from "@mui/icons-material/AutoGraph";
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+
+// My UI Components
+import Sidebar from "./components/Sidebar";
 import "./App.css";
+import TasksView from "./views/TasksView/TasksView";
+import HabitsView from "./views/HabitsView/HabitsView";
+import StreaksWatchView from "./views/StreaksWatchView/StreaksWatchView";
+
+const TABS = [
+  { id: "0", name: "Tasks", icon: <AssignmentIcon /> },
+  { id: "1", name: "Habits", icon: <DirectionsRunIcon /> },
+  { id: "2", name: "StreaksWatch", icon: <AutoGraphIcon /> },
+];
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [tab, setTab] = useState("Tasks");
+  const [showSidebar, setSidebar] = useState(true);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
+  function toggleTab(newTab) {
+    setTab(newTab);
   }
 
   return (
-    <div className="container">
-      <h1>Welcome to Tauri!</h1>
-
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <>
+      <div className="container">
+        <button
+          type="button"
+          className="toggle-sidebar-btn"
+          onClick={() => setSidebar(!showSidebar)}
+        >{<FormatListBulletedIcon />}</button>
+        {showSidebar && (
+          <Sidebar tabs={TABS} toggleTab={toggleTab} activeTab={tab} />
+        )}
+        <div className="main-area">
+          {tab === "Tasks" && <TasksView />}
+          {tab === "Habits" && <HabitsView />}
+          {tab === "StreaksWatch" && <StreaksWatchView />}
+        </div>
       </div>
-
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p>{greetMsg}</p>
-    </div>
+    </>
   );
 }
 
