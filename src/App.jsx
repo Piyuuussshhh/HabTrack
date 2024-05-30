@@ -3,11 +3,6 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 
 // External UI Components
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-// I have no idea how CSS frameworks like bootstrap or tailwind work.
-import NavDropdown from "react-bootstrap/NavDropdown";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";

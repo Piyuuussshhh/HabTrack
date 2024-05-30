@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
+/* -------------------------------------------------------------------------- */
+/* ------------------------GENERAL APP-WIDE STYLES--------------------------- */
+/* -------------------------------------------------------------------------- */
+
 *,
 *::after,
 *::before {
@@ -60,9 +64,13 @@ body,
   font-weight: var(--subtext);
 }
 
+/* -------------------------------------------------------------------------- */
+/* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
+/* -------------------------------------------------------------------------- */
+
 .toggle-sidebar-btn {
   position: absolute;
-  top: 10px;
+  bottom: 10px; /* this is a jugaad just because I don't want it to get in the way for now.*/
   left: 20px;
   height: 40px;
   width: 40px;
@@ -95,7 +103,11 @@ body,
   height: 100%;
 }
 
-.sidebar-list {
+/* -------------------------------------------------------------------------- */
+/* ------------------------------SIDEBAR STYLES------------------------------ */
+/* -------------------------------------------------------------------------- */
+
+.sidebar .sidebar-list {
   height: 100%;
   width: 100%;
   /* Let's keep the border, it divides the screen better. */
@@ -117,23 +129,58 @@ body,
   flex-direction: row;
   justify-content: center;
   align-items: center;
+
+  /* The hover works DONOT TOUCH */
+  position: relative;
+  overflow: hidden;
+  z-index: 3;
 }
 
+/* For the smooth transition animation */
+.sidebar-list .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: var(--secondary);
+  transition: transform 0.3s ease;
+  z-index: -1;
+  /* opacity: 0; */
+  transform: translateX(-100%);
+}
+
+.row:hover::before {
+  transform: translateX(0);
+  /* opacity: 1; */
+}
+
+/* idk chatgpt said this is necessary for animation. */
+.row span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+/* Icon of each view on the sidebar. */
 .row #icon {
   flex: 30%;
   display: grid;
   place-items: center;
+  z-index: 1;
 }
 
+/* The name of each view on the sidebar. */
 .row .tab-title {
   flex: 70%;
 }
 
-.sidebar-list .row:hover {
-  cursor: pointer;
-  background-color: var(--bg-color);
-}
-
+/* To show which tab is currently active. */
 .sidebar-list #active {
   background-color: var(--bg-color);
 }
+
+/* -------------------------------------------------------------------------- */
+/* -----------------------------TASK VIEW STYLES----------------------------- */
+/* -------------------------------------------------------------------------- */

@@ -1,5 +1,11 @@
 import React from "react";
 
+/*
+  In props, I pass:
+    -> the names of all the tabs in an array {tabs}
+    -> the active tab that the user is currently viewing {activeTab}
+    -> the function to change the active tab {toggleTab}
+*/
 const Sidebar = (props) => {
   return (
     <div className="sidebar">
@@ -15,7 +21,7 @@ const Sidebar = (props) => {
               }}
             >
               <div id="icon">{tab.icon}</div>
-              <span className="bold tab-title">{tab.name}</span>
+              <span className="tab-title">{tab.name}</span>
             </li>
           );
         })}
