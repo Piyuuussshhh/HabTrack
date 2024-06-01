@@ -1,7 +1,12 @@
-# Tauri + React
+# Build
 
-This template should help get you started developing with Tauri and React in Vite.
+- like install rust
+- install tauri (follow the guide on their getting started page)
+- install tauri-cli (`cargo install tauri-cli`)
+- install node and npm
+- then install vite (`npm install -g vite@latest`)
+- then clone this repo
+- cd into this repo
+- run `npm install`
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- now run the app by running this command `cargo tauri dev`

@@ -1,18 +1,43 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+@font-face {
+  font-family: 'CustFont';
+  src: url('./assets/michelle digital handwritten.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------GENERAL APP-WIDE STYLES--------------------------- */
+/* -------------------------------------------------------------------------- */
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
 }
+
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  --bg-color: #030304;
+  --primary: #15171c;
+  --secondary: #35a0ca;
+  --light: #eeeeee;
+  --grey: #2f3239;
+
+  /* Font weights */
+  --title: 770;
+  --bold: 650;
+  --regular: 400;
+  --subtext: 300;
+
+  font-family: Inter, sans-serif;
+  font-size: 20px;
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  background-color: var(--bg-color);
+  color: var(--light);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,96 +46,348 @@
   -webkit-text-size-adjust: 100%;
 }
 
+:root,
+body,
+#root,
 .container {
   margin: 0;
-  padding-top: 10vh;
+  padding: 0;
+  height: 100%;
+}
+
+.title {
+  font-weight: var(--title);
+}
+
+.bold {
+  font-weight: var(--bold);
+}
+
+.regular {
+  font-weight: var(--regular);
+}
+
+.subtext {
+  font-size: 15px;
+  font-weight: var(--subtext);
+}
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
+/* -------------------------------------------------------------------------- */
+
+.toggle-sidebar-btn {
+  position: absolute;
+  bottom: 10px; /* this is a jugaad just because I don't want it to get in the way for now.*/
+  left: 20px;
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  border-radius: 6px;
+  border-width: 0px;
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--light);
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.container .sidebar {
+  flex: 20%;
+  background-color: var(--primary);
+  height: 100%;
+  max-width: 275px;
+  display: flex;
+}
+
+.container .main-area {
+  flex: 80%;
+  height: 100%;
+  overflow: scroll;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------SIDEBAR STYLES------------------------------ */
+/* -------------------------------------------------------------------------- */
+
+.sidebar .sidebar-list {
+  height: 100%;
+  width: 100%;
+  /* Let's keep the border, it divides the screen better. */
+  border-right: 1px solid black;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
+.sidebar-list .row {
+  cursor: pointer;
+  width: 100%;
+  height: 60px;
+  list-style-type: none;
+  margin: 0;
   display: flex;
+  flex-direction: row;
   justify-content: center;
+  align-items: center;
+
+  /* The hover works DONOT TOUCH */
+  position: relative;
+  overflow: hidden;
+  z-index: 3;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* For the smooth transition animation */
+.sidebar-list .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: var(--secondary);
+  transition: transform 0.3s ease;
+  z-index: -1;
+  /* opacity: 0; */
+  transform: translateX(-100%);
 }
 
-a:hover {
-  color: #535bf2;
+.row:hover::before {
+  transform: translateX(0);
+  /* opacity: 1; */
 }
 
-h1 {
-  text-align: center;
+/* idk chatgpt said this is necessary for animation. */
+.row span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
 }
 
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+/* Icon of each view on the sidebar. */
+.row #icon {
+  flex: 30%;
+  display: grid;
+  place-items: center;
+  z-index: 1;
 }
 
-button {
+/* The name of each view on the sidebar. */
+.row .tab-title {
+  flex: 70%;
+}
+
+/* To show which tab is currently active. */
+.sidebar-list #active {
+  background-color: var(--bg-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* -----------------------------TASK VIEW STYLES----------------------------- */
+/* -------------------------------------------------------------------------- */
+
+/* ------ */
+/* Navbar */
+/* ------ */
+
+.nav {
+  background-color: var(--primary);
+  color: var(--light);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid black;
+}
+
+.nav ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.page-title {
+  margin: 20px 0 20px 0;
+  font-size: 2rem;
+}
+
+/* ---- */
+/* Task */
+/* ---- */
+
+.task-card {
+  width: inherit;
+  /* height: fit-content; */
+  height: inherit;
+  background-color: var(--grey);
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin: 0.5rem;
+  padding: 0 1rem;
+}
+
+/* Checkboxes are a bitch I CANT STYLE IT*/
+.task-card input[type="checkbox"] {
+  flex: 5%;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid black; /* doesnt show squat */
+}
+
+.text-container {
+  flex: 80%;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+.task-card ul {
+  padding: 0;
+  flex: 15%;
+
+  list-style-type: none;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-evenly;
+}
+
+/* ---------- */
+/* Task Group */
+/* ---------- */
+
+.task-area{
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.taskgroup-container {
+  width: 75%;
+  /* height: fit-content; */
+  height: inherit;
+  min-width: 900px;
+  
+
+  background-color: var(--primary);
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(28, 28, 28);
+
+  display: flex;
+  flex-direction: column;
+
+  margin: 0.5rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+}
+
+.taskgroup-container  .taskgroup-container{
+  width: inherit;
+  min-width: 300px;
+}
+
+.btn{
+  background: #3576cc;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 1.2rem;
+  font-family: CustFont, sans-serif;
+  cursor: pointer;
+  outline: inherit;
+  border-radius: 15px;
+  box-shadow: 6px 6px 7px black;
+  
+}
+
+.btn:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+.task-btn{
+  background: #3576bb;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-family: CustFont, sans-serif;
+  font-size: 1.05rem;
+  cursor: pointer;
+  outline: inherit;
+  border-radius: 17px;
+  box-shadow: 6px 6px 7px #000;
+}
+
+.task-btn:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.task-btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+.delete-icon {
+  color: white;
+  border: none;
+  padding:12px;
+  font-size: 24px;
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
+.delete-icon:hover{
+  background: white;
+  color: red;
+  filter: brightness(120%);
+  border-radius: 15px;
 }
 
-#greet-input {
-  margin-right: 5px;
+.delete-icon:active {
+  color: white;
+  box-shadow: inset 2px 2px 10px white;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.edit-icon {
+  color: blue;
+  border:none;
+  padding:12px;
+  font-size: 24px;
+  cursor: pointer;
 }
+
+.edit-icon:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.edit-icon:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+
+
