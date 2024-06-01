@@ -1,11 +1,16 @@
 import React from "react";
 import { nanoid } from "nanoid";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 const Task = (props) => {
   function handleOnDrag(e, task) {
     e.dataTransfer.setData("task", task);
   }
 
+  /*Tried adding the edit symbol, but the entire screen just goes black?*/
+  /* <FontAwesomeIcon icon={faEdit} className="icon edit-icon" /> */
+  
   return (
     <div
       className="task-card"
@@ -23,10 +28,11 @@ const Task = (props) => {
       </div>
       <ul>
         <li>
-          <button>edit</button>
+          <button className="task_btn">Edit</button>
+      
         </li>
         <li>
-          <button>del</button>
+          <FontAwesomeIcon icon={faTrashAlt} className="delete-icon" />
         </li>
       </ul>
     </div>

@@ -1,5 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
+@font-face {
+  font-family: 'CustFont';
+  src: url('./assets/michelle digital handwritten.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------GENERAL APP-WIDE STYLES--------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -11,11 +19,11 @@
 }
 
 :root {
-  --bg-color: #282c34;
-  --primary: #31363f;
-  --secondary: #76abae;
+  --bg-color: #030304;
+  --primary: #15171c;
+  --secondary: #35a0ca;
   --light: #eeeeee;
-  --grey: #3c4048;
+  --grey: #2f3239;
 
   /* Font weights */
   --title: 770;
@@ -193,6 +201,7 @@ body,
 .nav {
   background-color: var(--primary);
   color: var(--light);
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -224,7 +233,7 @@ body,
   height: inherit;
   background-color: var(--grey);
   border-radius: 1rem;
-  box-shadow: 0px 10px 8px rgb(28, 28, 28);
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
 
   display: flex;
   flex-direction: row;
@@ -264,12 +273,29 @@ body,
 /* Task Group */
 /* ---------- */
 
+.Box{
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.TaskArea{
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
 .taskgroup-container {
-  width: inherit;
+  width: 75%;
   /* height: fit-content; */
   height: inherit;
-  max-width: 1000px;
+  min-width: 900px;
+  
 
+  justify-content: center;
   background-color: var(--primary);
   border-radius: 1rem;
   box-shadow: 0px 10px 8px rgb(28, 28, 28);
@@ -281,4 +307,95 @@ body,
   padding-bottom: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
+
 }
+
+.taskgroup-container  .taskgroup-container{
+  width: inherit;
+  min-width: 300px;
+}
+
+.btn{
+  background: #3576cc;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 1.2rem;
+  font-family: CustFont, sans-serif;
+  cursor: pointer;
+  outline: inherit;
+  border-radius: 15px;
+  box-shadow: 6px 6px 7px black;
+  
+}
+
+.btn:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+.task_btn{
+  background: #3576bb;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-family: CustFont, sans-serif;
+  font-size: 1.05rem;
+  cursor: pointer;
+  outline: inherit;
+  border-radius: 17px;
+  box-shadow: 6px 6px 7px #000;
+}
+
+.task_btn:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.task_btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+.delete-icon {
+  color: white;
+  border: none;
+  padding:12px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.delete-icon:hover{
+  background: white;
+  color: red;
+  filter: brightness(120%);
+  border-radius: 15px;
+}
+
+.delete-icon:active {
+  color: white;
+  box-shadow: inset 2px 2px 10px white;
+}
+
+.edit-icon {
+  color: blue;
+  border:none;
+  padding:12px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.edit-icon:hover{
+  filter: brightness(120%);
+  box-shadow: 10px 10px 10px #000;
+}
+
+.edit-icon:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+
+
