@@ -91,16 +91,17 @@ body,
 }
 
 .container .sidebar {
-  flex: 30%;
+  flex: 20%;
   background-color: var(--primary);
   height: 100%;
-  max-width: 300px;
+  max-width: 275px;
   display: flex;
 }
 
 .container .main-area {
-  flex: 70%;
+  flex: 80%;
   height: 100%;
+  overflow: scroll;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -111,7 +112,7 @@ body,
   height: 100%;
   width: 100%;
   /* Let's keep the border, it divides the screen better. */
-  border: 1px solid black;
+  border-right: 1px solid black;
   margin: 0;
   padding: 0;
   display: flex;
@@ -184,3 +185,100 @@ body,
 /* -------------------------------------------------------------------------- */
 /* -----------------------------TASK VIEW STYLES----------------------------- */
 /* -------------------------------------------------------------------------- */
+
+/* ------ */
+/* Navbar */
+/* ------ */
+
+.nav {
+  background-color: var(--primary);
+  color: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid black;
+}
+
+.nav ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.page-title {
+  margin: 20px 0 20px 0;
+  font-size: 2rem;
+}
+
+/* ---- */
+/* Task */
+/* ---- */
+
+.task-card {
+  width: inherit;
+  /* height: fit-content; */
+  height: inherit;
+  background-color: var(--grey);
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(28, 28, 28);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin: 0.5rem;
+  padding: 0 1rem;
+}
+
+/* Checkboxes are a bitch I CANT STYLE IT*/
+.task-card input[type="checkbox"] {
+  flex: 5%;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid black; /* doesnt show squat */
+}
+
+.text-container {
+  flex: 80%;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+.task-card ul {
+  padding: 0;
+  flex: 15%;
+
+  list-style-type: none;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-evenly;
+}
+
+/* ---------- */
+/* Task Group */
+/* ---------- */
+
+.taskgroup-container {
+  width: inherit;
+  /* height: fit-content; */
+  height: inherit;
+  max-width: 1000px;
+
+  background-color: var(--primary);
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(28, 28, 28);
+
+  display: flex;
+  flex-direction: column;
+
+  margin: 0.5rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
