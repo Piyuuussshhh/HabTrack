@@ -25,7 +25,7 @@ const TaskGroup = (props) => {
         handleDragOver(e);
       }}
     >
-      <h3 className="bold">{props.name}</h3>
+      {props.name !== "/" && <h3 className="bold">{props.name}</h3>}
       <div className="subtasks-list">
         {tasksInGroup.map((task) => {
           if (task.type === "task") {
