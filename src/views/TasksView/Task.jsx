@@ -28,7 +28,7 @@ const Task = (props) => {
       </div>
       <ul>
         <li>
-          <button className="task_btn">Edit</button>
+          <button className="task-btn">Edit</button>
       
         </li>
         <li>

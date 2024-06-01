@@ -66,10 +66,10 @@ const TasksView = () => {
   };
 
   return (
-    <div className="Box">
+    <div className="box">
 
       <Navbar />
-      <div className="TaskArea">{renderStructure(structure)}</div>
+      <div className="task-area">{renderStructure(structure)}</div>
     
     </div>
   );
