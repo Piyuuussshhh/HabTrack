@@ -1,22 +1,23 @@
 import React from "react";
-import { nanoid } from "nanoid";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { DragDropContext } from "./DragDropContext";
+import { useContext } from "react";
 
 const Task = (props) => {
-  function handleOnDrag(e, task) {
-    e.dataTransfer.setData("task", task);
-  }
+  // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
+  const { handleOnDrag } = useContext(DragDropContext);
 
   /*Tried adding the edit symbol, but the entire screen just goes black?*/
   /* <FontAwesomeIcon icon={faEdit} className="icon edit-icon" /> */
-  
+
   return (
     <div
       className="task-card"
       draggable
       onDragStart={(e) => {
-        handleOnDrag(e, `${props.name}`);
+        /* A duplicate of this current task is passed to handleOnDrag*/
+        handleOnDrag(e, {id: props.id, name: props.name, type: "task"});
       }}
     >
       <input type="checkbox" id={props.id} />
@@ -29,7 +30,7 @@ const Task = (props) => {
       <ul>
         <li>
           <button className="task-btn">Edit</button>
-      
+
         </li>
         <li>
           <FontAwesomeIcon icon={faTrashAlt} className="delete-icon" />
