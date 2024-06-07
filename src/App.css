@@ -269,8 +269,8 @@ body,
 
 .task-name {
   cursor: pointer;
-  /* user-select doesn't work for some reason */
   -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ---------- */
