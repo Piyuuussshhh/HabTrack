@@ -255,7 +255,6 @@ body,
 
 .text-container {
   flex: 80%;
-  cursor: pointer;
   padding: 1rem;
 }
 
@@ -267,6 +266,10 @@ body,
   display: flex;
   gap: 1rem;
   justify-content: space-evenly;
+}
+
+.task-name {
+  cursor: pointer;
 }
 
 /* ---------- */
