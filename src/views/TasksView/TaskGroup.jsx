@@ -1,40 +1,36 @@
-import React, { useState } from "react";
-import { nanoid } from "nanoid";
+import React, { useContext } from "react";
+
 import Task from "./Task";
+import { DragDropContext } from "./DragDropContext";
 
-const TaskGroup = (props) => {
-  const [tasksInGroup, setTasksInGroup] = useState(props.subtasks);
+const ROOT = "/";
 
-  function handleOnDrop(e) {
-    // TODO: handle drop of taskgroups too.
-    const newTask = e.dataTransfer.getData("task");
-    setTasksInGroup([...tasksInGroup, newTask]);
-  }
+const TaskGroup = ({key, id, name, children}) => {
+  const { handleOnDrop } = useContext(DragDropContext);
 
-  function handleDragOver(e) {
-    e.preventDefault();
-  }
   return (
     <div
       className="taskgroup-container"
       draggable
       onDrop={(e) => {
-        handleOnDrop(e);
+        handleOnDrop(e, id);
       }}
-      onDragOver={(e) => {
-        handleDragOver(e);
-      }}
+      onDragOver={(e) => e.preventDefault()}
     >
-      {props.name !== "/" && <h3 className="bold">{props.name}</h3>}
+      {name !== ROOT && <h3 className="bold">{name}</h3>}
       <div className="subtasks-list">
-        {tasksInGroup.map((task) => {
-          if (task.type === "task") {
-            return (<Task name={task.name} id={task.id} key={task.id} />);
+        {children.map((child) => {
+          if (child.type === "task") {
+            return <Task name={child.name} id={child.id} key={child.id} />;
           } else {
-            return (<TaskGroup key={task.id}
-              id={task.id}
-              name={task.name}
-              subtasks={task.children}/>)
+            return (
+              <TaskGroup
+                key={child.id}
+                id={child.id}
+                name={child.name}
+                children={child.children}
+              />
+            );
           }
         })}
       </div>
