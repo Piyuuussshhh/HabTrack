@@ -17,10 +17,13 @@
     "@mui/icons-material": "^5.15.18",
     "@mui/material": "^5.15.18",
     "@tauri-apps/api": "^1",
+    "anychart": "^8.12.1",
     "bootstrap": "^5.3.3",
+    "github-contributions-canvas": "^0.7.0",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
+    "react-calendar-heatmap": "^1.9.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
