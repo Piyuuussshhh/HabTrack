@@ -16,14 +16,19 @@ const TasksView = () => {
         <DragDropProvider>
           <DragDropContext.Consumer>
             {/* This structure = initialStructure from DragDropContext.jsx */}
-            {({ structure }) => (
-              <TaskGroup
-                key={structure.id}
-                id={structure.id}
-                name={structure.name}
-                children={structure.children}
-              />
-            )}
+            {/* Null check to ensure structure is populated w contents of db */}
+            {({ structure }) =>
+              structure ? (
+                <TaskGroup
+                  key={structure.id}
+                  id={structure.id}
+                  name={structure.name}
+                  children={structure.children}
+                />
+              ) : (
+                <p>loading...</p>
+              )
+            }
           </DragDropContext.Consumer>
         </DragDropProvider>
       </div>

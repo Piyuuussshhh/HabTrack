@@ -1,40 +1,35 @@
-import React, { createContext, useState } from "react";
+import { invoke } from "@tauri-apps/api";
+import React, { createContext, useEffect, useState } from "react";
 
 const DragDropContext = createContext();
 
 // TODO: Import task data from database here.
 
 const DragDropProvider = ({ children }) => {
-  const initialStructure = {
-    id: "0",
-    type: "group",
-    name: "/",
-    children: [
-      { id: "1", type: "task", name: "Cook food" },
-      { id: "2", type: "task", name: "Take meds" },
-      {
-        id: "3",
-        type: "group",
-        name: "Programming",
-        children: [
-          { id: "4", type: "task", name: "learn react" },
-          { id: "5", type: "task", name: "learn rust" },
-          {
-            id: "6",
-            type: "group",
-            name: "WebDev",
-            children: [
-              { id: "7", type: "task", name: "learn HTML" },
-              { id: "8", type: "task", name: "learn CSS" },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-
-  const [structure, setStructure] = useState(initialStructure);
+  const [structure, setStructure] = useState();
   const [draggedItem, setDraggedItem] = useState(null);
+
+  useEffect(() => {
+    console.log("in useEffect in DragDropContext");
+    async function fetchTasks() {
+      try {
+        console.log("fetching data...");
+        const response = await invoke("get_tasks_view");
+        const data = JSON.parse(response);
+        console.log(`fetched data: ${data.name}`);
+
+        setStructure(data);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    }
+
+    fetchTasks();
+
+    // THE EMPTY DEPENDENCY ARRAY AS THE SECOND ARGUMENT OF
+    // useEffect() IS VERY IMPORTANT BECAUSE IT STOPS THE
+    // FUNCTION FROM RUNNING A BAJILLION TIMES.
+  }, []);
 
   const handleOnDrag = (event, item) => {
     event.dataTransfer.setData("text/plain", item.id);
