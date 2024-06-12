@@ -5,6 +5,7 @@ import { DragDropContext } from "./DragDropContext";
 
 const ROOT = "/";
 const TASK = "Task";
+const TASK_GROUP = "TaskGroup";
 
 const TaskGroup = ({ id, name, children }) => {
   const { handleOnDrop } = useContext(DragDropContext);
@@ -24,7 +25,7 @@ const TaskGroup = ({ id, name, children }) => {
           {children.map((child) => {
             if (child.type === TASK) {
               return <Task name={child.name} id={child.id} key={child.id} />;
-            } else {
+            } else if (child.type === TASK_GROUP) {
               return (
                 <TaskGroup
                   key={child.id}

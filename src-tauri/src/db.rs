@@ -101,7 +101,7 @@ pub mod ops {
 
     use super::{DB_SINGLETON, ROOT_GROUP, ROOT_GROUP_ID};
 
-    #[derive(Serialize, Debug, Clone)]
+    #[derive(Serialize, Debug, Clone, Copy)]
     #[serde(tag = "type")]
     pub enum Type {
         Task,
@@ -182,11 +182,51 @@ pub mod ops {
             Ok(())
         }
 
-        pub fn fetch_task_records(&self) -> Result<HashMap<u64, TaskRecord>> {
+        /// Forms the nested root TaskGroup containing all tasks/groups expected by frontend.
+        /// Uses DFS traversal.
+        fn get_final_structure(
+            &self,
+            id: u64,
+            children_map: &mut HashMap<u64, Vec<TaskRecord>>,
+            group_info: &HashMap<u64, String>,
+        ) -> TaskRecord {
+            let mut final_children: Vec<TaskRecord> = Vec::new();
+
+            if let Some(children) = children_map.remove(&id) {
+                for child in children {
+                    match child.task_record_type {
+                        Type::Task => final_children.push(child),
+                        Type::TaskGroup => final_children.push(self.get_final_structure(
+                            child.id,
+                            children_map,
+                            group_info,
+                        )),
+                    }
+                }
+            }
+
+            let record_name = group_info.get(&id).cloned().unwrap();
+
+            if final_children.is_empty() {
+                return TaskRecord::new(id, record_name, Type::TaskGroup, None, None, None);
+            }
+
+            TaskRecord::new(
+                id,
+                record_name,
+                Type::TaskGroup,
+                None,
+                None,
+                Some(final_children),
+            )
+        }
+
+        pub fn fetch_tasks_view(&self) -> Result<TaskRecord> {
             let mut stmt = self
                 .conn
                 .prepare("SELECT id, name, type, is_active, parent_group_id FROM today")?;
 
+            // Fetch all rows from the database.
             let task_record_iter = stmt.query_map([], |row| {
                 let id: u64 = row.get(0)?;
                 let name: String = row.get(1)?;
@@ -210,9 +250,15 @@ pub mod ops {
                     _ => panic!("Unknown task_record type"),
                 };
 
+                println!(
+                    "{}\t{}\t{:?}\t{:?}\t{:?}",
+                    id, name, task_record_type, is_active, parent_group_id
+                );
+
                 Ok((id, name, task_record_type, is_active, parent_group_id))
             })?;
 
+            // Holds the rows mapped by their ids.
             let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
             let mut parent_map: HashMap<u64, Vec<u64>> = HashMap::new();
 
@@ -220,7 +266,7 @@ pub mod ops {
                 let (id, name, task_record_type, is_active, parent_group_id) = task_record?;
                 task_records.insert(
                     id,
-                    TaskRecord::new(id, name, task_record_type.clone(), is_active, parent_group_id, {
+                    TaskRecord::new(id, name, task_record_type, is_active, parent_group_id, {
                         match task_record_type {
                             Type::Task => None,
                             Type::TaskGroup => Some(vec![]),
@@ -228,22 +274,23 @@ pub mod ops {
                     }),
                 );
                 if let Some(pid) = parent_group_id {
-                    parent_map
-                        .entry(pid.clone())
-                        .or_insert_with(Vec::new)
-                        .push(id);
+                    parent_map.entry(pid).or_insert_with(Vec::new).push(id);
                 }
             }
 
             dbg!(&task_records);
+            dbg!(&parent_map);
+            let temp = task_records.clone();
 
-            // Separate map to hold children temporarily.
+            // Holds the children of a group temporarily.
             let mut children_map: HashMap<u64, Vec<TaskRecord>> = HashMap::new();
 
             // Collect children from task_records into children_map.
             for (parent_group_id, children_ids) in parent_map {
+                println!("setting children of group {parent_group_id}");
                 for child_id in children_ids {
                     if let Some(child) = task_records.remove(&child_id) {
+                        println!("adding {child:?} to children_map");
                         children_map
                             .entry(parent_group_id)
                             .or_insert_with(Vec::new)
@@ -252,21 +299,23 @@ pub mod ops {
                 }
             }
 
-            // Move children from children_map to their respective parents in task_records.
-            for (parent_group_id, children_temp) in children_map {
-                // Grab the parent from the task_records.
-                if let Some(parent) = task_records.get_mut(&parent_group_id) {
-                    // If the parent is a group, get their children vector.
-                    if let Some(children_vec) = &mut parent.children {
-                        // Add the child to the parent's children vector.
-                        children_vec.extend(children_temp);
-                    }
-                }
+            dbg!(&children_map);
+
+            // Holds the names of all groups with non-null (Some) children.
+            let mut group_names: HashMap<u64, String> = HashMap::new();
+            for id in children_map.keys() {
+                println!("id = {id}");
+                let name = temp.get(&id).unwrap().name.clone();
+                println!("found {name}");
+                group_names.insert(*id, name);
             }
 
             dbg!(&task_records);
+            dbg!(&group_names);
 
-            Ok(task_records)
+            let root = self.get_final_structure(0, &mut children_map, &group_names);
+
+            Ok(root)
         }
     }
 
@@ -331,24 +380,12 @@ pub mod ops {
     pub fn get_tasks_view() -> String {
         let db = DB_SINGLETON.lock().unwrap();
 
-        match db.fetch_task_records() {
-            Ok(task_records) => {
-                if task_records.is_empty() {
-                    println!("table is empty");
-                    // Default view: Root group with no children.
-                    serde_json::json!({"id": "0", "name": "/", "type": "task", "children": []})
-                        .to_string()
-                } else {
-                    let root_group = task_records
-                        .get(&ROOT_GROUP_ID)
-                        .ok_or(rusqlite::Error::InvalidQuery)
-                        .expect("[ERROR] Could not fetch root group from task_records.");
+        match db.fetch_tasks_view() {
+            Ok(root) => {
+                let res = serde_json::to_string(&root)
+                    .expect("[ERROR] Cannot parse the root group into JSON.");
 
-                    let res = serde_json::to_string(root_group)
-                        .expect("[ERROR] Cannot parse the root group into JSON.");
-
-                    return res;
-                }
+                return res;
             }
             Err(e) => {
                 // Return a JSON indicating an error occurred
