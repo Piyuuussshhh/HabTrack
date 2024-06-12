@@ -39,36 +39,28 @@ pub mod init {
 
         pub fn init(&self) {
             if !self.db_file_exists() {
-                println!("db not found, thus creating it");
                 self.create_db_file();
-            } else {
-                println!("db found! nothing to initialize");
-            };
+            }
         }
 
         // Create the database file.
         fn create_db_file(&self) {
             let db_path = self.get_db_path();
             let db_dir = Path::new(&db_path).parent().unwrap();
-            println!("parent dir: {db_dir:?}");
 
             // If the parent directory does not exist, create it.
             if !db_dir.exists() {
-                println!("creating parent dir as it doesn't exist");
                 fs::create_dir_all(db_dir).unwrap();
             }
 
             // Create the database file.
             fs::File::create(db_path).unwrap();
-            println!("db created!");
         }
 
         // Check whether the database file exists.
         fn db_file_exists(&self) -> bool {
             let db_path = self.get_db_path();
             let res = Path::new(&db_path).exists();
-
-            println!("db file exists: {res}");
 
             return res;
         }
@@ -79,7 +71,6 @@ pub mod init {
             let app = &self.app_handle;
             if let Some(path) = app.path_resolver().app_data_dir() {
                 res = format!("{}/{DB_NAME}", path.to_string_lossy().into_owned());
-                println!("db path: {res}");
             }
 
             res
@@ -190,12 +181,17 @@ pub mod ops {
             children_map: &mut HashMap<u64, Vec<TaskRecord>>,
             group_info: &HashMap<u64, String>,
         ) -> TaskRecord {
+            // This will hold all the children (including descendents) of a parent group.
             let mut final_children: Vec<TaskRecord> = Vec::new();
 
+            // Access the children of the parent whose id = function parameter id.
             if let Some(children) = children_map.remove(&id) {
+                // Iterate through each child.
                 for child in children {
                     match child.task_record_type {
+                        // If the child is a task, simply push it in.
                         Type::Task => final_children.push(child),
+                        // If it's a group, set its children before pushing it in.
                         Type::TaskGroup => final_children.push(self.get_final_structure(
                             child.id,
                             children_map,
@@ -207,10 +203,13 @@ pub mod ops {
 
             let record_name = group_info.get(&id).cloned().unwrap();
 
+            // Can only happen when no tasks have been set previously.
             if final_children.is_empty() {
                 return TaskRecord::new(id, record_name, Type::TaskGroup, None, None, None);
             }
 
+            // Finally, return the group formed.
+            // In the end, the root group is returned with all the children nested correctly.
             TaskRecord::new(
                 id,
                 record_name,
@@ -221,6 +220,7 @@ pub mod ops {
             )
         }
 
+        /// Retrieve the data from the db and return it in the nested, expected format.
         pub fn fetch_tasks_view(&self) -> Result<TaskRecord> {
             let mut stmt = self
                 .conn
@@ -250,11 +250,6 @@ pub mod ops {
                     _ => panic!("Unknown task_record type"),
                 };
 
-                println!(
-                    "{}\t{}\t{:?}\t{:?}\t{:?}",
-                    id, name, task_record_type, is_active, parent_group_id
-                );
-
                 Ok((id, name, task_record_type, is_active, parent_group_id))
             })?;
 
@@ -278,8 +273,6 @@ pub mod ops {
                 }
             }
 
-            dbg!(&task_records);
-            dbg!(&parent_map);
             let temp = task_records.clone();
 
             // Holds the children of a group temporarily.
@@ -287,10 +280,8 @@ pub mod ops {
 
             // Collect children from task_records into children_map.
             for (parent_group_id, children_ids) in parent_map {
-                println!("setting children of group {parent_group_id}");
                 for child_id in children_ids {
                     if let Some(child) = task_records.remove(&child_id) {
-                        println!("adding {child:?} to children_map");
                         children_map
                             .entry(parent_group_id)
                             .or_insert_with(Vec::new)
@@ -299,21 +290,18 @@ pub mod ops {
                 }
             }
 
-            dbg!(&children_map);
-
             // Holds the names of all groups with non-null (Some) children.
-            let mut group_names: HashMap<u64, String> = HashMap::new();
-            for id in children_map.keys() {
-                println!("id = {id}");
-                let name = temp.get(&id).unwrap().name.clone();
-                println!("found {name}");
-                group_names.insert(*id, name);
-            }
+            let parent_group_names = {
+                let mut names: HashMap<u64, String> = HashMap::new();
+                for id in children_map.keys() {
+                    let name = temp.get(&id).unwrap().name.clone();
+                    names.insert(*id, name);
+                }
 
-            dbg!(&task_records);
-            dbg!(&group_names);
+                names
+            };
 
-            let root = self.get_final_structure(0, &mut children_map, &group_names);
+            let root = self.get_final_structure(0, &mut children_map, &parent_group_names);
 
             Ok(root)
         }
