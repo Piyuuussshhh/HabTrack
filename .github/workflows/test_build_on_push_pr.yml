@@ -46,6 +46,15 @@ jobs:
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
+      - name: setup sqlite (windows only)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          choco install sqlite
+          setx /M PATH "%PATH%;C:\tools\sqlite"
+        env:
+          SQLITE_LIB_DIR: C:\tools\sqlite
+          SQLITE_INCLUDE_DIR: C:\tools\sqlite\include
+
       - name: install frontend dependencies
         run: npm install # Change this to npm, pnpm, or bun depending on which one you use.
 
