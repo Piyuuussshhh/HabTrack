@@ -1,4 +1,5 @@
 import React from "react";
+import CalendarChart from "./Cal-chart";
 
 const StreaksWatchView = () => {
   const data = [
@@ -11,6 +12,7 @@ const StreaksWatchView = () => {
   return (
     <div>
       <h1>GitHub Contributions Graph</h1>
+      <CalendarChart data={data} />
     </div>
   );
 };
