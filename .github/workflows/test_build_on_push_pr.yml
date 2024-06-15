@@ -20,8 +20,7 @@ jobs:
             args: "--target x86_64-apple-darwin"
           - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ""
-          - platform: "windows-latest"
-            args: ""
+            # No windows cuz WE HATE WINDOWS, IT SUCKS NOTHING BUILDS
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -45,15 +44,6 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
-
-      - name: setup sqlite (windows only)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          choco install sqlite
-          setx /M PATH "%PATH%;C:\tools\sqlite"
-        env:
-          SQLITE_LIB_DIR: C:\tools\sqlite
-          SQLITE_INCLUDE_DIR: C:\tools\sqlite\include
 
       - name: install frontend dependencies
         run: npm install # Change this to npm, pnpm, or bun depending on which one you use.
