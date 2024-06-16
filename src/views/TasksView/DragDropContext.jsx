@@ -3,10 +3,10 @@ import React, { createContext, useEffect, useState } from "react";
 
 const TASK = "Task";
 const TASK_GROUP = "TaskGroup";
+const TASKS_VIEW = "view";
+const TAURI_FETCH_TASKS = "get_tasks_view";
 
 const DragDropContext = createContext();
-
-// TODO: Import task data from database here.
 
 const DragDropProvider = ({ children }) => {
   const [structure, setStructure] = useState();
@@ -14,12 +14,22 @@ const DragDropProvider = ({ children }) => {
 
   useEffect(() => {
     console.log("in useEffect in DragDropContext");
+
     async function fetchTasks() {
+      const storedTasks = sessionStorage.getItem(TASKS_VIEW);
+      if (storedTasks) {
+        console.log("View fetched from sessionStorage.");
+        setStructure(JSON.parse(storedTasks));
+        return;
+      }
       try {
         console.log("fetching data...");
-        const response = await invoke("get_tasks_view");
+        const response = await invoke(TAURI_FETCH_TASKS);
         const data = JSON.parse(response);
         console.log(`fetched data: ${data.name}`);
+
+        // Set sessionStorage.
+        sessionStorage.setItem(TASKS_VIEW, response);
 
         setStructure(data);
       } catch (error) {
@@ -42,7 +52,8 @@ const DragDropProvider = ({ children }) => {
   const handleOnDrop = (event, targetId) => {
     event.preventDefault();
     event.stopPropagation();
-    // DraggedItemID is a string for whatever reason, convert it to number.
+    // droppedItemID is a string for whatever reason, convert it to number.
+    // basically event.dataTransfer.getData() always returns a string.
     const droppedItemId = Number(event.dataTransfer.getData("text/plain"));
     console.log(`droppedItemId: ${droppedItemId}`);
     console.log(`targetId: ${targetId}`);
@@ -50,7 +61,7 @@ const DragDropProvider = ({ children }) => {
     setStructure((prevStructure) => {
       const newStructure = JSON.parse(JSON.stringify(prevStructure));
 
-      // Helper function to find and remove the item from its original location
+      // Helper function to find and remove the item from its original location.
       const removeItem = (id, node) => {
         if (node.children) {
           node.children = node.children.filter((child) => child.id !== id);

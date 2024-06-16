@@ -173,6 +173,8 @@ pub mod ops {
             Ok(())
         }
 
+        // TODO: get_final_structure() is recursive, an iterative alternative exists.
+
         /// Forms the nested root TaskGroup containing all tasks/groups expected by frontend.
         /// Uses DFS traversal.
         fn get_final_structure(
