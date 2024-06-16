@@ -4,7 +4,7 @@ import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { DragDropContext } from "./DragDropContext";
 import { useContext } from "react";
 
-const TASK = "Task";
+import { TASK } from "../../Constants";
 
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.

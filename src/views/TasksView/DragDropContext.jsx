@@ -1,10 +1,12 @@
 import { invoke } from "@tauri-apps/api";
 import React, { createContext, useEffect, useState } from "react";
 
-const TASK = "Task";
-const TASK_GROUP = "TaskGroup";
-const TASKS_VIEW = "view";
-const TAURI_FETCH_TASKS = "get_tasks_view";
+import {
+  TASKS_VIEW,
+  TAURI_FETCH_TASKS,
+  TASK,
+  TASK_GROUP,
+} from "../../Constants";
 
 const DragDropContext = createContext();
 

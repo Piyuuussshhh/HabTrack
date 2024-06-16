@@ -1,11 +1,8 @@
 import React, { useContext } from "react";
 
+import { ROOT, TASK, TASK_GROUP } from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
-
-const ROOT = "/";
-const TASK = "Task";
-const TASK_GROUP = "TaskGroup";
 
 const TaskGroup = ({ id, name, children }) => {
   const { handleOnDrop } = useContext(DragDropContext);
@@ -13,7 +10,6 @@ const TaskGroup = ({ id, name, children }) => {
   return (
     <div
       className="taskgroup-container"
-      draggable
       onDrop={(e) => {
         handleOnDrop(e, id);
       }}

@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "./Navbar";
 
+import { TASKS_VIEW } from "../../Constants";
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
 
@@ -8,6 +9,12 @@ import { DragDropProvider, DragDropContext } from "./DragDropContext";
 // THIS IS CHANGED. NOW YOU HAVE TO INVOKE TASK IN DragDropProvider.jsx
 
 const TasksView = () => {
+  function add() {
+    // Add task/group.
+
+    sessionStorage.removeItem(TASKS_VIEW);
+  }
+
   return (
     <div className="box">
       <Navbar />
