@@ -8,9 +8,10 @@ use lazy_static::lazy_static;
 use std::sync::Mutex;
 
 const DB_NAME: &str = "database.sqlite";
-const DB_PATH: &str = "/home/nvmpiyush2/.local/share/com.tauri.dev/database.sqlite";
+// This needs to go.
+const DB_PATH: &str = "/home/nvmpiyush2/.local/share/com.habtrack.dev/database.sqlite";
 const ROOT_GROUP: &str = "/";
-const ROOT_GROUP_ID: u64 = 0;
+// const ROOT_GROUP_ID: u64 = 0;
 const TASK: &str = "Task";
 const TASK_GROUP: &str = "TaskGroup";
 
@@ -79,18 +80,14 @@ pub mod init {
 }
 
 pub mod ops {
-    use std::{
-        collections::HashMap,
-        hash::{DefaultHasher, Hash, Hasher},
-    };
+    use std::collections::HashMap;
 
     use rusqlite::{params, Connection, Result};
     use serde::Serialize;
-    use uuid::Uuid;
 
     use crate::db::{TASK, TASK_GROUP};
 
-    use super::{DB_SINGLETON, ROOT_GROUP, ROOT_GROUP_ID};
+    use super::{DB_SINGLETON, ROOT_GROUP};
 
     #[derive(Serialize, Debug, Clone, Copy)]
     #[serde(tag = "type")]
@@ -159,7 +156,7 @@ pub mod ops {
 
                 parent_group_id stores the ID of the parent group.
             */
-            self.conn.execute(
+            let num_rows_changed = self.conn.execute(
                 "CREATE TABLE IF NOT EXISTS today (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -169,6 +166,14 @@ pub mod ops {
             )",
                 [],
             )?;
+
+            // Only add the root group when the table is created for the first time.
+            if num_rows_changed != 0 {
+                self.conn.execute(
+                    "INSERT INTO today (id, name, type) VALUES (0, '/', 'TaskGroup')",
+                    [],
+                )?;
+            }
 
             Ok(())
         }
@@ -181,7 +186,7 @@ pub mod ops {
             &self,
             id: u64,
             children_map: &mut HashMap<u64, Vec<TaskRecord>>,
-            group_info: &HashMap<u64, String>,
+            group_info: &HashMap<u64, TaskRecord>,
         ) -> TaskRecord {
             // This will hold all the children (including descendents) of a parent group.
             let mut final_children: Vec<TaskRecord> = Vec::new();
@@ -203,12 +208,7 @@ pub mod ops {
                 }
             }
 
-            let record_name = group_info.get(&id).cloned().unwrap();
-
-            // Can only happen when no tasks have been set previously.
-            if final_children.is_empty() {
-                return TaskRecord::new(id, record_name, Type::TaskGroup, None, None, None);
-            }
+            let record_name = group_info.get(&id).cloned().unwrap().name;
 
             // Finally, return the group formed.
             // In the end, the root group is returned with all the children nested correctly.
@@ -292,77 +292,50 @@ pub mod ops {
                 }
             }
 
-            // Holds the names of all groups with non-null (Some) children.
-            let parent_group_names = {
-                let mut names: HashMap<u64, String> = HashMap::new();
-                for id in children_map.keys() {
-                    let name = temp.get(&id).unwrap().name.clone();
-                    names.insert(*id, name);
-                }
-
-                names
-            };
-
-            let root = self.get_final_structure(0, &mut children_map, &parent_group_names);
+            let root = self.get_final_structure(0, &mut children_map, &temp);
 
             Ok(root)
         }
     }
 
-    // Generates a 64 bit ALMOST ALWAYS unique ID for all tasks/groups.
-    fn generate_id() -> u64 {
-        let uuid = Uuid::new_v4();
-        let mut hasher = DefaultHasher::new();
-        uuid.hash(&mut hasher);
-        hasher.finish()
-    }
-
-    #[tauri::command]
-    pub fn add_task(table: &str, name: &str, parent_group_id: &str) {
+    #[tauri::command(rename_all = "snake_case")]
+    pub fn add_task(table: &str, name: &str, parent_group_id: u64) {
+        println!("Received args: {table}\t{name}\t{parent_group_id}");
         let db = DB_SINGLETON.lock().unwrap();
-
-        let task_id = generate_id();
 
         let command = format!(
-            "INSERT INTO {table} (id, name, type, is_active, parent_group_id) VALUES (?1, ?2, ?3, ?4, ?5)"
+            "INSERT INTO {table} (name, type, is_active, parent_group_id) VALUES (?1, ?2, ?3, ?4)"
         );
-        db.conn
-            .execute(
-                &command,
-                params![&task_id, name, TASK, false, parent_group_id],
-            )
-            .expect("[ERROR] Insertion of task failed.");
+        match db
+            .conn
+            .execute(&command, params![name, TASK, 1u64, parent_group_id])
+        {
+            Ok(_) => println!("added task"),
+            Err(err) => println!("{}", err.to_string()),
+        }
     }
 
-    #[tauri::command]
-    pub fn add_task_group(table: &str, name: &str, parent_group_id: &str) {
+    #[tauri::command(rename_all = "snake_case")]
+    pub fn add_task_group(table: &str, name: &str, parent_group_id: u64) {
+        println!("Received args: {table}\t{name}\t{parent_group_id}");
         let db = DB_SINGLETON.lock().unwrap();
-
-        let task_group_id = {
-            match name {
-                // Root group.
-                "/" => ROOT_GROUP_ID,
-                // Non root-group.
-                _ => generate_id(),
-            }
-        };
 
         // When the group is ROOT.
         if name == ROOT_GROUP {
-            let command = format!("INSERT INTO {table} (id, name, type) VALUES (?1, ?2, ?3)");
+            let command = format!("INSERT INTO {table} (name, type) VALUES (?1, ?2)");
             db.conn
-                .execute(&command, params![&task_group_id, name, TASK_GROUP])
+                .execute(&command, params![name, TASK_GROUP])
                 .expect("[ERROR] Insertion of root group failed.");
         } else {
-            let command = format!(
-                "INSERT INTO {table} (id, name, type, parent_group_id) VALUES (?1, ?2, ?3, ?4)"
-            );
-            db.conn
-                .execute(
-                    &command,
-                    params![&task_group_id, name, TASK_GROUP, parent_group_id],
-                )
-                .expect("[ERROR] Insertion of group failed.");
+            let command =
+                format!("INSERT INTO {table} (name, type, parent_group_id) VALUES (?1, ?2, ?3)");
+            match db
+                .conn
+                .execute(&command, params![name, TASK_GROUP, parent_group_id])
+            {
+                Ok(_) => println!("added group"),
+                Err(err) => println!("{}", err.to_string()),
+            }
         }
     }
 

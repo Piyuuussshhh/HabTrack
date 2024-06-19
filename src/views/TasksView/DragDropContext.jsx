@@ -1,50 +1,16 @@
-import { invoke } from "@tauri-apps/api";
 import React, { createContext, useEffect, useState } from "react";
 
-import {
-  TASKS_VIEW,
-  TAURI_FETCH_TASKS,
-  TASK,
-  TASK_GROUP,
-} from "../../Constants";
+import { TASK, TASK_GROUP } from "../../Constants";
 
 const DragDropContext = createContext();
 
-const DragDropProvider = ({ children }) => {
+const DragDropProvider = ({ children, item }) => {
   const [structure, setStructure] = useState();
   const [draggedItem, setDraggedItem] = useState(null);
 
   useEffect(() => {
-    console.log("in useEffect in DragDropContext");
-
-    async function fetchTasks() {
-      const storedTasks = sessionStorage.getItem(TASKS_VIEW);
-      if (storedTasks) {
-        console.log("View fetched from sessionStorage.");
-        setStructure(JSON.parse(storedTasks));
-        return;
-      }
-      try {
-        console.log("fetching data...");
-        const response = await invoke(TAURI_FETCH_TASKS);
-        const data = JSON.parse(response);
-        console.log(`fetched data: ${data.name}`);
-
-        // Set sessionStorage.
-        sessionStorage.setItem(TASKS_VIEW, response);
-
-        setStructure(data);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    }
-
-    fetchTasks();
-
-    // THE EMPTY DEPENDENCY ARRAY AS THE SECOND ARGUMENT OF
-    // useEffect() IS VERY IMPORTANT BECAUSE IT STOPS THE
-    // FUNCTION FROM RUNNING A BAJILLION TIMES.
-  }, []);
+    setStructure(item);
+  }, [item]);
 
   const handleOnDrag = (event, item) => {
     event.dataTransfer.setData("text/plain", item.id);
@@ -66,7 +32,17 @@ const DragDropProvider = ({ children }) => {
       // Helper function to find and remove the item from its original location.
       const removeItem = (id, node) => {
         if (node.children) {
-          node.children = node.children.filter((child) => child.id !== id);
+          node.children = node.children.filter((child) => {
+            console.log("child.id: " + child.id + " " + "droppedItemId: " + id);
+            console.log(
+              "typeof child.id: " +
+                typeof child.id +
+                " " +
+                "typeof droppedItemId: " +
+                typeof id
+            );
+            return child.id !== id;
+          });
           // If item not found in node.children, search and remove it from each child of node.children.
           node.children.forEach((child) => removeItem(id, child));
         }
@@ -75,6 +51,14 @@ const DragDropProvider = ({ children }) => {
 
       // Helper function to find the target group and add the item.
       const addItem = (item, targetId, node) => {
+        console.log("node.id: " + node.id + " " + "targetId: " + targetId);
+        console.log(
+          "typeof node.id: " +
+            typeof node.id +
+            " " +
+            "typeof targetId: " +
+            typeof targetId
+        );
         if (node.id === targetId) {
           if (!node.children) node.children = [];
           node.children.push(item);

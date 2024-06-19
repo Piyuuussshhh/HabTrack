@@ -15,14 +15,17 @@ import TasksView from "./views/TasksView/TasksView";
 import HabitsView from "./views/HabitsView/HabitsView";
 import StreaksWatchView from "./views/StreaksWatchView/StreaksWatchView";
 
+// Constants.
+import { TASKS_VIEW, HABITS_VIEW, STREAKS_VIEW } from "./Constants";
+
 const TABS = [
-  { id: "0", name: "Tasks", icon: <AssignmentIcon /> },
-  { id: "1", name: "Habits", icon: <DirectionsRunIcon /> },
-  { id: "2", name: "StreaksWatch", icon: <AutoGraphIcon /> },
+  { id: "0", name: TASKS_VIEW, icon: <AssignmentIcon /> },
+  { id: "1", name: HABITS_VIEW, icon: <DirectionsRunIcon /> },
+  { id: "2", name: STREAKS_VIEW, icon: <AutoGraphIcon /> },
 ];
 
 function App() {
-  const [tab, setTab] = useState("Tasks");
+  const [tab, setTab] = useState(TASKS_VIEW);
   const [showSidebar, setSidebar] = useState(true);
 
   function toggleTab(newTab) {
@@ -41,9 +44,9 @@ function App() {
           <Sidebar tabs={TABS} toggleTab={toggleTab} activeTab={tab} />
         )}
         <div className="main-area">
-          {tab === "Tasks" && <TasksView />}
-          {tab === "Habits" && <HabitsView />}
-          {tab === "StreaksWatch" && <StreaksWatchView />}
+          {tab === TASKS_VIEW && <TasksView />}
+          {tab === HABITS_VIEW && <HabitsView />}
+          {tab === STREAKS_VIEW && <StreaksWatchView />}
         </div>
       </div>
     </>

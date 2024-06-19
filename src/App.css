@@ -93,6 +93,7 @@ p {
   justify-content: center;
   align-items: center;
   color: var(--light);
+  z-index: 1;
 }
 
 .container {
@@ -129,6 +130,7 @@ p {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  z-index: 0;
 }
 
 .sidebar-list .row {
@@ -194,6 +196,45 @@ p {
 }
 
 /* -------------------------------------------------------------------------- */
+/* ------------------------------MODAL STYLES-------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: var(--secondary);
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 80%;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.option-buttons button {
+  margin: 0 5px;
+}
+
+.option-buttons .active {
+  background-color: #007bff;
+  color: white;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* -------------------------------------------------------------------------- */
 /* -----------------------------TASK VIEW STYLES----------------------------- */
 /* -------------------------------------------------------------------------- */
 
@@ -235,6 +276,7 @@ p {
   /* height: fit-content; */
   height: inherit;
   background-color: var(--grey);
+  border: 1px solid black;
   border-radius: 1rem;
   box-shadow: 0px 10px 8px rgb(0, 0, 0);
 
