@@ -8,16 +8,17 @@ use lazy_static::lazy_static;
 use std::sync::Mutex;
 
 const DB_NAME: &str = "database.sqlite";
-// This needs to go.
-const DB_PATH: &str = "/home/nvmpiyush2/.local/share/com.habtrack.dev/database.sqlite";
 const ROOT_GROUP: &str = "/";
-// const ROOT_GROUP_ID: u64 = 0;
 const TASK: &str = "Task";
 const TASK_GROUP: &str = "TaskGroup";
 
 // Singleton because we need a single point of access to the db across the app.
+// Mutex because only one process should be able to use the singleton at a time,
+// to prevent race conditions.
+// Default because we need to set the db_path according to the specific user of the app.
+// We do this in tauri::Builder::default().setup() in main.rs
 lazy_static! {
-    static ref DB_SINGLETON: Mutex<ops::Db> = Mutex::new(ops::Db::new(DB_PATH).expect("pls work"));
+    pub static ref DB_SINGLETON: Mutex<ops::Db> = Mutex::new(ops::Db::default());
 }
 
 pub mod init {
@@ -38,10 +39,12 @@ pub mod init {
             Self { app_handle }
         }
 
-        pub fn init(&self) {
+        pub fn init(self) -> Self {
             if !self.db_file_exists() {
                 self.create_db_file();
             }
+
+            self
         }
 
         // Create the database file.
@@ -66,7 +69,8 @@ pub mod init {
             return res;
         }
 
-        // Get the path where the database file should be located.
+        /// Get the path where the database file should be located.
+        /// For Linux and macOS only.
         pub fn get_db_path(&self) -> String {
             let mut res = String::from("");
             let app = &self.app_handle;
@@ -80,14 +84,10 @@ pub mod init {
 }
 
 pub mod ops {
-    use std::collections::HashMap;
-
-    use rusqlite::{params, Connection, Result};
-    use serde::Serialize;
-
     use crate::db::{TASK, TASK_GROUP};
-
-    use super::{DB_SINGLETON, ROOT_GROUP};
+    use rusqlite::{Connection, Result};
+    use serde::Serialize;
+    use std::{collections::HashMap, path::PathBuf};
 
     #[derive(Serialize, Debug, Clone, Copy)]
     #[serde(tag = "type")]
@@ -133,18 +133,24 @@ pub mod ops {
     }
 
     pub struct Db {
-        pub conn: Connection,
+        pub db_conn: Option<Connection>,
+    }
+
+    impl Default for Db {
+        fn default() -> Self {
+            Self { db_conn: None }
+        }
     }
 
     impl Db {
-        pub fn new(db_path: &str) -> Result<Self> {
+        pub fn set_conn(&mut self, db_path: &str) -> Result<()> {
             let conn = Connection::open(db_path)?;
-            let db = Db { conn };
+            self.db_conn = Some(conn);
 
-            db.create_tables()?;
-            // db.migrate_tables()?;
+            self.create_tables()?;
+            // self.migrate_tables()?;
 
-            Ok(db)
+            Ok(())
         }
 
         fn create_tables(&self) -> Result<()> {
@@ -156,21 +162,20 @@ pub mod ops {
 
                 parent_group_id stores the ID of the parent group.
             */
-            let num_rows_changed = self.conn.execute(
-                "CREATE TABLE IF NOT EXISTS today (
-                id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                is_active INTEGER,
-                parent_group_id INTEGER
-            )",
-                [],
-            )?;
-
-            // Only add the root group when the table is created for the first time.
-            if num_rows_changed != 0 {
-                self.conn.execute(
-                    "INSERT INTO today (id, name, type) VALUES (0, '/', 'TaskGroup')",
+            if let Some(conn) = &self.db_conn {
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS today (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    is_active INTEGER,
+                    parent_group_id INTEGER
+                )",
+                    [],
+                )?;
+                // Only add the root group when the table is created for the first time.
+                conn.execute(
+                    "INSERT INTO today (id, name, type) VALUES (0, '/', 'TaskGroup') ON CONFLICT DO NOTHING",
                     [],
                 )?;
             }
@@ -224,136 +229,140 @@ pub mod ops {
 
         /// Retrieve the data from the db and return it in the nested, expected format.
         pub fn fetch_tasks_view(&self) -> Result<TaskRecord> {
-            let mut stmt = self
-                .conn
-                .prepare("SELECT id, name, type, is_active, parent_group_id FROM today")?;
+            if let Some(conn) = &self.db_conn {
+                let mut stmt =
+                    conn.prepare("SELECT id, name, type, is_active, parent_group_id FROM today")?;
 
-            // Fetch all rows from the database.
-            let task_record_iter = stmt.query_map([], |row| {
-                let id: u64 = row.get(0)?;
-                let name: String = row.get(1)?;
-                let type_str: String = row.get(2)?;
-                let is_active: Option<i32> = row.get(3)?;
-                let parent_group_id: Option<u64> = row.get(4)?;
+                // Fetch all rows from the database.
+                let task_record_iter = stmt.query_map([], |row| {
+                    let id: u64 = row.get(0)?;
+                    let name: String = row.get(1)?;
+                    let type_str: String = row.get(2)?;
+                    let is_active: Option<i32> = row.get(3)?;
+                    let parent_group_id: Option<u64> = row.get(4)?;
 
-                let is_active = {
-                    match is_active {
-                        Some(0) => Some(false),
-                        Some(1) => Some(true),
-                        // IF FOR WHATEVER REASON, is_active HAS A VALUE OTHER THAN 1, None IS SET.
-                        Some(_) => None,
-                        None => None,
-                    }
-                };
-
-                let task_record_type = match type_str.as_str() {
-                    TASK => Type::Task,
-                    TASK_GROUP => Type::TaskGroup,
-                    _ => panic!("Unknown task_record type"),
-                };
-
-                Ok((id, name, task_record_type, is_active, parent_group_id))
-            })?;
-
-            // Holds the rows mapped by their ids.
-            let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
-            let mut parent_map: HashMap<u64, Vec<u64>> = HashMap::new();
-
-            for task_record in task_record_iter {
-                let (id, name, task_record_type, is_active, parent_group_id) = task_record?;
-                task_records.insert(
-                    id,
-                    TaskRecord::new(id, name, task_record_type, is_active, parent_group_id, {
-                        match task_record_type {
-                            Type::Task => None,
-                            Type::TaskGroup => Some(vec![]),
+                    let is_active = {
+                        match is_active {
+                            Some(0) => Some(false),
+                            Some(1) => Some(true),
+                            // IF FOR WHATEVER REASON, is_active HAS A VALUE OTHER THAN 1, None IS SET.
+                            Some(_) => None,
+                            None => None,
                         }
-                    }),
-                );
-                if let Some(pid) = parent_group_id {
-                    parent_map.entry(pid).or_insert_with(Vec::new).push(id);
-                }
-            }
+                    };
 
-            let temp = task_records.clone();
+                    let task_record_type = match type_str.as_str() {
+                        TASK => Type::Task,
+                        TASK_GROUP => Type::TaskGroup,
+                        _ => panic!("Unknown task_record type"),
+                    };
 
-            // Holds the children of a group temporarily.
-            let mut children_map: HashMap<u64, Vec<TaskRecord>> = HashMap::new();
+                    Ok((id, name, task_record_type, is_active, parent_group_id))
+                })?;
 
-            // Collect children from task_records into children_map.
-            for (parent_group_id, children_ids) in parent_map {
-                for child_id in children_ids {
-                    if let Some(child) = task_records.remove(&child_id) {
-                        children_map
-                            .entry(parent_group_id)
-                            .or_insert_with(Vec::new)
-                            .push(child);
+                // Holds the rows mapped by their ids.
+                let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
+                let mut parent_map: HashMap<u64, Vec<u64>> = HashMap::new();
+
+                for task_record in task_record_iter {
+                    let (id, name, task_record_type, is_active, parent_group_id) = task_record?;
+                    task_records.insert(
+                        id,
+                        TaskRecord::new(id, name, task_record_type, is_active, parent_group_id, {
+                            match task_record_type {
+                                Type::Task => None,
+                                Type::TaskGroup => Some(vec![]),
+                            }
+                        }),
+                    );
+                    if let Some(pid) = parent_group_id {
+                        parent_map.entry(pid).or_insert_with(Vec::new).push(id);
                     }
                 }
+
+                let temp = task_records.clone();
+
+                // Holds the children of a group temporarily.
+                let mut children_map: HashMap<u64, Vec<TaskRecord>> = HashMap::new();
+
+                // Collect children from task_records into children_map.
+                for (parent_group_id, children_ids) in parent_map {
+                    for child_id in children_ids {
+                        if let Some(child) = task_records.remove(&child_id) {
+                            children_map
+                                .entry(parent_group_id)
+                                .or_insert_with(Vec::new)
+                                .push(child);
+                        }
+                    }
+                }
+
+                let root = self.get_final_structure(0, &mut children_map, &temp);
+
+                Ok(root)
+            } else {
+                Err(rusqlite::Error::InvalidPath(PathBuf::default()))
             }
-
-            let root = self.get_final_structure(0, &mut children_map, &temp);
-
-            Ok(root)
         }
     }
 
-    #[tauri::command(rename_all = "snake_case")]
-    pub fn add_task(table: &str, name: &str, parent_group_id: u64) {
-        println!("Received args: {table}\t{name}\t{parent_group_id}");
-        let db = DB_SINGLETON.lock().unwrap();
+    pub mod commands {
+        use crate::db::{DB_SINGLETON, ROOT_GROUP, TASK, TASK_GROUP};
+        use rusqlite::params;
 
-        let command = format!(
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn add_task(table: &str, name: &str, parent_group_id: u64) {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            let command = format!(
             "INSERT INTO {table} (name, type, is_active, parent_group_id) VALUES (?1, ?2, ?3, ?4)"
         );
-        match db
-            .conn
-            .execute(&command, params![name, TASK, 1u64, parent_group_id])
-        {
-            Ok(_) => println!("added task"),
-            Err(err) => println!("{}", err.to_string()),
-        }
-    }
-
-    #[tauri::command(rename_all = "snake_case")]
-    pub fn add_task_group(table: &str, name: &str, parent_group_id: u64) {
-        println!("Received args: {table}\t{name}\t{parent_group_id}");
-        let db = DB_SINGLETON.lock().unwrap();
-
-        // When the group is ROOT.
-        if name == ROOT_GROUP {
-            let command = format!("INSERT INTO {table} (name, type) VALUES (?1, ?2)");
-            db.conn
-                .execute(&command, params![name, TASK_GROUP])
-                .expect("[ERROR] Insertion of root group failed.");
-        } else {
-            let command =
-                format!("INSERT INTO {table} (name, type, parent_group_id) VALUES (?1, ?2, ?3)");
-            match db
-                .conn
-                .execute(&command, params![name, TASK_GROUP, parent_group_id])
-            {
-                Ok(_) => println!("added group"),
-                Err(err) => println!("{}", err.to_string()),
+            if let Some(conn) = &db.db_conn {
+                match conn.execute(&command, params![name, TASK, 1u64, parent_group_id]) {
+                    Err(err) => println!("{}", err.to_string()),
+                    Ok(_) => (),
+                }
             }
         }
-    }
 
-    #[tauri::command]
-    pub fn get_tasks_view() -> String {
-        let db = DB_SINGLETON.lock().unwrap();
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn add_task_group(table: &str, name: &str, parent_group_id: u64) {
+            let db = DB_SINGLETON.lock().unwrap();
 
-        match db.fetch_tasks_view() {
-            Ok(root) => {
-                let res = serde_json::to_string(&root)
-                    .expect("[ERROR] Cannot parse the root group into JSON.");
-
-                return res;
+            if let Some(conn) = &db.db_conn {
+                // When the group is ROOT.
+                if name == ROOT_GROUP {
+                    let command = format!("INSERT INTO {table} (name, type) VALUES (?1, ?2)");
+                    conn.execute(&command, params![name, TASK_GROUP])
+                        .expect("[ERROR] Insertion of root group failed.");
+                } else {
+                    let command = format!(
+                        "INSERT INTO {table} (name, type, parent_group_id) VALUES (?1, ?2, ?3)"
+                    );
+                    match conn.execute(&command, params![name, TASK_GROUP, parent_group_id]) {
+                        Err(err) => println!("{}", err.to_string()),
+                        Ok(_) => (),
+                    }
+                }
             }
-            Err(e) => {
-                // Return a JSON indicating an error occurred
-                return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
+        }
+
+        #[tauri::command]
+        pub fn get_tasks_view() -> String {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            match db.fetch_tasks_view() {
+                Ok(root) => {
+                    let res = serde_json::to_string(&root)
+                        .expect("[ERROR] Cannot parse the root group into JSON.");
+
+                    return res;
+                }
+                Err(e) => {
+                    // Return a JSON indicating an error occurred
+                    return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
                     .to_string();
+                }
             }
         }
     }
