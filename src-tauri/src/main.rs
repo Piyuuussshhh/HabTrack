@@ -22,9 +22,10 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            ops::commands::get_tasks_view,
             ops::commands::add_task,
             ops::commands::add_task_group,
-            ops::commands::get_tasks_view
+            ops::commands::delete_task,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

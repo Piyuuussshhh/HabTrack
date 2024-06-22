@@ -13,6 +13,7 @@ const TASK_GROUP = "TaskGroup";
 const TAURI_FETCH_TASKS = "get_tasks_view";
 const TAURI_ADD_TASK = "add_task";
 const TAURI_ADD_TASKGROUP = "add_task_group";
+const TAURI_DELETE_TASK = "delete_task";
 
 export {
   // Table names
@@ -30,4 +31,5 @@ export {
   TAURI_FETCH_TASKS,
   TAURI_ADD_TASK,
   TAURI_ADD_TASKGROUP,
+  TAURI_DELETE_TASK,
 };

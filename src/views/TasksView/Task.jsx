@@ -1,10 +1,13 @@
 import React from "react";
+import { useContext } from "react";
+import { invoke } from "@tauri-apps/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import { DragDropContext } from "./DragDropContext";
-import { useContext } from "react";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import EditIcon from "@mui/icons-material/Edit";
 
-import { TASK } from "../../Constants";
+import { DragDropContext } from "./DragDropContext";
+import { TASK, TASKS_VIEW, TAURI_DELETE_TASK, TODAY } from "../../Constants";
 
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
@@ -12,6 +15,17 @@ const Task = (props) => {
 
   /*Tried adding the edit symbol, but the entire screen just goes black?*/
   /* <FontAwesomeIcon icon={faEdit} className="icon edit-icon" /> */
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    invoke(TAURI_DELETE_TASK, {
+      table: TODAY,
+      id: props.id,
+    });
+    sessionStorage.removeItem(TASKS_VIEW);
+    // TODO: NO RELOADING, DELETE FROM SESSIONSTORAGE.
+    location.reload();
+  };
 
   return (
     <div
@@ -31,10 +45,14 @@ const Task = (props) => {
       </div>
       <ul>
         <li>
-          <button className="task-btn">Edit</button>
+          <button className="edit-icon">
+            <EditIcon />
+          </button>
         </li>
         <li>
-          <FontAwesomeIcon icon={faTrashAlt} className="delete-icon" />
+          <button className="delete-icon" onClick={handleDelete}>
+            <DeleteForeverIcon />
+          </button>
         </li>
       </ul>
     </div>

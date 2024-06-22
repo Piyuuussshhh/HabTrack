@@ -310,6 +310,25 @@ pub mod ops {
         use crate::db::{DB_SINGLETON, ROOT_GROUP, TASK, TASK_GROUP};
         use rusqlite::params;
 
+        #[tauri::command]
+        pub fn get_tasks_view() -> String {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            match db.fetch_tasks_view() {
+                Ok(root) => {
+                    let res = serde_json::to_string(&root)
+                        .expect("[ERROR] Cannot parse the root group into JSON.");
+
+                    return res;
+                }
+                Err(e) => {
+                    // Return a JSON indicating an error occurred
+                    return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
+                    .to_string();
+                }
+            }
+        }
+
         #[tauri::command(rename_all = "snake_case")]
         pub fn add_task(table: &str, name: &str, parent_group_id: u64) {
             let db = DB_SINGLETON.lock().unwrap();
@@ -347,21 +366,16 @@ pub mod ops {
             }
         }
 
-        #[tauri::command]
-        pub fn get_tasks_view() -> String {
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn delete_task(table: &str, id: u64) {
+            println!("received args: {table}, {id}");
             let db = DB_SINGLETON.lock().unwrap();
 
-            match db.fetch_tasks_view() {
-                Ok(root) => {
-                    let res = serde_json::to_string(&root)
-                        .expect("[ERROR] Cannot parse the root group into JSON.");
-
-                    return res;
-                }
-                Err(e) => {
-                    // Return a JSON indicating an error occurred
-                    return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
-                    .to_string();
+            if let Some(conn) = &db.db_conn {
+                let command = format!("DELETE FROM {table} WHERE id={id}");
+                match conn.execute(&command, []) {
+                    Err(err) => println!("[ERROR] Could not delete task: {}", err.to_string()),
+                    Ok(_) => (),
                 }
             }
         }

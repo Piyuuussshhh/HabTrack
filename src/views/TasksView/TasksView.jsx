@@ -54,7 +54,7 @@ const TasksView = () => {
       the JSON object in sessionStorage. SEE TOP TODO.
   */
   useEffect(() => {
-    console.log("in useEffect in TaskView");
+    console.log("in useEffect in TasksView");
 
     async function fetchTasks() {
       const storedTasks = sessionStorage.getItem(TASKS_VIEW);
@@ -84,7 +84,7 @@ const TasksView = () => {
     // THE EMPTY DEPENDENCY ARRAY AS THE SECOND ARGUMENT OF
     // useEffect() IS VERY IMPORTANT BECAUSE IT STOPS THE
     // FUNCTION FROM RUNNING A BAJILLION TIMES.
-  }, []);
+  }, [sessionStorage]);
 
   function seeModal() {
     setModalVisibility(true);
