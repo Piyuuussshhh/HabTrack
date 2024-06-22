@@ -77,8 +77,10 @@ body,
 
 .toggle-sidebar-btn {
   position: absolute;
-  bottom: 10px; /* this is a jugaad just because I don't want it to get in the way for now.*/
-  left: 20px;
+  top: 0;
+  left: 0;
+  margin: 10px;
+  z-index: 1;
   height: 40px;
   width: 40px;
   padding: 0;
@@ -189,6 +191,7 @@ body,
   background-color: var(--bg-color);
 }
 
+
 /* -------------------------------------------------------------------------- */
 /* -----------------------------TASK VIEW STYLES----------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -218,8 +221,10 @@ body,
 }
 
 .page-title {
-  margin: 20px 0 20px 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 auto; 
+  text-align: center;
 }
 
 /* ---- */

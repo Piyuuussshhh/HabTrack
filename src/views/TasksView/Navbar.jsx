@@ -10,7 +10,7 @@ import { faTrashAlt, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-i
 const Navbar = () => {
   return (
     <nav className='nav'>
-        <p className='page-title title'>Tasks</p>
+        <p className='page-title title' style={{textAlign: 'center'}}>Tasks</p>
         <ul>
             <li>
                 <button className='btn'>Tommorow</button>
