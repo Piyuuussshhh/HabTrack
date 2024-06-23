@@ -23,8 +23,6 @@ const DragDropProvider = ({ children, item }) => {
     // droppedItemID is a string for whatever reason, convert it to number.
     // basically event.dataTransfer.getData() always returns a string.
     const droppedItemId = Number(event.dataTransfer.getData("text/plain"));
-    console.log(`droppedItemId: ${droppedItemId}`);
-    console.log(`targetId: ${targetId}`);
 
     setStructure((prevStructure) => {
       const newStructure = JSON.parse(JSON.stringify(prevStructure));
@@ -32,17 +30,7 @@ const DragDropProvider = ({ children, item }) => {
       // Helper function to find and remove the item from its original location.
       const removeItem = (id, node) => {
         if (node.children) {
-          node.children = node.children.filter((child) => {
-            console.log("child.id: " + child.id + " " + "droppedItemId: " + id);
-            console.log(
-              "typeof child.id: " +
-                typeof child.id +
-                " " +
-                "typeof droppedItemId: " +
-                typeof id
-            );
-            return child.id !== id;
-          });
+          node.children = node.children.filter((child) => child.id !== id);
           // If item not found in node.children, search and remove it from each child of node.children.
           node.children.forEach((child) => removeItem(id, child));
         }
@@ -51,20 +39,11 @@ const DragDropProvider = ({ children, item }) => {
 
       // Helper function to find the target group and add the item.
       const addItem = (item, targetId, node) => {
-        console.log("node.id: " + node.id + " " + "targetId: " + targetId);
-        console.log(
-          "typeof node.id: " +
-            typeof node.id +
-            " " +
-            "typeof targetId: " +
-            typeof targetId
-        );
         if (node.id === targetId) {
           if (!node.children) node.children = [];
           node.children.push(item);
           // Sorting & reversing so that sub-tasks appear above sub-groups.
           node.children.sort(tasksFirstGroupsNext);
-          console.log(children);
         } else if (node.children) {
           // Find and add the item in the group in which it needs to be added.
           node.children.forEach((child) => addItem(item, targetId, child));
