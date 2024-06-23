@@ -54,27 +54,23 @@ const TasksView = () => {
       the JSON object in sessionStorage. SEE TOP TODO.
   */
   useEffect(() => {
-    console.log("in useEffect in TasksView");
 
     async function fetchTasks() {
       const storedTasks = sessionStorage.getItem(TASKS_VIEW);
       if (storedTasks) {
-        console.log("View fetched from sessionStorage.");
         setStructure(JSON.parse(storedTasks));
         return;
       }
       try {
-        console.log("fetching data...");
         const response = await invoke(TAURI_FETCH_TASKS);
-        console.log(response);
         const data = JSON.parse(response);
-        console.log(`fetched data: ${JSON.stringify(data)}`);
 
         // Set sessionStorage.
         sessionStorage.setItem(TASKS_VIEW, response);
 
         setStructure(data);
       } catch (error) {
+        // Deal with errors properly here.
         console.error("Error fetching tasks:", error);
       }
     }
@@ -91,7 +87,6 @@ const TasksView = () => {
   }
 
   const add = (option, name, parentName) => {
-    console.log("inside add()");
     const storedView = sessionStorage.getItem(TASKS_VIEW);
 
     function getId(node) {
@@ -117,17 +112,14 @@ const TasksView = () => {
       // show Error in the modal.
       return;
     }
-    console.log(`got id: ${parentGroupId}`);
 
     if (option === TASK) {
-      console.log("adding task");
       invoke(TAURI_ADD_TASK, {
         table: TODAY,
         name: name,
         parent_group_id: parentGroupId,
       });
     } else if (option === TASK_GROUP) {
-      console.log("adding group");
       invoke(TAURI_ADD_TASKGROUP, {
         table: TODAY,
         name: name,
@@ -136,7 +128,6 @@ const TasksView = () => {
     }
 
     sessionStorage.removeItem(TASKS_VIEW);
-    console.log("deleted session storage");
     setModalVisibility(false);
 
     // CHEAP TRICK. I NEED TO RELOAD THE WEBVIEW TO DISPLAY

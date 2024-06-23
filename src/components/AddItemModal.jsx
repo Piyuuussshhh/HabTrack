@@ -12,7 +12,6 @@ const AddItemModal = ({ itemType, onAdd, onCancel }) => {
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log("inside handleSubmit");
     onAdd(option, name, parentName);
   }
 
