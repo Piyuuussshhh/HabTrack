@@ -7,7 +7,7 @@ import { faTrashAlt, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-i
 
 // TODO: style this component.
 
-const Navbar = () => {
+const Navbar = ({ onAdd }) => {
   return (
     <nav className='nav'>
         <p className='page-title title'>Tasks</p>
@@ -16,11 +16,11 @@ const Navbar = () => {
                 <button className='btn'>Tommorow</button>
             </li>
             <li>
-                <button className='btn'>+</button>
+                <button className='btn' onClick={onAdd}>+</button>
             </li>
             <li>
                 <button className='btn'>Completed</button>
-                
+
             </li>
         </ul>
     </nav>
