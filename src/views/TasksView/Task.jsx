@@ -8,6 +8,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { DragDropContext } from "./DragDropContext";
 import { TASK, TASKS_VIEW, TAURI_DELETE_TASK, TODAY } from "../../Constants";
+import { removeItem } from "../../utility/AddRemoveItems";
 
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
@@ -18,13 +19,18 @@ const Task = (props) => {
 
   const handleDelete = (e) => {
     e.preventDefault();
+
     invoke(TAURI_DELETE_TASK, {
       table: TODAY,
       id: props.id,
     });
-    sessionStorage.removeItem(TASKS_VIEW);
-    // TODO: NO RELOADING, DELETE FROM SESSIONSTORAGE.
-    location.reload();
+
+    let storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+
+    removeItem(props.id, storedView);
+
+    sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
+    props.onDelete();
   };
 
   return (

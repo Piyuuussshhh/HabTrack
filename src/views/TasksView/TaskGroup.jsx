@@ -4,7 +4,7 @@ import { ROOT, TASK, TASK_GROUP } from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
 
-const TaskGroup = ({ id, name, children }) => {
+const TaskGroup = ({ id, name, children, onDelete }) => {
   const { handleOnDrop } = useContext(DragDropContext);
 
   return (
@@ -20,7 +20,14 @@ const TaskGroup = ({ id, name, children }) => {
         <div className="subtasks-list">
           {children.map((child) => {
             if (child.type === TASK) {
-              return <Task name={child.name} id={child.id} key={child.id} />;
+              return (
+                <Task
+                  name={child.name}
+                  id={child.id}
+                  key={child.id}
+                  onDelete={onDelete}
+                />
+              );
             } else if (child.type === TASK_GROUP) {
               return (
                 <TaskGroup
@@ -28,6 +35,7 @@ const TaskGroup = ({ id, name, children }) => {
                   id={child.id}
                   name={child.name}
                   children={child.children}
+                  onDelete={onDelete}
                 />
               );
             }

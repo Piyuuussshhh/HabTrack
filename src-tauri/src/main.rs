@@ -12,7 +12,6 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let db_init_obj = DbInitializer::new(app.handle()).init();
-            println!("calling set_conn now");
             DB_SINGLETON
                 .lock()
                 .unwrap()

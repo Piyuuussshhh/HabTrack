@@ -7,7 +7,7 @@ import {
   TASK,
   TASKS_VIEW,
   TASK_GROUP,
-  TAURI_FETCH_TASKS,
+  TAURI_FETCH_TASKS_VIEW,
   TAURI_ADD_TASK,
   TAURI_ADD_TASKGROUP,
 } from "../../Constants";
@@ -15,15 +15,9 @@ import {
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
 import AddItemModal from "../../components/AddItemModal";
+import { addItem } from "../../utility/AddRemoveItems";
 
 /*
-    TODO -> FEWER DATABASE QUERY OPTIMIZATION.
-            On addition, add the task to the database BUT
-            to generate the final structure, just use the addItem function
-            similar to the one in dragDropContext w some modifications.
-
-            Similarly, this approach can be used in task deletion as well.
-
     TODO -> ERROR HANDLING.
             We don't handle errors when the input string in
             Parent Name in the add item model is not an actual
@@ -31,16 +25,6 @@ import AddItemModal from "../../components/AddItemModal";
 
             Arnav's idea: Instead of a textbox, use a dropdown menu
             to display the available parent groups.
-
-    TODO -> FIX CHEAP RELOAD TRICK.
-            Rn, we have to reload the page after adding a new task
-            or a group because I can't figure out how to get the new
-            item to be displayed without doing so.
-
-            Probably when the optimization mentioned above is implemented,
-            a reload will not be necessary. This is because, inevitably,
-            setStructure() will be called, leading to a re-render of the
-            TasksView component.
 */
 
 const NOT_FOUND = -1;
@@ -54,15 +38,14 @@ const TasksView = () => {
       the JSON object in sessionStorage. SEE TOP TODO.
   */
   useEffect(() => {
-
     async function fetchTasks() {
-      const storedTasks = sessionStorage.getItem(TASKS_VIEW);
-      if (storedTasks) {
-        setStructure(JSON.parse(storedTasks));
+      const storedView = sessionStorage.getItem(TASKS_VIEW);
+      if (storedView) {
+        setStructure(JSON.parse(storedView));
         return;
       }
       try {
-        const response = await invoke(TAURI_FETCH_TASKS);
+        const response = await invoke(TAURI_FETCH_TASKS_VIEW);
         const data = JSON.parse(response);
 
         // Set sessionStorage.
@@ -80,15 +63,13 @@ const TasksView = () => {
     // THE EMPTY DEPENDENCY ARRAY AS THE SECOND ARGUMENT OF
     // useEffect() IS VERY IMPORTANT BECAUSE IT STOPS THE
     // FUNCTION FROM RUNNING A BAJILLION TIMES.
-  }, [sessionStorage]);
+  }, []);
 
   function seeModal() {
     setModalVisibility(true);
   }
 
   const add = (option, name, parentName) => {
-    const storedView = sessionStorage.getItem(TASKS_VIEW);
-
     function getId(node) {
       // This will store the id of the parent if it is found, -1 if not.
       let res = NOT_FOUND;
@@ -107,7 +88,8 @@ const TasksView = () => {
       return res;
     }
 
-    const parentGroupId = getId(JSON.parse(storedView));
+    const storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+    const parentGroupId = getId(storedView);
     if (parentGroupId === NOT_FOUND) {
       // show Error in the modal.
       return;
@@ -118,25 +100,59 @@ const TasksView = () => {
         table: TODAY,
         name: name,
         parent_group_id: parentGroupId,
-      });
+      })
+        .then((id) => {
+          // Adding the new task to the view without having to fetch again.
+          addItem(
+            {
+              id: id,
+              name: name,
+              type: TASK,
+              is_active: true,
+              parent_group_id: parentGroupId,
+              children: null,
+            },
+            parentGroupId,
+            storedView
+          );
+          setStructure(storedView);
+          sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
+        })
+        // TODO: ERROR HANDLING {i know you came here probably by ctrl+f-ing for console.log()s}
+        .catch((error) => console.log(error));
     } else if (option === TASK_GROUP) {
       invoke(TAURI_ADD_TASKGROUP, {
         table: TODAY,
         name: name,
         parent_group_id: parentGroupId,
+      }).then((id) => {
+        // Adding the new group to the view without having to fetch again.
+        addItem(
+          {
+            id: id,
+            name: name,
+            type: TASK_GROUP,
+            is_active: null,
+            parent_group_id: parentGroupId,
+            children: [],
+          },
+          parentGroupId,
+          storedView
+        );
+        setStructure(storedView);
+        sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
       });
     }
 
-    sessionStorage.removeItem(TASKS_VIEW);
     setModalVisibility(false);
-
-    // CHEAP TRICK. I NEED TO RELOAD THE WEBVIEW TO DISPLAY
-    // THE UPDATED TASKS VIEW W THE NEW TASK.
-    location.reload();
   };
 
   function closeModal() {
     setModalVisibility(false);
+  }
+
+  function onDelete() {
+    setStructure(JSON.parse(sessionStorage.getItem(TASKS_VIEW)));
   }
 
   return (
@@ -156,6 +172,7 @@ const TasksView = () => {
                     id={structure.id}
                     name={structure.name}
                     children={structure.children}
+                    onDelete={onDelete}
                   />
                 ) : (
                   <p>loading...</p>

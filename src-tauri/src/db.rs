@@ -308,7 +308,6 @@ pub mod ops {
 
     pub mod commands {
         use crate::db::{DB_SINGLETON, ROOT_GROUP, TASK, TASK_GROUP};
-        use rusqlite::params;
 
         #[tauri::command]
         pub fn get_tasks_view() -> String {
@@ -329,46 +328,90 @@ pub mod ops {
             }
         }
 
+        /*
+            The next two functions return Result<u64, tauri::Error>.
+            According to me, they should return rusqlite errors
+            so that the frontend can handle them by displaying custom
+            error messages based on the error type.
+
+            But I cannot return a rusqlite::Error because I get the following
+            error: "the method `blocking_kind` exists for reference `&Result<i64, Error>`, but its trait bounds were not satisfied
+            the following trait bounds were not satisfied:
+            `rusqlite::error::Error: Into<InvokeError>`
+            which is required by `Result<i64, rusqlite::error::Error>: tauri::command::private::ResultKind`
+            `Result<i64, rusqlite::error::Error>: serde::ser::Serialize`
+            which is required by `&Result<i64, rusqlite::error::Error>: tauri::command::private::SerializeKind`"
+        */
+
         #[tauri::command(rename_all = "snake_case")]
-        pub fn add_task(table: &str, name: &str, parent_group_id: u64) {
+        pub fn add_task(
+            table: &str,
+            name: &str,
+            parent_group_id: u64,
+        ) -> Result<i64, tauri::Error> {
             let db = DB_SINGLETON.lock().unwrap();
 
-            let command = format!(
-            "INSERT INTO {table} (name, type, is_active, parent_group_id) VALUES (?1, ?2, ?3, ?4)"
-        );
             if let Some(conn) = &db.db_conn {
-                match conn.execute(&command, params![name, TASK, 1u64, parent_group_id]) {
-                    Err(err) => println!("{}", err.to_string()),
-                    Ok(_) => (),
+                let command = format!(
+                    "INSERT INTO {table} (name, type, is_active, parent_group_id) VALUES ('{name}', '{TASK}', '{}', '{parent_group_id}')", 1u64
+                );
+                let mut stmt = conn
+                    .prepare(&command)
+                    .expect("[Error] Could not prepare statement");
+                match stmt.insert([]) {
+                    Err(err) => println!(
+                        "[ERROR] Error occurred while trying to insert task: {}",
+                        err.to_string()
+                    ),
+                    Ok(id) => return Ok(id),
                 }
             }
+
+            Err(tauri::Error::FailedToExecuteApi(
+                tauri::api::Error::Command("add_task".to_string()),
+            ))
         }
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn add_task_group(table: &str, name: &str, parent_group_id: u64) {
+        pub fn add_task_group(
+            table: &str,
+            name: &str,
+            parent_group_id: u64,
+        ) -> Result<i64, tauri::Error> {
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
-                // When the group is ROOT.
-                if name == ROOT_GROUP {
-                    let command = format!("INSERT INTO {table} (name, type) VALUES (?1, ?2)");
-                    conn.execute(&command, params![name, TASK_GROUP])
-                        .expect("[ERROR] Insertion of root group failed.");
-                } else {
-                    let command = format!(
-                        "INSERT INTO {table} (name, type, parent_group_id) VALUES (?1, ?2, ?3)"
-                    );
-                    match conn.execute(&command, params![name, TASK_GROUP, parent_group_id]) {
-                        Err(err) => println!("{}", err.to_string()),
-                        Ok(_) => (),
+                let command = {
+                    if name == ROOT_GROUP {
+                        format!(
+                            "INSERT INTO {table} (name, type) VALUES ('{name}', '{TASK_GROUP}')"
+                        )
+                    } else {
+                        format!(
+                            "INSERT INTO {table} (name, type, parent_group_id) VALUES ('{name}', '{TASK_GROUP}', {parent_group_id})"
+                        )
                     }
+                };
+
+                let mut stmt = conn
+                    .prepare(&command)
+                    .expect("[Error] Could not prepare statement");
+                match stmt.insert([]) {
+                    Err(err) => println!(
+                        "[ERROR] Error occurred while trying to insert task: {}",
+                        err.to_string()
+                    ),
+                    Ok(id) => return Ok(id),
                 }
             }
+
+            Err(tauri::Error::FailedToExecuteApi(
+                tauri::api::Error::Command("add_task_group".to_string()),
+            ))
         }
 
         #[tauri::command(rename_all = "snake_case")]
         pub fn delete_task(table: &str, id: u64) {
-            println!("received args: {table}, {id}");
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
