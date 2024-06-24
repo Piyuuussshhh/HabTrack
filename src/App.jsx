@@ -32,11 +32,6 @@ function App() {
   return (
     <>
       <div className="container">
-        <button
-          type="button"
-          className="toggle-sidebar-btn"
-          onClick={() => setSidebar(!showSidebar)}
-        >{<FormatListBulletedIcon />}</button>
         {showSidebar && (
           <Sidebar tabs={TABS} toggleTab={toggleTab} activeTab={tab} />
         )}

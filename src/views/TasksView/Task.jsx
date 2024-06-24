@@ -1,8 +1,8 @@
 import React from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { DragDropContext } from "./DragDropContext";
 import { useContext } from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
@@ -21,6 +21,7 @@ const Task = (props) => {
       }}
     >
       <input type="checkbox" id={props.id} />
+      <label className="task-checkbox" htmlFor={props.id}></label>
       <div className="text-container">
         <label className="task-name" htmlFor={props.id}>
           {props.name}
@@ -29,11 +30,11 @@ const Task = (props) => {
       </div>
       <ul>
         <li>
-          <button className="task-btn">Edit</button>
+          <button className="task-btn"><EditIcon></EditIcon></button>
 
         </li>
         <li>
-          <FontAwesomeIcon icon={faTrashAlt} className="delete-icon" />
+          <button className="delete-icon"><DeleteIcon></DeleteIcon></button>
         </li>
       </ul>
     </div>
