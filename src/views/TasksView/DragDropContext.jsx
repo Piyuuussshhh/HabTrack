@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 
 import { addItem, removeItem } from "../../utility/AddRemoveItems";
+import { TASKS_VIEW } from "../../Constants";
 
 const DragDropContext = createContext();
 
@@ -26,11 +27,9 @@ const DragDropProvider = ({ children, item }) => {
 
     setStructure((prevStructure) => {
       const newStructure = JSON.parse(JSON.stringify(prevStructure));
-
       removeItem(droppedItemId, newStructure);
-
       addItem(draggedItem, targetId, newStructure);
-
+      sessionStorage.setItem(TASKS_VIEW, JSON.stringify(newStructure));
       return newStructure;
     });
     setDraggedItem(null);
