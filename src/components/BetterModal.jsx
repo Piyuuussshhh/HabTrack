@@ -4,7 +4,7 @@ import { TASKS_VIEW, TASK_GROUP, TASK } from "../Constants";
 const Modal = ({ itemType, onAdd, onCancel }) => {
   const [option, setOption] = useState(TASK);
   const [name, setName] = useState("");
-  const [group, setGroup] = useState("Root");
+  const [group, setGroup] = useState("/");
   const [groups, setAllGroups] = useState(null);
 
   useEffect(() => {
