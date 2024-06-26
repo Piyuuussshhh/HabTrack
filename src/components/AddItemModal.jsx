@@ -21,15 +21,15 @@ const AddItemModal = ({ itemType, onAdd, onCancel }) => {
 
   return (
     <div className="modal-overlay">
-      <div>
+      <div className="modal-main-area">
         <button className="close-btn" onClick={onClose}>
           <CloseIcon />
         </button>
         <div className="modal">
           <h2>Add</h2>
           <form onSubmit={handleSubmit}>
+            
             <div className="form-group">
-              <label>Options:</label>
               <div className="option-buttons">
                 <button
                   type="button"
