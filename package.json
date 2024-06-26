@@ -19,6 +19,7 @@
     "@tauri-apps/api": "^1",
     "anychart": "^8.12.1",
     "bootstrap": "^5.3.3",
+    "framer-motion": "^11.2.10",
     "github-contributions-canvas": "^0.7.0",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",

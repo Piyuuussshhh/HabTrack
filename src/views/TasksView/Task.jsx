@@ -1,11 +1,12 @@
 import React from "react";
 import { useContext } from "react";
 import { invoke } from "@tauri-apps/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import EditIcon from "@mui/icons-material/Edit";
 
+// Icon Imports
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+
+// Local Resources
 import { DragDropContext } from "./DragDropContext";
 import { TASK, TASKS_VIEW, TAURI_DELETE_TASK, TODAY } from "../../Constants";
 import { removeItem } from "../../utility/AddRemoveItems";
@@ -13,9 +14,6 @@ import { removeItem } from "../../utility/AddRemoveItems";
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
   const { handleOnDrag } = useContext(DragDropContext);
-
-  /*Tried adding the edit symbol, but the entire screen just goes black?*/
-  /* <FontAwesomeIcon icon={faEdit} className="icon edit-icon" /> */
 
   const handleDelete = (e) => {
     e.preventDefault();
@@ -43,22 +41,18 @@ const Task = (props) => {
       }}
     >
       <input type="checkbox" id={props.id} />
+      <label className="task-checkbox" htmlFor={props.id}></label>
       <div className="text-container">
         <label className="task-name" htmlFor={props.id}>
           {props.name}
         </label>
-        {/* <p className='sub-text'></p> */}
       </div>
       <ul>
         <li>
-          <button className="edit-icon">
-            <EditIcon />
-          </button>
+          <button className="task-btn"><EditIcon></EditIcon></button>
         </li>
         <li>
-          <button className="delete-icon" onClick={handleDelete}>
-            <DeleteForeverIcon />
-          </button>
+          <button className="delete-icon" onClick={handleDelete}><DeleteIcon></DeleteIcon></button>
         </li>
       </ul>
     </div>

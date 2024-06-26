@@ -1,32 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
-/*
-  In props, I pass:
-    -> the names of all the tabs in an array {tabs}
-    -> the active tab that the user is currently viewing {activeTab}
-    -> the function to change the active tab {toggleTab}
-*/
 const Sidebar = (props) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [isSpinning, setIsSpinning] = useState(false);
+
+  const toggleSidebarVisibility = () => {
+    setIsSpinning(true);
+    setTimeout(() => {
+      setIsVisible(!isVisible);
+      setIsSpinning(false);
+    }, 200);
+    
+    // props.toggleSidebar();
+
+  };
+
   return (
-    <div className="sidebar">
-      <ul className="sidebar-list">
-        {props.tabs.map((tab) => {
-          return (
-            <li
-              key={tab.name}
-              className="row"
-              id={tab.name == props.activeTab ? "active" : ""}
-              onClick={() => {
-                props.toggleTab(tab.name);
-              }}
-            >
-              <div id="icon">{tab.icon}</div>
-              <span className="tab-title">{tab.name}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <>
+      <motion.div
+        className="sidebar"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{
+          scale: isVisible ? 1 : 0,
+          opacity: isVisible ? 1 : 0,
+          transition: {
+            duration: 0.2,
+            ease: "easeInOut",
+          },
+        }}
+      >
+        <ul className="sidebar-list">
+          {props.tabs.map((tab) => {
+            return (
+              <li
+                key={tab.name}
+                className="row"
+                id={tab.name === props.activeTab ? "active" : ""}
+                onClick={() => {
+                  props.toggleTab(tab.name);
+                }}
+              >
+                <div id="icon">{tab.icon}</div>
+                <span className="tab-title">{tab.name}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </motion.div>
+
+     
+      
+    </>
   );
 };
 
