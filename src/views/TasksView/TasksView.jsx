@@ -15,6 +15,7 @@ import {
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
 import AddItemModal from "../../components/AddItemModal";
+import {Modal} from "../../components/BetterModal";
 import { addItem } from "../../utility/AddRemoveItems";
 
 /*
@@ -183,7 +184,7 @@ const TasksView = () => {
         </div>
       </div>
       {showModal && (
-        <AddItemModal itemType={TASK} onAdd={add} onCancel={closeModal} />
+        <Modal itemType={TASK} onAdd={add} onCancel={closeModal} />
       )}
     </>
   );
