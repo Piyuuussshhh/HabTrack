@@ -1,12 +1,11 @@
 // Non-UI stuff.
 import { useState } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 
 // External UI Components
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 // My UI Components
 import Sidebar from "./components/Sidebar";
@@ -14,6 +13,7 @@ import "./App.css";
 import TasksView from "./views/TasksView/TasksView";
 import HabitsView from "./views/HabitsView/HabitsView";
 import StreaksWatchView from "./views/StreaksWatchView/StreaksWatchView";
+import { motion } from "framer-motion";
 
 // Constants.
 import { TASKS_VIEW, HABITS_VIEW, STREAKS_VIEW } from "./Constants";
@@ -32,11 +32,37 @@ function App() {
     setTab(newTab);
   }
 
+  function toggleSidebar() {
+    setSidebar(!showSidebar);
+  }
+
   return (
     <>
       <div className="container">
+
+         <motion.button
+          className="sidebar-button"
+          initial={{ rotate: 0 }}
+          // animate={{
+          //   rotate: isSpinning ? 180 : 0,
+          //   transition: {
+          //     duration: 0.2,
+          //     ease: "easeInOut",
+          //   },
+          //}
+
+          onClick={toggleSidebar}
+        >
+          <FormatListBulletedIcon></FormatListBulletedIcon>
+        </motion.button>
+
         {showSidebar && (
-          <Sidebar tabs={TABS} toggleTab={toggleTab} activeTab={tab} />
+          <Sidebar
+            tabs={TABS}
+            toggleTab={toggleTab}
+            activeTab={tab}
+            toggleSidebar={toggleSidebar}
+          />
         )}
         <div className="main-area">
           {tab === TASKS_VIEW && <TasksView />}
