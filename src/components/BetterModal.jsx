@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { TASKS_VIEW, TASK_GROUP, TASK } from "../Constants";
+import { TASKS_VIEW, TASK_GROUP, TASK, ROOT } from "../Constants";
 
 const Modal = ({ itemType, onAdd, onCancel }) => {
   const [option, setOption] = useState(TASK);
   const [name, setName] = useState("");
-  const [group, setGroup] = useState("/");
+  const [group, setGroup] = useState(ROOT);
   const [groups, setAllGroups] = useState(null);
 
   useEffect(() => {
