@@ -4,6 +4,7 @@ import { ROOT, TASK, TASK_GROUP } from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
 
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const TaskGroup = ({ id, name, children, onDelete }) => {
   const { handleOnDrop } = useContext(DragDropContext);

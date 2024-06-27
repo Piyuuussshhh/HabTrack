@@ -678,3 +678,124 @@ form .form-group select {
 .add-btn:hover {
   filter: brightness(120%);
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------CALENDER CHART STYLES----------------------- */
+/* -------------------------------------------------------------------------- */
+
+/*The featured week*/
+
+.featured-week {
+  margin-top: 20px;
+  margin-bottom:40px ;
+  border: 1px solid wheat;
+  color: wheat;
+}
+
+.featured-week .days {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.featured-day-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 25px;
+  margin-left: 70px;
+
+}
+
+.featured-day {
+  background-color: #fff;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  border-radius: 20px;
+  padding: 10px;
+  position: relative;
+}
+
+.featured-day-name {
+  margin-top: 10px; 
+  font-size: 20px;
+  text-align: center;
+  color: wheat;
+}
+
+
+/*Idk how we can style different colors, this was for well 2 tasks*/
+/*Right now, I am passing the color directly with the day, instead of the class and then styling it*/
+
+/* .featured-done {
+  background-color: seagreen;
+  filter: brightness(120%);
+}
+
+.featured-different-task {
+  background-color: #286bb3;
+  filter: brightness(120%); 
+} */
+
+
+/* CalendarChart */
+.calendar-chart {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.month {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid wheat;
+  border-radius: 10px;
+  width: 300px;
+}
+
+.month h2 {
+  margin-top: 0;
+  color: wheat;
+  font-weight: bold;
+  text-align: center;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 10px;
+  grid-row-gap: 15px;
+}
+
+.day {
+  background-color: #fff;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px; /* Adjust the spacing as needed */
+  border-radius: 10px;
+}
+
+.day-number {
+  font-size: 14px;
+  text-align: center;
+  color: wheat;
+}
+
+.day-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.done {
+  background-color: var(--secondary);
+}
+
+.not-done {
+  background-color: #fff;
+}
+
+
