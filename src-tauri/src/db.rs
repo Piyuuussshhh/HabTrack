@@ -337,6 +337,7 @@ pub mod ops {
 
     pub mod commands {
         use crate::db::{DB_SINGLETON, ROOT_GROUP, TASK, TASK_GROUP};
+        use rusqlite::Result;
 
         #[tauri::command]
         pub fn get_tasks_view(table: &str) -> String {
@@ -447,6 +448,37 @@ pub mod ops {
                 let command = format!("DELETE FROM {table} WHERE id={id}");
                 match conn.execute(&command, []) {
                     Err(err) => println!("[ERROR] Could not delete task: {}", err.to_string()),
+                    Ok(_) => (),
+                }
+            }
+        }
+
+        // fn delete_group_recursion(table: &str, db: &MutexGuard<super::Db>, id: u64) -> Result<()> {
+        //     if let Some(conn) = &db.db_conn {
+        //         // To-Be-Deleted group, [0] because fetch_records returns a Vec w only 1 element.
+        //         let &(tbd_group_id, _, _, _, tbd_group_children) = &db.fetch_records(conn, table, Some(id))?[0];
+
+
+        //     }
+
+        //     Ok(())
+        // }
+
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn delete_task_group(table: &str, id: u64) {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            if let Some(conn) = &db.db_conn {
+                let main_command = format!("DELETE FROM {table} WHERE id={id}");
+                let del_children_command = format!("DELETE FROM {table} WHERE parent_group_id={id}");
+
+                match conn.execute(&main_command, []) {
+                    Err(err) => println!("[ERROR] Could not delete main group: {}", err.to_string()),
+                    Ok(_) => (),
+                }
+
+                match conn.execute(&del_children_command, []) {
+                    Err(err) => println!("[ERROR] Could not delete children: {}", err.to_string()),
                     Ok(_) => (),
                 }
             }

@@ -5,9 +5,18 @@ import { MoreVert } from "@mui/icons-material";
 import { Menu } from "@mui/material";
 import { MenuItem } from "@mui/material";
 
-import { ROOT, TASK, TASK_GROUP } from "../../Constants";
+import {
+  ROOT,
+  TASK,
+  TASKS_VIEW,
+  TASK_GROUP,
+  TAURI_DELETE_GROUP,
+  TODAY,
+} from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
+import { invoke } from "@tauri-apps/api";
+import { removeItem } from "../../utility/AddRemoveItems";
 
 const TaskGroup = ({ id, name, children, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -31,7 +40,18 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
   }
 
   function deleteGroup() {
-    console.log("deleting group: " + name + "-" + id);
+    // Deleting group from database.
+    invoke(TAURI_DELETE_GROUP, {
+      table: TODAY,
+      id: id,
+    });
+
+    // Deleting group from front-end.
+    const storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+    removeItem(id, storedView);
+    sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
+    // To rerender TasksView.
+    onDelete();
   }
 
   const handleClose = () => {
