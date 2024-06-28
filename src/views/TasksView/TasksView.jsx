@@ -14,8 +14,7 @@ import {
 
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
-import AddItemModal from "../../components/AddItemModal";
-import { Modal } from "../../components/BetterModal";
+import Modal from "../../components/Modal";
 import { addItem } from "../../utility/AddRemoveItems";
 
 /*

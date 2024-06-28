@@ -390,14 +390,6 @@ form .form-group select {
   padding-right: 30px;
 }
 
-#group * {
-  color: wheat !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  max-width: inherit !important;
-}
-
 .buttons {
   display: flex;
   justify-content: space-between;
@@ -665,6 +657,7 @@ form .form-group select {
   border: none;
   border-radius: 17px;
   box-shadow: 5px 5px 5px black;
+  cursor: pointer;
 }
 
 .cancel-btn:hover {
@@ -683,4 +676,11 @@ form .form-group select {
 
 .add-btn:hover {
   filter: brightness(120%);
+}
+
+.alert-btn {
+  border: 2px solid var(--secondary);
+  padding: 10px;
+  width: 50%;
+  cursor: pointer;
 }
