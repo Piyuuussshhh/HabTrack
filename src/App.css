@@ -229,62 +229,6 @@ ul {
 /* ------------------------------MODAL STYLES-------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-/* .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-main-area {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  color: #ffffff;
-}
-
-.modal {
-  background: var(--secondary);
-  border-radius: 0.5rem; 
-  padding-left: 1.7rem; 
-  padding-right: 1.7rem; 
-  padding-bottom: 1.2rem; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 1.25rem; 
-  align-items: center; 
-}
-
-.form-group {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
-.option-buttons button {
-  margin: 0 5px;
-}
-
-.option-buttons .active {
-  background-color: #007bff;
-  color: white;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.close-btn {
-  place-self: end;
-  background: transparent;
-  color: white;
-  border: none;
-} */
-
 .modal {
   position: fixed;
   top: 0;
@@ -295,6 +239,8 @@ ul {
   display: flex;
   justify-content: center;
   align-items: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -730,16 +676,6 @@ form .form-group select {
 /*Idk how we can style different colors, this was for well 2 tasks*/
 /*Right now, I am passing the color directly with the day, instead of the class and then styling it*/
 
-/* .featured-done {
-  background-color: seagreen;
-  filter: brightness(120%);
-}
-
-.featured-different-task {
-  background-color: #286bb3;
-  filter: brightness(120%); 
-} */
-
 
 /* CalendarChart */
 .calendar-chart {
@@ -776,6 +712,7 @@ form .form-group select {
   height: 30px;
   margin-bottom: 5px; /* Adjust the spacing as needed */
   border-radius: 10px;
+  filter: brightness(120%);
 }
 
 .day-number {

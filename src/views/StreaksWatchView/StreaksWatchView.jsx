@@ -1,7 +1,6 @@
 import React from "react";
-// import CalendarChart from "./Cal-chart";
 import Navbar from "./Navbar2";
-import CalendarChart from "./custom-cal-chart";
+import CalendarChart from "./CalendarChart";
 
 const StreaksWatchView = () => {
   return (
