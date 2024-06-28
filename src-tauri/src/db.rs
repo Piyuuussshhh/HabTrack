@@ -227,29 +227,37 @@ pub mod ops {
             )
         }
 
-        /// Retrieve the data from the db and return it in the nested, expected format.
-        pub fn fetch_tasks_view(&self) -> Result<TaskRecord> {
-            if let Some(conn) = &self.db_conn {
-                let mut stmt =
-                    conn.prepare("SELECT id, name, type, is_active, parent_group_id FROM today")?;
+        fn fetch_records(
+            &self,
+            conn: &Connection,
+            table: &str,
+            id: Option<u64>,
+        ) -> Result<Vec<(u64, String, Type, Option<bool>, Option<u64>)>> {
+            let mut stmt = if let Some(id) = id {
+                conn.prepare(format!(
+                    "SELECT id, name, type, is_active, parent_group_id FROM {table} WHERE id={}",
+                    id
+                ).as_str())?
+            } else {
+                conn.prepare(format!(
+                    "SELECT id, name, type, is_active, parent_group_id FROM {table}",
+                ).as_str())?
+            };
 
-                // Fetch all rows from the database.
-                let task_record_iter = stmt.query_map([], |row| {
-                    let id: u64 = row.get(0)?;
-                    let name: String = row.get(1)?;
-                    let type_str: String = row.get(2)?;
-                    let is_active: Option<i32> = row.get(3)?;
-                    let parent_group_id: Option<u64> = row.get(4)?;
+            let task_record_iter = stmt.query_map([], |row| {
+                let id: u64 = row.get(0)?;
+                let name: String = row.get(1)?;
+                let type_str: String = row.get(2)?;
+                let is_active: Option<i32> = row.get(3)?;
+                let parent_group_id: Option<u64> = row.get(4)?;
 
-                    let is_active = {
-                        match is_active {
-                            Some(0) => Some(false),
-                            Some(1) => Some(true),
-                            // IF FOR WHATEVER REASON, is_active HAS A VALUE OTHER THAN 1, None IS SET.
-                            Some(_) => None,
-                            None => None,
-                        }
-                    };
+                let is_active = match is_active {
+                    Some(0) => Some(false),
+                    Some(1) => Some(true),
+                    // If for whatever reason, is_active has a value other than 0 or 1, None is set.
+                    Some(_) => None,
+                    None => None,
+                };
 
                     let task_record_type = match type_str.as_str() {
                         TASK => Type::Task,
@@ -257,26 +265,47 @@ pub mod ops {
                         _ => panic!("Unknown task_record type"),
                     };
 
-                    Ok((id, name, task_record_type, is_active, parent_group_id))
-                })?;
+                Ok((id, name, task_record_type, is_active, parent_group_id))
+            })?;
+
+            task_record_iter.collect()
+        }
+
+        /// Retrieve the data from the db and return it in the nested, expected format.
+        pub fn fetch_tasks_view(&self, table: &str) -> Result<TaskRecord> {
+            if let Some(conn) = &self.db_conn {
+                let fetched_records = self.fetch_records(conn, table, None);
 
                 // Holds the rows mapped by their ids.
                 let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
                 let mut parent_map: HashMap<u64, Vec<u64>> = HashMap::new();
 
-                for task_record in task_record_iter {
-                    let (id, name, task_record_type, is_active, parent_group_id) = task_record?;
-                    task_records.insert(
-                        id,
-                        TaskRecord::new(id, name, task_record_type, is_active, parent_group_id, {
-                            match task_record_type {
-                                Type::Task => None,
-                                Type::TaskGroup => Some(vec![]),
+                match fetched_records {
+                    Err(err) => panic!("idk what error: {err}"),
+                    Ok(task_record_iter) => {
+                        for task_record in task_record_iter {
+                            let (id, name, task_record_type, is_active, parent_group_id) =
+                                task_record;
+                            task_records.insert(
+                                id,
+                                TaskRecord::new(
+                                    id,
+                                    name,
+                                    task_record_type,
+                                    is_active,
+                                    parent_group_id,
+                                    {
+                                        match task_record_type {
+                                            Type::Task => None,
+                                            Type::TaskGroup => Some(vec![]),
+                                        }
+                                    },
+                                ),
+                            );
+                            if let Some(pid) = parent_group_id {
+                                parent_map.entry(pid).or_insert_with(Vec::new).push(id);
                             }
-                        }),
-                    );
-                    if let Some(pid) = parent_group_id {
-                        parent_map.entry(pid).or_insert_with(Vec::new).push(id);
+                        }
                     }
                 }
 
@@ -310,10 +339,10 @@ pub mod ops {
         use crate::db::{DB_SINGLETON, ROOT_GROUP, TASK, TASK_GROUP};
 
         #[tauri::command]
-        pub fn get_tasks_view() -> String {
+        pub fn get_tasks_view(table: &str) -> String {
             let db = DB_SINGLETON.lock().unwrap();
 
-            match db.fetch_tasks_view() {
+            match db.fetch_tasks_view(table) {
                 Ok(root) => {
                     let res = serde_json::to_string(&root)
                         .expect("[ERROR] Cannot parse the root group into JSON.");
