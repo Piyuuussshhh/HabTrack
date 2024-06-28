@@ -135,8 +135,6 @@ pub mod ops {
     enum FetchBasis {
         // Fetch all items.
         All,
-        // Fetch item with a particular ID.
-        ByID(u64),
         // Fetch all items under a common parent.
         ByParent(u64),
     }
@@ -243,13 +241,6 @@ pub mod ops {
             fetch_basis: FetchBasis,
         ) -> Result<Vec<(u64, String, Type, Option<bool>, Option<u64>)>> {
             let mut stmt = match fetch_basis {
-                FetchBasis::ByID(id) => conn.prepare(
-                    format!(
-                    "SELECT id, name, type, is_active, parent_group_id FROM {table} WHERE id={}",
-                    id
-                )
-                    .as_str(),
-                )?,
                 FetchBasis::ByParent(parent_id) => conn.prepare(
                     format!("SELECT * FROM {table} WHERE parent_group_id={parent_id}").as_str(),
                 )?,
