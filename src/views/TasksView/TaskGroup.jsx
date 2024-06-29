@@ -17,13 +17,15 @@ import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
 import { invoke } from "@tauri-apps/api";
 import { removeItem } from "../../utility/AddRemoveItems";
+import AlertModal from "../../components/AlertModal";
 
 const TaskGroup = ({ id, name, children, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showAlert, setAlertVisibility] = useState(false);
 
   const { handleOnDrop } = useContext(DragDropContext);
 
-  const groupOptions = ["Delete Group"];
+  const groupOptions = ["Edit", "Add Task", "Delete Group"];
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -31,12 +33,17 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
 
   const open = Boolean(anchorEl);
 
-  function handleMenuItemClick(option) {
+  function handleMenuItemClick(e, option) {
     if (option === "Delete Group") {
-      deleteGroup();
+      setAlertVisibility(true);
     }
 
     handleClose();
+  }
+
+  function handleConfirmDelete() {
+    deleteGroup();
+    setAlertVisibility(false);
   }
 
   function deleteGroup() {
@@ -52,6 +59,10 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
     sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
     // To rerender TasksView.
     onDelete();
+  }
+
+  function onCancel() {
+    setAlertVisibility(false);
   }
 
   const handleClose = () => {
@@ -78,16 +89,21 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
           >
             <MoreVert />
           </IconButton>
+          {/* Use IconMenu instead for better looks. Add icon -> Add task etc.*/}
           <Menu
             anchorEl={anchorEl}
             keepMounted
             onClose={handleClose}
             open={open}
+            MenuListProps={{
+              'display': "flex",
+              'flex-direction': "column",
+            }}
           >
             {groupOptions.map((option) => (
               <MenuItem
                 key={option}
-                onClick={() => handleMenuItemClick(option)}
+                onClick={(e) => handleMenuItemClick(e, option)}
               >
                 {option}
               </MenuItem>
@@ -122,6 +138,16 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
         </div>
       ) : (
         <p>No tasks yet!</p>
+      )}
+      {showAlert && (
+        <AlertModal
+          alertType={TASK_GROUP}
+          message={
+            "Deleting a group will delete all its sub-tasks and sub-groups."
+          }
+          onConfirm={handleConfirmDelete}
+          onCancel={onCancel}
+        />
       )}
     </div>
   );

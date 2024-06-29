@@ -81,6 +81,10 @@ ul {
   align-items: center;
 }
 
+h2 {
+  margin-top: 10px;
+}
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -321,12 +325,16 @@ ul {
 .tab button:nth-child(1) {
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
   border-right: none;
 }
 
 .tab button:nth-child(2) {
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
   border-left: none;
 }
 
@@ -402,6 +410,10 @@ form .form-group select {
 }
 
 .idle-btn {
+  border: 2px solid var(--secondary);
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 17px;
   background-color: transparent;
   color: var(--secondary);
 }
@@ -678,9 +690,21 @@ form .form-group select {
   filter: brightness(120%);
 }
 
-.alert-btn {
-  border: 2px solid var(--secondary);
+.MuiMenu-list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--grey);
+  color: white;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.MuiMenuItem-root {
+  width: 100%;
+  text-align: left;
   padding: 10px;
-  width: 50%;
-  cursor: pointer;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: var(--bg-color) !important;
 }
