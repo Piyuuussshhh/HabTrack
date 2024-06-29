@@ -682,6 +682,14 @@ form .form-group select {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  flex-direction: row;
+}
+
+.months-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
 }
 
 .month {
@@ -699,12 +707,18 @@ form .form-group select {
   text-align: center;
 }
 
+
+
 .days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(7, 1fr);
   grid-gap: 10px;
-  grid-row-gap: 15px;
+  grid-row-gap: 10px;
+  grid-auto-flow: column;
 }
+
+
 
 .day {
   background-color: #fff;
@@ -715,17 +729,12 @@ form .form-group select {
   filter: brightness(120%);
 }
 
-.day-number {
-  font-size: 14px;
-  text-align: center;
-  color: wheat;
-}
-
 .day-container {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 
 .done {
   background-color: var(--secondary);
@@ -733,6 +742,17 @@ form .form-group select {
 
 .not-done {
   background-color: #fff;
+}
+
+.day:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -25px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 2px 5px;
+  white-space: nowrap;
 }
 
 
