@@ -14,8 +14,7 @@ import {
 
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
-import AddItemModal from "../../components/AddItemModal";
-import {Modal} from "../../components/BetterModal";
+import Modal from "../../components/Modal";
 import { addItem } from "../../utility/AddRemoveItems";
 
 /*
@@ -46,7 +45,7 @@ const TasksView = () => {
         return;
       }
       try {
-        const response = await invoke(TAURI_FETCH_TASKS_VIEW);
+        const response = await invoke(TAURI_FETCH_TASKS_VIEW, { table: TODAY });
         const data = JSON.parse(response);
 
         // Set sessionStorage.
@@ -183,9 +182,7 @@ const TasksView = () => {
           </DragDropProvider>
         </div>
       </div>
-      {showModal && (
-        <Modal itemType={TASK} onAdd={add} onCancel={closeModal} />
-      )}
+      {showModal && <Modal itemType={TASK} onAdd={add} onCancel={closeModal} />}
     </>
   );
 };

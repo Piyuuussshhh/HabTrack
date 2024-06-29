@@ -16,7 +16,14 @@ const addItem = (item, targetId, node) => {
 // Helper function to find and remove the item from its original location.
 const removeItem = (id, node) => {
   if (node.children) {
-    node.children = node.children.filter((child) => child.id !== id);
+    node.children = node.children.filter((child) => {
+      // if the item to be removed is a TaskGroup, then remove its children too.
+      if (child.id === id && child.type === TASK_GROUP) {
+        child.children = [];
+      }
+
+      return child.id !== id;
+    });
     node.children.sort(tasksFirstGroupsNext)
     // If item not found in node.children, search and remove it from each child of node.children.
     node.children.forEach((child) => removeItem(id, child));

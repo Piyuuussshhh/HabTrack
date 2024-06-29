@@ -109,4 +109,4 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
     </div>
   );
 };
-export { Modal };
+export default Modal;

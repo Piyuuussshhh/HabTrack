@@ -81,6 +81,10 @@ ul {
   align-items: center;
 }
 
+h2 {
+  margin-top: 10px;
+}
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -267,12 +271,16 @@ ul {
 .tab button:nth-child(1) {
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
   border-right: none;
 }
 
 .tab button:nth-child(2) {
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
   border-left: none;
 }
 
@@ -336,14 +344,6 @@ form .form-group select {
   padding-right: 30px;
 }
 
-#group * {
-  color: wheat !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  max-width: inherit !important;
-}
-
 .buttons {
   display: flex;
   justify-content: space-between;
@@ -356,6 +356,10 @@ form .form-group select {
 }
 
 .idle-btn {
+  border: 2px solid var(--secondary);
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 17px;
   background-color: transparent;
   color: var(--secondary);
 }
@@ -520,6 +524,12 @@ form .form-group select {
   min-width: 300px;
 }
 
+.group-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 /* -------------------------------------------------------------------------- */
 /* -----------------------------BUTTON STYLES-------------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -605,6 +615,7 @@ form .form-group select {
   border: none;
   border-radius: 17px;
   box-shadow: 5px 5px 5px black;
+  cursor: pointer;
 }
 
 .cancel-btn:hover {
@@ -625,6 +636,24 @@ form .form-group select {
   filter: brightness(120%);
 }
 
+.MuiMenu-list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--grey);
+  color: white;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.MuiMenuItem-root {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: var(--bg-color) !important;
+}
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------------CALENDER CHART STYLES----------------------- */
@@ -754,5 +783,3 @@ form .form-group select {
   padding: 2px 5px;
   white-space: nowrap;
 }
-
-
