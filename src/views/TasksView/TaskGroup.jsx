@@ -4,6 +4,7 @@ import { IconButton } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { Menu } from "@mui/material";
 import { MenuItem } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
   ROOT,

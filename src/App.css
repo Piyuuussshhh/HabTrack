@@ -233,62 +233,6 @@ h2 {
 /* ------------------------------MODAL STYLES-------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-/* .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-main-area {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  color: #ffffff;
-}
-
-.modal {
-  background: var(--secondary);
-  border-radius: 0.5rem;
-  padding-left: 1.7rem;
-  padding-right: 1.7rem;
-  padding-bottom: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-.form-group {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
-.option-buttons button {
-  margin: 0 5px;
-}
-
-.option-buttons .active {
-  background-color: #007bff;
-  color: white;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.close-btn {
-  place-self: end;
-  background: transparent;
-  color: white;
-  border: none;
-} */
-
 .modal {
   position: fixed;
   top: 0;
@@ -299,6 +243,8 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -707,4 +653,133 @@ form .form-group select {
 
 .MuiMenuItem-root:hover {
   background-color: var(--bg-color) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------CALENDER CHART STYLES----------------------- */
+/* -------------------------------------------------------------------------- */
+
+/*The featured week*/
+
+.featured-week {
+  margin-top: 20px;
+  margin-bottom:40px ;
+  border: 1px solid wheat;
+  color: wheat;
+}
+
+.featured-week .days {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.featured-day-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 25px;
+  margin-left: 70px;
+
+}
+
+.featured-day {
+  background-color: #fff;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  border-radius: 20px;
+  padding: 10px;
+  position: relative;
+}
+
+.featured-day-name {
+  margin-top: 10px; 
+  font-size: 20px;
+  text-align: center;
+  color: wheat;
+}
+
+
+/*Idk how we can style different colors, this was for well 2 tasks*/
+/*Right now, I am passing the color directly with the day, instead of the class and then styling it*/
+
+
+/* CalendarChart */
+.calendar-chart {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.months-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+}
+
+.month {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid wheat;
+  border-radius: 10px;
+  width: 300px;
+}
+
+.month h2 {
+  margin-top: 0;
+  color: wheat;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  grid-gap: 10px;
+  grid-row-gap: 10px;
+  grid-auto-flow: column;
+}
+
+
+
+.day {
+  background-color: #fff;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px; /* Adjust the spacing as needed */
+  border-radius: 10px;
+  filter: brightness(120%);
+}
+
+.day-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.done {
+  background-color: var(--secondary);
+}
+
+.not-done {
+  background-color: #fff;
+}
+
+.day:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -25px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 2px 5px;
+  white-space: nowrap;
 }
