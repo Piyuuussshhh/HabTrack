@@ -1,9 +1,19 @@
-import React from 'react'
+import React from "react";
+import Navbar from "./Navbar3";
 
 const HabitsView = () => {
   return (
-    <div>HabitsView</div>
-  )
-}
+    <div>
+      <div>
+        <Navbar />
+      </div>
 
-export default HabitsView
+      <div>
+        {" "}
+        <p><strong><center>Habits Watch</center></strong></p>
+      </div>
+    </div>
+  );
+};
+
+export default HabitsView;

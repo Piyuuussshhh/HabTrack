@@ -3,8 +3,8 @@ import { useContext } from "react";
 import { invoke } from "@tauri-apps/api";
 
 // Icon Imports
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Local Resources
 import { DragDropContext } from "./DragDropContext";
@@ -37,8 +37,8 @@ const Task = (props) => {
       draggable
       onDragStart={(e) => {
         /* A duplicate of this current task is passed to handleOnDrag*/
-        handleOnDrag(e, { id: props.id, name: props.name, type: TASK });
-      }}
+        handleOnDrag(e, { id: props.id, name: props.name, type: TASK })
+      }}  
     >
       <input type="checkbox" id={props.id} />
       <label className="task-checkbox" htmlFor={props.id}></label>
@@ -49,10 +49,14 @@ const Task = (props) => {
       </div>
       <ul>
         <li>
-          <button className="task-btn"><EditIcon></EditIcon></button>
+          <button className="task-btn">
+            <EditIcon></EditIcon>
+          </button>
         </li>
         <li>
-          <button className="delete-icon" onClick={handleDelete}><DeleteIcon></DeleteIcon></button>
+          <button className="delete-icon" onClick={handleDelete}>
+            <DeleteIcon></DeleteIcon>
+          </button>
         </li>
       </ul>
     </div>
