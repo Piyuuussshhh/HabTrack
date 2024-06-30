@@ -26,6 +26,7 @@ fn main() {
             ops::commands::add_task_group,
             ops::commands::delete_task,
             ops::commands::delete_task_group,
+            ops::commands::edit_task_or_group,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

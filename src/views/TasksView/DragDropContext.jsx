@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 
-import { addItem, removeItem } from "../../utility/AddRemoveItems";
+import { addItem, removeItem } from "../../utility/AddRemoveUpdateItems";
 import { TASKS_VIEW } from "../../Constants";
 
 const DragDropContext = createContext();
