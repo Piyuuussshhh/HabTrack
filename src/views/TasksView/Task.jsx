@@ -82,18 +82,16 @@ const Task = (props) => {
         /* A duplicate of this current task is passed to handleOnDrag*/
         handleOnDrag(e, { id: props.id, name: props.name, type: TASK });
       }}
-      onClick={editingTaskId === props.id ? cancelEdit : null}
     >
       <input type="checkbox" id={props.id} />
       <label className="task-checkbox" htmlFor={props.id}></label>
       <div className="text-container">
-        {editingTaskId == props.id ? (
+        {editingTaskId === props.id ? (
           <span className="edit-area">
             <input
               type="text"
               className="edit-task-inp"
               onInput={onChange}
-              onBlur={cancelEdit}
               autoFocus
             />
           </span>
