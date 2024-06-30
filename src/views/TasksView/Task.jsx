@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { invoke } from "@tauri-apps/api";
 
 // Icon Imports
@@ -23,6 +23,18 @@ const Task = (props) => {
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
+
+  useEffect(() => {
+    if (editingTaskId) {
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [editingTaskId]);
 
   const handleDelete = (e) => {
     e.preventDefault();
@@ -67,6 +79,12 @@ const Task = (props) => {
 
     setEditingTaskId(null);
     props.onChangeTasksView();
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      cancelEdit();
+    }
   }
 
   function cancelEdit() {
