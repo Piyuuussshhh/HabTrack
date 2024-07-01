@@ -1,17 +1,13 @@
 import React from "react";
 import Navbar from "./Navbar3";
+import Habits from "./Habits";
 
 const HabitsView = () => {
   return (
-    <div>
-      <div>
+    <div className="box">
         <Navbar />
-      </div>
 
-      <div>
-        {" "}
-        <p><strong><center>Habits Watch</center></strong></p>
-      </div>
+        < Habits />
     </div>
   );
 };
