@@ -17,10 +17,10 @@ import {
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
 import { invoke } from "@tauri-apps/api";
-import { removeItem } from "../../utility/AddRemoveItems";
+import { removeItem } from "../../utility/AddRemoveUpdateItems";
 import AlertModal from "../../components/AlertModal";
 
-const TaskGroup = ({ id, name, children, onDelete }) => {
+const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showAlert, setAlertVisibility] = useState(false);
 
@@ -59,7 +59,7 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
     removeItem(id, storedView);
     sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
     // To rerender TasksView.
-    onDelete();
+    onChangeTasksView();
   }
 
   function onCancel() {
@@ -97,8 +97,8 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
             onClose={handleClose}
             open={open}
             MenuListProps={{
-              'display': "flex",
-              'flex-direction': "column",
+              display: "flex",
+              "flex-direction": "column",
             }}
           >
             {groupOptions.map((option) => (
@@ -121,7 +121,7 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
                   name={child.name}
                   id={child.id}
                   key={child.id}
-                  onDelete={onDelete}
+                  onChangeTasksView={onChangeTasksView}
                 />
               );
             } else if (child.type === TASK_GROUP) {
@@ -131,7 +131,7 @@ const TaskGroup = ({ id, name, children, onDelete }) => {
                   id={child.id}
                   name={child.name}
                   children={child.children}
-                  onDelete={onDelete}
+                  onChangeTasksView={onChangeTasksView}
                 />
               );
             }

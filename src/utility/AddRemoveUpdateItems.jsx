@@ -24,7 +24,7 @@ const removeItem = (id, node) => {
 
       return child.id !== id;
     });
-    node.children.sort(tasksFirstGroupsNext)
+    node.children.sort(tasksFirstGroupsNext);
     // If item not found in node.children, search and remove it from each child of node.children.
     node.children.forEach((child) => removeItem(id, child));
   }
@@ -40,4 +40,14 @@ function tasksFirstGroupsNext(child1, child2) {
   }
 }
 
-export { addItem, removeItem };
+const updateItem = (id, name, node) => {
+  if (node.id === id) {
+    console.log("previous name: " + node.name);
+    node.name = name;
+    console.log("updated name: " + node.name);
+  } else if (node.children) {
+    node.children.forEach((child) => updateItem(id, name, child));
+  }
+};
+
+export { addItem, removeItem, updateItem };

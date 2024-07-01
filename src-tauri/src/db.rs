@@ -458,6 +458,20 @@ pub mod ops {
             }
         }
 
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn edit_task_or_group(table: &str, name: &str, id: u64) {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            if let Some(conn) = &db.db_conn {
+                let command = format!("UPDATE {table} SET name=(?1) WHERE id=(?2)");
+
+                match conn.execute(&command, params![name, id]) {
+                    Ok(_) => (),
+                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+                }
+            }
+        }
+
         /* ----------------------------------------------------------------------------- */
         /* -------------------------------HELPER FUNCTIONS------------------------------ */
         /* ----------------------------------------------------------------------------- */

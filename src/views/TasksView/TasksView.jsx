@@ -15,7 +15,7 @@ import {
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
 import Modal from "../../components/Modal";
-import { addItem } from "../../utility/AddRemoveItems";
+import { addItem } from "../../utility/AddRemoveUpdateItems";
 
 /*
     TODO -> ERROR HANDLING.
@@ -151,7 +151,7 @@ const TasksView = () => {
     setModalVisibility(false);
   }
 
-  function onDelete() {
+  function onChangeTasksView() {
     setStructure(JSON.parse(sessionStorage.getItem(TASKS_VIEW)));
   }
 
@@ -172,7 +172,7 @@ const TasksView = () => {
                     id={structure.id}
                     name={structure.name}
                     children={structure.children}
-                    onDelete={onDelete}
+                    onChangeTasksView={onChangeTasksView}
                   />
                 ) : (
                   <p>loading...</p>
