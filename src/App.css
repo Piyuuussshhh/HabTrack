@@ -575,6 +575,7 @@ form .form-group select {
   display: flex;
   align-items: center;
   padding: 12px;
+  cursor: pointer;
 }
 
 .task-btn:hover {
@@ -863,4 +864,100 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding-bottom: 1rem;
   padding-right: 1rem;
   padding-left: 1rem;
+}
+
+
+.habits-card {
+  height: 200px;
+  background-color: var(--grey);
+  border: 1px solid black;
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 2rem;
+  padding: 0 1rem;
+  
+}
+
+.habits-card ul {
+  padding: 0;
+  flex: 15%;
+  list-style-type: none;
+  display: flex;
+  gap: 1rem;
+  justify-content: end;
+  }
+
+.habits-card label {
+  margin: 0;
+}
+
+.text-container2{
+  display: flex;
+  flex-direction: row;
+  margin: 10px;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.habits-card input[type="checkbox"] {
+  /* Hide the default checkbox */
+  display: none;
+}
+
+.habits-card input[type="checkbox"] + label {
+  /* Create a custom checkbox */
+  display: inline-block;
+  position: relative;
+}
+
+.habits-card input[type="checkbox"] + label:before {
+  content: "";
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #0a0a0a;
+  background-color: white;
+  cursor: pointer;
+  color: black;
+}
+
+.habits-card input[type="checkbox"]:checked + label:before {
+  /* Style the checked state */
+  background-color: #3576cc;
+  border-color: #000000;
+}
+
+.habits-card input[type="checkbox"]:checked + label:after {
+  /* Add a checkmark */
+  content: "✔";
+  font-size: 25px;
+  background-color: #3576cc;
+  color: #fff;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+
+.day-type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  box-shadow: 10px 10px 10px black;
+  border-radius: 15px;
+  cursor: pointer;
+  
+  padding-left: 15px;
+  padding-right: 15px;
+
+  background-color: #3576cc;
+  color: white;
+  font-weight: bold;
 }

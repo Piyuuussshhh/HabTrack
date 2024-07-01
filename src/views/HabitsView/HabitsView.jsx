@@ -4,7 +4,7 @@ import Habits from "./Habits";
 
 const HabitsView = () => {
   return (
-    <div className="Box">
+    <div className="box">
         <Navbar />
 
         < Habits />
