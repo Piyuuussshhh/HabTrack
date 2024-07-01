@@ -1,35 +1,20 @@
 import React from "react";
 import "../../App.css";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import HabitCard from "./HabitGroup"; 
 
 const Habits = () => {
+  const habits = [
+    { name: "Habit 1" },
+    { name: "Habit 2" },
+    { name: "Habit 3"}
+  ];
+
   return (
     <div className="habits-area">
       <div className="habits-container">
-        <div className="habits-card">
-
-          <input type="checkbox" />
-          <label></label>
-          <div className="text-container2">
-            <label className="task-name">Habit 1</label>
-            </div>
-            <div className="day-type">
-                <p>DAY TYPE</p>
-            </div>
-          <ul>
-            <li>
-              <button className="task-btn">
-                <EditIcon />
-              </button>
-            </li>
-            <li>
-              <button className="delete-icon">
-                <DeleteIcon />
-              </button>
-            </li>
-          </ul>
-        </div>
+        {habits.map((habit, index) => (
+          <HabitCard key={index} habitName={habit.name} />
+        ))}
       </div>
     </div>
   );

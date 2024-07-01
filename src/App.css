@@ -847,10 +847,8 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
 
 .habits-container{
-  width: 95%;
+  width: 65%;
   height: inherit;
-  min-width: 90%;
-  max-width: 95%;
 
   background-color: var(--primary);
   border: 1px solid black;
@@ -859,6 +857,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
   display: flex;
   flex-direction: column;
+  align-items: center;
 
   margin: 0.5rem;
   padding-bottom: 1rem;
@@ -868,7 +867,8 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
 
 .habits-card {
-  height: 200px;
+  height: 150px;
+  width: 90%;
   background-color: var(--grey);
   border: 1px solid black;
   border-radius: 1rem;
@@ -876,9 +876,8 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin: 2rem;
+  margin: 1rem;
   padding: 0 1rem;
-  
 }
 
 .habits-card ul {
@@ -911,6 +910,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   /* Create a custom checkbox */
   display: inline-block;
   position: relative;
+  border: none;
 }
 
 .habits-card input[type="checkbox"] + label:before {
@@ -918,7 +918,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   display: inline-block;
   width: 25px;
   height: 25px;
-  border: 1px solid #0a0a0a;
+  border: none;
   background-color: white;
   cursor: pointer;
   color: black;
@@ -927,7 +927,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 .habits-card input[type="checkbox"]:checked + label:before {
   /* Style the checked state */
   background-color: #3576cc;
-  border-color: #000000;
+  border: none;
 }
 
 .habits-card input[type="checkbox"]:checked + label:after {
@@ -945,19 +945,43 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 }
 
 
-.day-type {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  box-shadow: 10px 10px 10px black;
-  border-radius: 15px;
-  cursor: pointer;
-  
-  padding-left: 15px;
-  padding-right: 15px;
-
+.day-type select {
+  padding: 10px;
   background-color: #3576cc;
+  border: 1px solid black;
+  border-radius: 15px;
+  width: 100%;
+  font-size: 16px;
   color: white;
-  font-weight: bold;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select option {
+  padding: 10px;
+  font-size: 16px;
+  color: #333;
+  background-color: black;
+}
+
+.day-type select {
+  appearance: none; /* Remove the default dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7.4 12.6l5.6 5.6 5.6-5.6'/%3E%3C/svg%3E");
+  background-size: 30px 30px;
+  background-position: 100% 50%;
+  background-repeat: no-repeat;
+  padding: 10px 30px 10px 10px;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select:hover {
+  background-color: #3576cc;
+  filter: brightness(120%);
+  cursor: pointer;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select:focus {
+  outline: none;
+  box-shadow: 10 10 10px black;
+
 }
