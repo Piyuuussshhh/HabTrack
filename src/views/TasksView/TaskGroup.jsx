@@ -4,14 +4,14 @@ import { IconButton } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { Menu } from "@mui/material";
 import { MenuItem } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+// import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
   ROOT,
   TASK,
   TASKS_VIEW,
   TASK_GROUP,
-  TAURI_DELETE_GROUP,
+  TAURI_DELETE_ITEM,
   TODAY,
 } from "../../Constants";
 import Task from "./Task";
@@ -19,6 +19,7 @@ import { DragDropContext } from "./DragDropContext";
 import { invoke } from "@tauri-apps/api";
 import { removeItem } from "../../utility/AddRemoveUpdateItems";
 import AlertModal from "../../components/AlertModal";
+import { updateFrontend } from "../../utility/UpdateFrontend";
 
 const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -34,7 +35,7 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
 
   const open = Boolean(anchorEl);
 
-  function handleMenuItemClick(e, option) {
+  function handleMenuItemClick(option) {
     if (option === "Delete Group") {
       setAlertVisibility(true);
     }
@@ -49,17 +50,14 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
 
   function deleteGroup() {
     // Deleting group from database.
-    invoke(TAURI_DELETE_GROUP, {
+    invoke(TAURI_DELETE_ITEM, {
       table: TODAY,
       id: id,
+      item_type: TASK_GROUP,
     });
 
     // Deleting group from front-end.
-    const storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
-    removeItem(id, storedView);
-    sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
-    // To rerender TasksView.
-    onChangeTasksView();
+    updateFrontend(removeItem, TASKS_VIEW, onChangeTasksView, id);
   }
 
   function onCancel() {

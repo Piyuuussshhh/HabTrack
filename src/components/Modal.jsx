@@ -45,7 +45,6 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
 
   function handleSubmit(e){
     e.preventDefault();
-    console.log(option + " " + name + " " + group);
     onAdd(option, name, group);
   };
 

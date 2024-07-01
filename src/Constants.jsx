@@ -11,11 +11,9 @@ const STREAKS_VIEW = "StreaksWatch";
 const TASK = "Task";
 const TASK_GROUP = "TaskGroup";
 const TAURI_FETCH_TASKS_VIEW = "get_tasks_view";
-const TAURI_ADD_TASK = "add_task";
-const TAURI_ADD_TASKGROUP = "add_task_group";
-const TAURI_DELETE_TASK = "delete_task";
-const TAURI_DELETE_GROUP = "delete_task_group";
-const TAURI_EDIT_TASK_OR_GROUP = "edit_task_or_group";
+const TAURI_ADD_ITEM = "add_item";
+const TAURI_DELETE_ITEM = "delete_item";
+const TAURI_EDIT_ITEM = "edit_item";
 
 export {
   // Table names
@@ -31,9 +29,7 @@ export {
   TASK,
   TASK_GROUP,
   TAURI_FETCH_TASKS_VIEW,
-  TAURI_ADD_TASK,
-  TAURI_ADD_TASKGROUP,
-  TAURI_DELETE_TASK,
-  TAURI_DELETE_GROUP,
-  TAURI_EDIT_TASK_OR_GROUP,
+  TAURI_ADD_ITEM,
+  TAURI_DELETE_ITEM,
+  TAURI_EDIT_ITEM,
 };

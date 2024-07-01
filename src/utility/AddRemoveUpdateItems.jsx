@@ -42,9 +42,7 @@ function tasksFirstGroupsNext(child1, child2) {
 
 const updateItem = (id, name, node) => {
   if (node.id === id) {
-    console.log("previous name: " + node.name);
     node.name = name;
-    console.log("updated name: " + node.name);
   } else if (node.children) {
     node.children.forEach((child) => updateItem(id, name, child));
   }

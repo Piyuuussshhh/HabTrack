@@ -12,10 +12,11 @@ import {
   TASK,
   TASKS_VIEW,
   TODAY,
-  TAURI_DELETE_TASK,
-  TAURI_EDIT_TASK_OR_GROUP,
+  TAURI_DELETE_ITEM,
+  TAURI_EDIT_ITEM,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
+import { updateFrontend } from "../../utility/UpdateFrontend";
 
 const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
@@ -26,30 +27,28 @@ const Task = (props) => {
 
   useEffect(() => {
     if (editingTaskId) {
-      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
     } else {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     }
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    }
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [editingTaskId]);
 
   const handleDelete = (e) => {
     e.preventDefault();
 
     // Delete task from the database.
-    invoke(TAURI_DELETE_TASK, {
+    invoke(TAURI_DELETE_ITEM, {
       table: TODAY,
       id: props.id,
+      item_type: TASK,
     });
 
     // Delete task from the frontend.
-    let storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
-    removeItem(props.id, storedView);
-    sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
-    props.onChangeTasksView();
+    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
   };
 
   function handleEdit() {
@@ -66,26 +65,29 @@ const Task = (props) => {
 
   function handleConfirmEdit() {
     // Update name in the database.
-    invoke(TAURI_EDIT_TASK_OR_GROUP, {
+    invoke(TAURI_EDIT_ITEM, {
       table: TODAY,
       name: editedName,
       id: props.id,
     });
 
     // Update name on the frontend.
-    const storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
-    updateItem(props.id, editedName, storedView);
-    sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
+    updateFrontend(
+      updateItem,
+      TASKS_VIEW,
+      props.onChangeTasksView,
+      props.id,
+      editedName
+    );
 
     setEditingTaskId(null);
-    props.onChangeTasksView();
   }
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       cancelEdit();
     }
-  }
+  };
 
   function cancelEdit() {
     setEditedName(null);
