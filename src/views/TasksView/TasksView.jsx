@@ -8,14 +8,14 @@ import {
   TASKS_VIEW,
   TASK_GROUP,
   TAURI_FETCH_TASKS_VIEW,
-  TAURI_ADD_TASK,
-  TAURI_ADD_TASKGROUP,
+  TAURI_ADD_ITEM,
 } from "../../Constants";
 
 import TaskGroup from "./TaskGroup";
 import { DragDropProvider, DragDropContext } from "./DragDropContext";
 import Modal from "../../components/Modal";
 import { addItem } from "../../utility/AddRemoveUpdateItems";
+import { updateFrontend } from "../../utility/UpdateFrontend";
 
 /*
     TODO -> ERROR HANDLING.
@@ -95,54 +95,33 @@ const TasksView = () => {
       return;
     }
 
-    if (option === TASK) {
-      invoke(TAURI_ADD_TASK, {
-        table: TODAY,
-        name: name,
-        parent_group_id: parentGroupId,
-      })
-        .then((id) => {
-          // Adding the new task to the view without having to fetch again.
-          addItem(
-            {
-              id: id,
-              name: name,
-              type: TASK,
-              is_active: true,
-              parent_group_id: parentGroupId,
-              children: null,
-            },
-            parentGroupId,
-            storedView
-          );
-          setStructure(storedView);
-          sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
-        })
-        // TODO: ERROR HANDLING {i know you came here probably by ctrl+f-ing for console.log()s}
-        .catch((error) => console.log(error));
-    } else if (option === TASK_GROUP) {
-      invoke(TAURI_ADD_TASKGROUP, {
-        table: TODAY,
-        name: name,
-        parent_group_id: parentGroupId,
-      }).then((id) => {
-        // Adding the new group to the view without having to fetch again.
-        addItem(
+    invoke(TAURI_ADD_ITEM, {
+      table: TODAY,
+      name: name,
+      parent_group_id: parentGroupId,
+      item_type: option,
+    })
+      .then((id) => {
+        let isActive = option === TASK ? true : null;
+        let children = option === TASK ? null : [];
+        // Adding the new task to the view without having to fetch again.
+        updateFrontend(
+          addItem,
+          TASKS_VIEW,
+          onChangeTasksView,
           {
             id: id,
             name: name,
-            type: TASK_GROUP,
-            is_active: null,
+            type: option,
+            is_active: isActive,
             parent_group_id: parentGroupId,
-            children: [],
+            children: children,
           },
-          parentGroupId,
-          storedView
+          parentGroupId
         );
-        setStructure(storedView);
-        sessionStorage.setItem(TASKS_VIEW, JSON.stringify(storedView));
-      });
-    }
+      })
+      // TODO: ERROR HANDLING {i know you came here probably by ctrl+f-ing for console.log()s}
+      .catch((error) => console.log(error));
 
     setModalVisibility(false);
   };
