@@ -4,12 +4,10 @@ import CalendarChart from "./CalendarChart";
 
 const StreaksWatchView = () => {
   return (
-    <div>
+    <div className="box">
       <Navbar />
-      <div>
         <CalendarChart />
       </div>
-    </div>
   );
 };
 

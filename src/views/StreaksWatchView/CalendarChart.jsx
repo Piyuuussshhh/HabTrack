@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import "../../App.css";
 import { Grid } from "@mui/material";
 
-// TODO:
-// 1) Shrink all the months to be in one row and make them scrollable
 
 const daysInMonth = (month, year) => {
   return new Date(year, month, 0).getDate();
@@ -78,25 +76,31 @@ const App = () => {
   const taskArray = generateTaskArray(tasks);
 
   return (
-    <div>
-      <div className="featured-week">
-        <h2>
-          <center>
-            <strong>Featured Week</strong>
-          </center>
-        </h2>
-        <div className="days">
-          {Object.keys(featuredWeek).map((day, index) => (
-            <div key={index} className="featured-day-container">
-              <div
-                className="featured-day"
-                style={{ backgroundColor: featuredWeek[day] }}
-              ></div>
-              <div className="featured-day-number">{day}</div>
-            </div>
+    <div className="streaks-area">
+      {/* naming this taskgroup-container, because I want the same styles as the one in tasks view might need
+      change after refactoring of css though */}
+      <div className="streaks-container">
+        <div className="featured-week">
+          <div className="featured-week-title">
+          <h2>
+            <center>
+              <strong>Featured Week</strong>
+            </center>
+          </h2>
+          </div>
+          <div className="days">
+            {Object.keys(featuredWeek).map((day, index) => (
+              <div key={index} className="featured-day-container">
+                <div
+                  className="featured-day"
+                  style={{ backgroundColor: featuredWeek[day] }}
+                ></div>
+                <div className="featured-day-number">{day}</div>
+              </div>
           ))}
         </div>
       </div>
+   
 
       <div className="calendar-chart">
         <h1>Task Master Streak</h1>
@@ -133,6 +137,7 @@ const App = () => {
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
