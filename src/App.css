@@ -676,31 +676,79 @@ form .form-group select {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ------------------------------CALENDER CHART STYLES----------------------- */
+/* -----------------------------STREAKS VIEW STYLES-------------------------- */
+/* -------------------------------------------------------------------------- */
+
+/* These are in calendar chart, since there were already unnamed divs, creating more in streakswatch just would have been 
+redudant. Not putting under calendar chart styles for obvious reasons. */
+
+.streaks-area{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+
+.streaks-container{
+  width: 95%;
+  height: inherit;
+  min-width: 90%;
+  max-width: 95%;
+
+  background-color: var(--primary);
+  border: 1px solid black;
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
+
+  display: flex;
+  flex-direction: column;
+
+  margin: 0.5rem;
+  padding-bottom: 1rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------CALENDAR CHART STYLES----------------------- */
 /* -------------------------------------------------------------------------- */
 
 /*The featured week*/
 
 .featured-week {
   margin-top: 20px;
+  /* margin-left: 100px;
+  margin-right: 100px; */
   margin-bottom:40px ;
   border: 1px solid wheat;
+  align-items: center;
+  min-width: 150px;
+}
+
+.featured-week-title{
   color: wheat;
+  margin-top: 30px;
 }
 
 .featured-week .days {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+  margin-top: 10px;
+  margin-left: 5px;
 }
 
 .featured-day-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 50px;
   margin-top: 30px;
   margin-bottom: 25px;
-  margin-left: 70px;
+  margin-left: 20px;
+  margin-right: 20px;
 
 }
 
@@ -722,16 +770,13 @@ form .form-group select {
 }
 
 
-/*Idk how we can style different colors, this was for well 2 tasks*/
-/*Right now, I am passing the color directly with the day, instead of the class and then styling it*/
-
-
 /* CalendarChart */
 .calendar-chart {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   flex-direction: row;
+  color: wheat;
 }
 
 .months-container {
@@ -742,7 +787,9 @@ form .form-group select {
 }
 
 .month {
-  margin: 20px;
+  margin-top: 20px;
+  margin-right: 40px;
+  margin-bottom: 30px;
   padding: 20px;
   border: 1px solid wheat;
   border-radius: 10px;
