@@ -75,7 +75,11 @@ pub mod init {
             let mut res = String::from("");
             let app = &self.app_handle;
             if let Some(path) = app.path_resolver().app_data_dir() {
-                res = format!("{}/{DB_NAME}", path.to_string_lossy().into_owned());
+                if std::env::consts::OS == "windows" {
+                    res = format!("{}\\{DB_NAME}", path.to_string_lossy().into_owned());
+                } else {
+                    res = format!("{}/{DB_NAME}", path.to_string_lossy().into_owned());
+                }
             }
 
             res
@@ -381,23 +385,26 @@ pub mod ops {
         */
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn add_task(
-            table: &str,
-            name: &str,
-            parent_group_id: u64,
-        ) -> Result<i64, tauri::Error> {
+        pub fn add_item(table: &str, name: &str, parent_group_id: u64, item_type: &str) -> Result<i64, tauri::Error>{
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
                 let command = format!(
                     "INSERT INTO {table} (name, type, is_active, parent_group_id) VALUES (?1, ?2, ?3, ?4)",
                 );
+
+                let is_active = match item_type {
+                    TASK => Some(1),
+                    TASK_GROUP => None,
+                    _ => panic!("invalid type"),
+                };
+
                 let mut stmt = conn
                     .prepare(&command)
                     .expect("[Error] Could not prepare statement");
-                match stmt.insert(params![name, TASK, 1, parent_group_id]) {
+                match stmt.insert(params![name, item_type, is_active, parent_group_id]) {
                     Err(err) => println!(
-                        "[ERROR] Error occurred while trying to insert task: {}",
+                        "[ERROR] Error occurred while trying to insert item: {}",
                         err.to_string()
                     ),
                     Ok(id) => return Ok(id),
@@ -410,56 +417,20 @@ pub mod ops {
         }
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn add_task_group(
-            table: &str,
-            name: &str,
-            parent_group_id: u64,
-        ) -> Result<i64, tauri::Error> {
+        pub fn delete_item(table: &str, id: u64, item_type: &str) {
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
-                // Need to use ?1 ?2 to because '{name}' or '{table}' causes sqlite errors.
-                let command = format!(
-                    "INSERT INTO {table} (name, type, parent_group_id) VALUES (?1, ?2, ?3)"
-                );
-
-                let mut stmt = conn
-                    .prepare(&command)
-                    .expect("[Error] Could not prepare statement");
-                match stmt.insert(params![name, TASK_GROUP, parent_group_id]) {
-                    Err(err) => println!(
-                        "[ERROR] Error occurred while trying to insert task: {}",
-                        err.to_string()
-                    ),
-                    Ok(id) => return Ok(id),
+                match item_type {
+                    TASK => delete_task(conn, table, id),
+                    TASK_GROUP => delete_group(&db, conn, table, id),
+                    _ => panic!("invalid type")
                 }
             }
-
-            Err(tauri::Error::FailedToExecuteApi(
-                tauri::api::Error::Command("add_task_group".to_string()),
-            ))
         }
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn delete_task(table: &str, id: u64) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                delete_task_from_db(conn, table, id);
-            }
-        }
-
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn delete_task_group(table: &str, id: u64) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                delete_group_recursion(&db, conn, table, id);
-            }
-        }
-
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn edit_task_or_group(table: &str, name: &str, id: u64) {
+        pub fn edit_item(table: &str, name: &str, id: u64) {
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
@@ -476,7 +447,7 @@ pub mod ops {
         /* -------------------------------HELPER FUNCTIONS------------------------------ */
         /* ----------------------------------------------------------------------------- */
 
-        fn delete_task_from_db(conn: &Connection, table: &str, id: u64) {
+        fn delete_task(conn: &Connection, table: &str, id: u64) {
             let command = format!("DELETE FROM {table} WHERE id={id}");
             match conn.execute(&command, []) {
                 Err(err) => println!("[ERROR] Could not delete task: {}", err.to_string()),
@@ -484,7 +455,7 @@ pub mod ops {
             }
         }
 
-        fn delete_group_recursion(
+        fn delete_group(
             db: &MutexGuard<super::Db>,
             conn: &Connection,
             table: &str,
@@ -509,8 +480,8 @@ pub mod ops {
             } else {
                 for (child_id, _, child_type, _, _) in children {
                     match child_type {
-                        Type::Task => delete_task_from_db(conn, table, child_id),
-                        Type::TaskGroup => delete_group_recursion(db, conn, table, child_id),
+                        Type::Task => delete_task(conn, table, child_id),
+                        Type::TaskGroup => delete_group(db, conn, table, child_id),
                     }
                 }
 
