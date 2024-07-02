@@ -407,7 +407,7 @@ form .form-group select {
 .task-card {
   width: inherit;
   /* height: fit-content; */
-  height: inherit;
+  height: auto;
   background-color: var(--grey);
   border: 1px solid black;
   border-radius: 1rem;
@@ -432,6 +432,7 @@ form .form-group select {
 }
 
 .task-card input[type="checkbox"] + label {
+  flex: 5%;
   /* Create a custom checkbox */
   display: inline-block;
   position: relative;
@@ -467,14 +468,18 @@ form .form-group select {
 }
 
 .text-container {
-  flex: 80%;
-  padding: 1rem;
+  flex: 1 1 80%;
+  /* max-width: 400px; */
+  padding: 1rem 1rem; /* Add padding to the left and right */
+  display: block;
+  width: 0;
+  word-wrap: break-word; /* Break long words */
 }
 
 .task-card ul {
   padding: 0;
-  flex: 15%;
-
+  flex: 1 1 15%;
+  flex-shrink: 0;
   list-style-type: none;
   display: flex;
   gap: 1rem;
@@ -482,20 +487,17 @@ form .form-group select {
 }
 
 .task-name {
+  width: 100%;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.edit-area {
-  height: 25px;
-  width: 100%;
-  align-items: center;
+  white-space: pre-wrap; /* Allow wrapping */
+  word-wrap: break-word;
 }
 
 .edit-task-inp {
-  height: inherit;
-  width: inherit;
+  height: 100%;
+  width: 100%;
   background: transparent;
   border: none;
   font-size: 20px;
@@ -505,6 +507,11 @@ form .form-group select {
   outline: none;
   animation: phase-caret 1s ease-in-out infinite;
   overflow: visible;
+  display: block;
+}
+
+.edit-task-inp::placeholder {
+  font-style: italic;
 }
 
 /* ---------- */
@@ -679,7 +686,7 @@ form .form-group select {
 /* -----------------------------STREAKS VIEW STYLES-------------------------- */
 /* -------------------------------------------------------------------------- */
 
-/* These are in calendar chart, since there were already unnamed divs, creating more in streakswatch just would have been 
+/* These are in calendar chart, since there were already unnamed divs, creating more in streakswatch just would have been
 redudant. Not putting under calendar chart styles for obvious reasons. */
 
 .streaks-area{

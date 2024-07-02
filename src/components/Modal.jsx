@@ -77,6 +77,7 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
               id="name"
               value={name}
               onChange={handleNameChange}
+              autoFocus
             />
           </div>
           {groups && (
