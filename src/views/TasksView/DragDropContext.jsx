@@ -1,7 +1,8 @@
 import React, { createContext, useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api";
 
 import { addItem, removeItem } from "../../utility/AddRemoveUpdateItems";
-import { TASKS_VIEW } from "../../Constants";
+import { TODAY, TASKS_VIEW, TAURI_UPDATE_ITEM } from "../../Constants";
 
 const DragDropContext = createContext();
 
@@ -24,6 +25,12 @@ const DragDropProvider = ({ children, item }) => {
     // droppedItemID is a string for whatever reason, convert it to number.
     // basically event.dataTransfer.getData() always returns a string.
     const droppedItemId = Number(event.dataTransfer.getData("text/plain"));
+
+    invoke(TAURI_UPDATE_ITEM, {
+      table: TODAY,
+      id: droppedItemId,
+      new_parent_group_id: targetId,
+    });
 
     setStructure((prevStructure) => {
       const newStructure = JSON.parse(JSON.stringify(prevStructure));

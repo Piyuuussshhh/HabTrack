@@ -443,6 +443,20 @@ pub mod ops {
             }
         }
 
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn update_item(table: &str, id: u64, new_parent_group_id: u64) {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            if let Some(conn) = &db.db_conn {
+                let command = format!("UPDATE {table} SET parent_group_id=(?1) WHERE id=(?2)");
+
+                match conn.execute(&command, params![new_parent_group_id, id]) {
+                    Ok(_) => (),
+                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+                }
+            }
+        }
+
         /* ----------------------------------------------------------------------------- */
         /* -------------------------------HELPER FUNCTIONS------------------------------ */
         /* ----------------------------------------------------------------------------- */
