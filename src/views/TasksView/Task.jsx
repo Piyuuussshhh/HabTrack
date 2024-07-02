@@ -107,22 +107,23 @@ const Task = (props) => {
       <label className="task-checkbox" htmlFor={props.id}></label>
       <div className="text-container">
         {editingTaskId === props.id ? (
-          <span className="edit-area">
-            <input
-              type="text"
-              className="edit-task-inp"
-              onInput={onChange}
-              autoFocus
-            />
-          </span>
+          <input
+            type="text"
+            className="edit-task-inp"
+            onInput={onChange}
+            placeholder="press ESC key to stop editing..."
+            autoFocus
+          />
         ) : (
-          <label className="task-name" htmlFor={props.id}>
-            {props.name}
-          </label>
+          <span>
+            <label className="task-name" htmlFor={props.id}>
+              {props.name}
+            </label>
+          </span>
         )}
       </div>
       <ul>
-        {editingTaskId == props.id ? (
+        {editingTaskId === props.id ? (
           <li>
             <button className="task-btn" onClick={handleConfirmEdit}>
               <CheckIcon />
