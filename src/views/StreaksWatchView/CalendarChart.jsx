@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../../App.css";
-import { Grid } from "@mui/material";
 
 
 const daysInMonth = (month, year) => {
@@ -77,8 +76,6 @@ const App = () => {
 
   return (
     <div className="streaks-area">
-      {/* naming this taskgroup-container, because I want the same styles as the one in tasks view might need
-      change after refactoring of css though */}
       <div className="streaks-container">
         <div className="featured-week">
           <div className="featured-week-title">

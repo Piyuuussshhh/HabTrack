@@ -602,6 +602,7 @@ form .form-group select {
   display: flex;
   align-items: center;
   padding: 12px;
+  cursor: pointer;
 }
 
 .task-btn:hover {
@@ -856,4 +857,158 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   border: 1px solid #ccc;
   padding: 2px 5px;
   white-space: nowrap;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* -----------------------------HABITS VIEW STYLES-------------------------- */
+/* -------------------------------------------------------------------------- */
+
+
+.habits-area{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+
+.habits-container{
+  width: 65%;
+  height: inherit;
+
+  background-color: var(--primary);
+  border: 1px solid black;
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin: 0.5rem;
+  padding-bottom: 1rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+
+.habits-card {
+  height: 150px;
+  width: 90%;
+  background-color: var(--grey);
+  border: 1px solid black;
+  border-radius: 1rem;
+  box-shadow: 0px 10px 8px rgb(0, 0, 0);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 1rem;
+  padding: 0 1rem;
+}
+
+.habits-card ul {
+  padding: 0;
+  flex: 15%;
+  list-style-type: none;
+  display: flex;
+  gap: 1rem;
+  justify-content: end;
+  }
+
+.habits-card label {
+  margin: 0;
+}
+
+.text-container2{
+  display: flex;
+  flex-direction: row;
+  margin: 10px;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.habits-card input[type="checkbox"] {
+  /* Hide the default checkbox */
+  display: none;
+}
+
+.habits-card input[type="checkbox"] + label {
+  /* Create a custom checkbox */
+  display: inline-block;
+  position: relative;
+  border: none;
+}
+
+.habits-card input[type="checkbox"] + label:before {
+  content: "";
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border: none;
+  background-color: white;
+  cursor: pointer;
+  color: black;
+}
+
+.habits-card input[type="checkbox"]:checked + label:before {
+  /* Style the checked state */
+  background-color: #3576cc;
+  border: none;
+}
+
+.habits-card input[type="checkbox"]:checked + label:after {
+  /* Add a checkmark */
+  content: "✔";
+  font-size: 25px;
+  background-color: #3576cc;
+  color: #fff;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+
+.day-type select {
+  padding: 10px;
+  background-color: #3576cc;
+  border: 1px solid black;
+  border-radius: 15px;
+  width: 100%;
+  font-size: 16px;
+  color: white;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select option {
+  padding: 10px;
+  font-size: 16px;
+  color: #333;
+  background-color: black;
+}
+
+.day-type select {
+  appearance: none; /* Remove the default dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7.4 12.6l5.6 5.6 5.6-5.6'/%3E%3C/svg%3E");
+  background-size: 30px 30px;
+  background-position: 100% 50%;
+  background-repeat: no-repeat;
+  padding: 10px 30px 10px 10px;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select:hover {
+  background-color: #3576cc;
+  filter: brightness(120%);
+  cursor: pointer;
+  box-shadow: 10px 10px 10px black;
+}
+
+.day-type select:focus {
+  outline: none;
+  box-shadow: 10 10 10px black;
+
 }
