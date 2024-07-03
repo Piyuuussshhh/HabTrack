@@ -102,7 +102,7 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
             {groupOptions.map((option) => (
               <MenuItem
                 key={option}
-                onClick={(e) => handleMenuItemClick(e, option)}
+                onClick={() => handleMenuItemClick(option)}
               >
                 {option}
               </MenuItem>
