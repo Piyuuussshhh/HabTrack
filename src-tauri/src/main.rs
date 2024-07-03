@@ -26,6 +26,7 @@ fn main() {
             ops::commands::delete_item,
             ops::commands::edit_item,
             ops::commands::update_item,
+            ops::commands::update_status_item,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

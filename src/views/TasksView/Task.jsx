@@ -14,6 +14,7 @@ import {
   TODAY,
   TAURI_DELETE_ITEM,
   TAURI_EDIT_ITEM,
+  TAURI_UPDATE_STATUS_ITEM,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
@@ -94,16 +95,35 @@ const Task = (props) => {
     setEditingTaskId(null);
   }
 
+  function handleCompletion(e) {
+    const isCompleted = e.target.checked;
+    if (isCompleted) {
+      // Update database.
+      invoke(TAURI_UPDATE_STATUS_ITEM, {
+        table: TODAY,
+        id: props.id,
+        status: isCompleted,
+      });
+
+      // Update frontend.
+      updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+    }
+  }
+
   return (
     <div
       className="task-card"
       draggable
       onDragStart={(e) => {
         /* A duplicate of this current task is passed to handleOnDrag*/
-        handleOnDrag(e, { id: props.id, name: props.name, type: TASK });
+        handleOnDrag(e, {
+          id: props.id,
+          name: props.name,
+          type: TASK,
+        });
       }}
     >
-      <input type="checkbox" id={props.id} />
+      <input type="checkbox" id={props.id} onClick={handleCompletion} />
       <label className="task-checkbox" htmlFor={props.id}></label>
       <div className="text-container">
         {editingTaskId === props.id ? (

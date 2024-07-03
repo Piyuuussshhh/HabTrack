@@ -6,6 +6,7 @@ import {
   TODAY,
   TASK,
   TASKS_VIEW,
+  ACTIVE_TASKS,
   TASK_GROUP,
   TAURI_FETCH_TASKS_VIEW,
   TAURI_ADD_ITEM,
@@ -16,6 +17,7 @@ import { DragDropProvider, DragDropContext } from "./DragDropContext";
 import Modal from "../../components/Modal";
 import { addItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
+import CompletedTasksModal from "../../components/CompletedTasksModal";
 
 /*
     TODO -> ERROR HANDLING.
@@ -32,6 +34,7 @@ const NOT_FOUND = -1;
 const TasksView = () => {
   const [showModal, setModalVisibility] = useState(false);
   const [structure, setStructure] = useState("");
+  const [showCompleted, setCompletedTasksVisibility] = useState(false);
 
   /*
       Probably should not do this, and just add the task to
@@ -45,7 +48,10 @@ const TasksView = () => {
         return;
       }
       try {
-        const response = await invoke(TAURI_FETCH_TASKS_VIEW, { table: TODAY });
+        const response = await invoke(TAURI_FETCH_TASKS_VIEW, {
+          table: TODAY,
+          status: ACTIVE_TASKS,
+        });
         const data = JSON.parse(response);
 
         // Set sessionStorage.
@@ -126,8 +132,16 @@ const TasksView = () => {
     setModalVisibility(false);
   };
 
-  function closeModal() {
-    setModalVisibility(false);
+  function closeModal(type) {
+    if (type === "Add") {
+      setModalVisibility(false);
+    } else if (type === "Completed") {
+      setCompletedTasksVisibility(false);
+    }
+  }
+
+  function toggleCompleted() {
+    setCompletedTasksVisibility(true);
   }
 
   function onChangeTasksView() {
@@ -137,7 +151,7 @@ const TasksView = () => {
   return (
     <>
       <div className="box">
-        <Navbar onAdd={seeModal} />
+        <Navbar onAdd={seeModal} toggleCompleted={toggleCompleted} />
         <div className="task-area">
           {/* I don't understand how this works, but it works. */}
           <DragDropProvider item={structure}>
@@ -161,7 +175,12 @@ const TasksView = () => {
           </DragDropProvider>
         </div>
       </div>
-      {showModal && <Modal itemType={TASK} onAdd={add} onCancel={closeModal} />}
+      {showModal && (
+        <Modal itemType={TASK} onAdd={add} onCancel={() => closeModal("Add")} />
+      )}
+      {showCompleted && (
+        <CompletedTasksModal onChangeTasksView={onChangeTasksView} onCancel={() => closeModal("Completed")} />
+      )}
     </>
   );
 };

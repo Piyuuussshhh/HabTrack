@@ -365,6 +365,74 @@ form .form-group select {
 }
 
 /* -------------------------------------------------------------------------- */
+/* ----------------------------COMPLETD TASKS STYLES------------------------- */
+/* -------------------------------------------------------------------------- */
+
+.completed-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 0;
+}
+
+.btn-area button {
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-area {
+  width: 750px;
+  display: flex;
+  justify-content: end;
+}
+
+.completed-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 750px;
+  text-align: center;
+  background-color: var(--grey);
+  z-index: 1;
+}
+
+.completed-modal ul {
+  width: 100%;
+  padding-left: 30px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: var(--bg-color);
+}
+
+.completed-modal li {
+  width: 100%;
+  padding-right: 30px;
+}
+
+.completed-task {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* -------------------------------------------------------------------------- */
 /* -----------------------------TASK VIEW STYLES----------------------------- */
 /* -------------------------------------------------------------------------- */
 
@@ -690,15 +758,14 @@ form .form-group select {
 /* These are in calendar chart, since there were already unnamed divs, creating more in streakswatch just would have been
 redudant. Not putting under calendar chart styles for obvious reasons. */
 
-.streaks-area{
+.streaks-area {
   display: flex;
   flex-direction: column;
   width: 100%;
   align-items: center;
 }
 
-
-.streaks-container{
+.streaks-container {
   width: 95%;
   height: inherit;
   min-width: 90%;
@@ -718,7 +785,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding-left: 1rem;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* ------------------------------CALENDAR CHART STYLES----------------------- */
 /* -------------------------------------------------------------------------- */
@@ -729,13 +795,13 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   margin-top: 20px;
   /* margin-left: 100px;
   margin-right: 100px; */
-  margin-bottom:40px ;
+  margin-bottom: 40px;
   border: 1px solid wheat;
   align-items: center;
   min-width: 150px;
 }
 
-.featured-week-title{
+.featured-week-title {
   color: wheat;
   margin-top: 30px;
 }
@@ -757,7 +823,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   margin-bottom: 25px;
   margin-left: 20px;
   margin-right: 20px;
-
 }
 
 .featured-day {
@@ -776,7 +841,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
   color: wheat;
 }
-
 
 /* CalendarChart */
 .calendar-chart {
@@ -811,8 +875,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
 }
 
-
-
 .days {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -821,8 +883,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   grid-row-gap: 10px;
   grid-auto-flow: column;
 }
-
-
 
 .day {
   background-color: #fff;
@@ -838,7 +898,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   flex-direction: column;
   align-items: center;
 }
-
 
 .done {
   background-color: var(--secondary);
@@ -859,21 +918,18 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   white-space: nowrap;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* -----------------------------HABITS VIEW STYLES-------------------------- */
 /* -------------------------------------------------------------------------- */
 
-
-.habits-area{
+.habits-area {
   display: flex;
   flex-direction: column;
   width: 100%;
   align-items: center;
 }
 
-
-.habits-container{
+.habits-container {
   width: 65%;
   height: inherit;
 
@@ -891,7 +947,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding-right: 1rem;
   padding-left: 1rem;
 }
-
 
 .habits-card {
   height: 150px;
@@ -914,13 +969,13 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   display: flex;
   gap: 1rem;
   justify-content: end;
-  }
+}
 
 .habits-card label {
   margin: 0;
 }
 
-.text-container2{
+.text-container2 {
   display: flex;
   flex-direction: row;
   margin: 10px;
@@ -971,7 +1026,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
 }
 
-
 .day-type select {
   padding: 10px;
   background-color: #3576cc;
@@ -1010,5 +1064,4 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 .day-type select:focus {
   outline: none;
   box-shadow: 10 10 10px black;
-
 }
