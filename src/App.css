@@ -690,15 +690,14 @@ form .form-group select {
 /* These are in calendar chart, since there were already unnamed divs, creating more in streakswatch just would have been
 redudant. Not putting under calendar chart styles for obvious reasons. */
 
-.streaks-area{
+.streaks-area {
   display: flex;
   flex-direction: column;
   width: 100%;
   align-items: center;
 }
 
-
-.streaks-container{
+.streaks-container {
   width: 95%;
   height: inherit;
   min-width: 90%;
@@ -718,7 +717,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding-left: 1rem;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* ------------------------------CALENDAR CHART STYLES----------------------- */
 /* -------------------------------------------------------------------------- */
@@ -729,13 +727,13 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   margin-top: 20px;
   /* margin-left: 100px;
   margin-right: 100px; */
-  margin-bottom:40px ;
+  margin-bottom: 40px;
   border: 1px solid wheat;
   align-items: center;
   min-width: 150px;
 }
 
-.featured-week-title{
+.featured-week-title {
   color: wheat;
   margin-top: 30px;
 }
@@ -757,7 +755,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   margin-bottom: 25px;
   margin-left: 20px;
   margin-right: 20px;
-
 }
 
 .featured-day {
@@ -776,7 +773,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
   color: wheat;
 }
-
 
 /* CalendarChart */
 .calendar-chart {
@@ -811,8 +807,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
 }
 
-
-
 .days {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -821,8 +815,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   grid-row-gap: 10px;
   grid-auto-flow: column;
 }
-
-
 
 .day {
   background-color: #fff;
@@ -838,7 +830,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   flex-direction: column;
   align-items: center;
 }
-
 
 .done {
   background-color: var(--secondary);
@@ -859,22 +850,19 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   white-space: nowrap;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* -----------------------------HABITS VIEW STYLES-------------------------- */
 /* -------------------------------------------------------------------------- */
 
-
-.habits-area{
+.habits-area {
   display: flex;
   flex-direction: column;
   width: 100%;
   align-items: center;
 }
 
-
-.habits-container{
-  width: 65%;
+.habits-container {
+  width: 60%;
   height: inherit;
 
   background-color: var(--primary);
@@ -892,10 +880,9 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding-left: 1rem;
 }
 
-
 .habits-card {
   height: 150px;
-  width: 90%;
+  width: 80%;
   background-color: var(--grey);
   border: 1px solid black;
   border-radius: 1rem;
@@ -907,34 +894,41 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   padding: 0 1rem;
 }
 
-.habits-card ul {
+.action-btn {
   padding: 0;
   flex: 15%;
   list-style-type: none;
   display: flex;
   gap: 1rem;
   justify-content: end;
-  }
+  flex: 15%;
+}
+
+.habit-data{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: start;
+  margin-left: 25px;
+  flex: 80%;
+}
 
 .habits-card label {
   margin: 0;
 }
 
-.text-container2{
+.text-container2 {
   display: flex;
   flex-direction: row;
   margin: 10px;
   align-items: center;
-  flex-grow: 1;
 }
 
-.habits-card input[type="checkbox"] {
-  /* Hide the default checkbox */
+/* .habits-card input[type="checkbox"] {
   display: none;
 }
 
 .habits-card input[type="checkbox"] + label {
-  /* Create a custom checkbox */
   display: inline-block;
   position: relative;
   border: none;
@@ -952,13 +946,11 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 }
 
 .habits-card input[type="checkbox"]:checked + label:before {
-  /* Style the checked state */
   background-color: #3576cc;
   border: none;
 }
 
 .habits-card input[type="checkbox"]:checked + label:after {
-  /* Add a checkmark */
   content: "✔";
   font-size: 25px;
   background-color: #3576cc;
@@ -969,8 +961,55 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+} */
+
+.done-btn-area{
+  flex: 5%;
 }
 
+.done-btn {
+  background-color: #3576cc;
+  color: white;
+  border: none;
+  border-radius: 17px;
+  box-shadow: 10px 10px 10px black;
+  display: flex;
+  padding: 12px;
+  align-items: center;
+  /* height: 100%;
+  width: 100%; */
+}
+
+.done-btn:hover {
+  filter: brightness(120%);
+  background-color: white;
+  color: green;
+}
+
+.done-btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+}
+
+/* .not-done-btn{
+  background-color: #3576cc;
+  color: white;
+  border: none;
+  border-radius: 17px;
+  box-shadow: 10px 10px 10px black;
+  display: flex;
+  padding: 12px;
+  align-items: center;
+}
+
+.not-done-btn:hover{
+  filter: brightness(120%);
+  background-color: white;
+  color: red;
+}
+
+.not-done-btn:active {
+  box-shadow: inset 2px 2px 10px #000;
+} */
 
 .day-type select {
   padding: 10px;
@@ -1010,5 +1049,4 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 .day-type select:focus {
   outline: none;
   box-shadow: 10 10 10px black;
-
 }
