@@ -89,6 +89,7 @@ h2 {
 /* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
 /* -------------------------------------------------------------------------- */
 
+
 .toggle-sidebar-btn {
   position: absolute;
   top: 0;
@@ -241,11 +242,86 @@ h2 {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
+
+.close-x-btn{
+  align-items: end;
+}
+.x-btn {
+  flex: 10%;
+  position: relative;
+  left: 200px;
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  transition: background 0.5s;
+}
+
+.X {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 25px;
+  height: 1px;
+  background-color: rgb(255, 255, 255);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.Y {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 25px;
+  height: 1px;
+  background-color: #fff;
+  transform: translateX(-50%) rotate(-45deg);
+}
+
+.close {
+  top:250px;
+  display: flex;
+  padding: 0.8rem 1.5rem;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  width: 3em;
+  height: 1.7em;
+  font-size: 12px;
+  background-color: rgb(19, 22, 24);
+  color: rgb(187, 229, 236);
+  border: none;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.x-btn:hover {
+  background-color: rgb(211, 21, 21);
+}
+
+.x-btn:active {
+  background-color: rgb(130, 0, 0);
+}
+
+.x-btn:hover > .close {
+  animation: close 0.2s forwards 0.25s;
+}
+
+@keyframes close {
+  100% {
+    opacity: 1;
+  }
+}
+
 
 .modal-content {
   background: white;
@@ -418,7 +494,7 @@ form .form-group select {
   align-items: center;
 
   margin: 2rem;
-  padding: 0 1rem;
+  padding: 0.5rem 1.5rem;
 }
 
 /* You cannot style an checkbox, the entirety of reddit and stackoverflow gave up */
@@ -427,13 +503,11 @@ form .form-group select {
 /* I am Gojo Satoru of CSS*/
 
 .task-card input[type="checkbox"] {
-  /* Hide the default checkbox */
   display: none;
 }
 
 .task-card input[type="checkbox"] + label {
   flex: 5%;
-  /* Create a custom checkbox */
   display: inline-block;
   position: relative;
 }
@@ -449,16 +523,14 @@ form .form-group select {
 }
 
 .task-card input[type="checkbox"]:checked + label:before {
-  /* Style the checked state */
   background-color: #3576cc;
   border-color: #000000;
 }
 
 .task-card input[type="checkbox"]:checked + label:after {
-  /* Add a checkmark */
   content: "✔";
   font-size: 25px;
-  color: #fff; /* Change the color to white */
+  color: #fff;
   display: block;
   position: absolute;
   top: 50%;
@@ -526,11 +598,11 @@ form .form-group select {
 }
 
 .taskgroup-container {
-  width: 75%;
+  width: 80%;
   /* height: fit-content; */
   height: inherit;
   min-width: 500px;
-  max-width: 750px;
+  max-width: 900px;
 
   background-color: var(--primary);
   border: 1px solid black;
@@ -564,7 +636,7 @@ form .form-group select {
 /* ----------------- */
 /* Buttons on navbar */
 /* ----------------- */
-.btn {
+/* .btn {
   background: #3576cc;
   color: white;
   border: none;
@@ -586,6 +658,114 @@ form .form-group select {
 
 .btn:active {
   box-shadow: inset 2px 2px 10px #000;
+} */
+
+.btn,
+.btn *,
+.btn :after,
+.btn :before,
+.btn:after,
+.btn:before {
+  border: 0 solid;
+  box-sizing: border-box;
+}
+.btn {
+  -webkit-tap-highlight-color: transparent;
+  background-color: #000;
+  background-image: none;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1.5;
+  margin: 0;
+  box-shadow: 10px 10px 10px black;
+}
+
+.btn:disabled {
+  cursor: default;
+}
+
+.btn:-moz-focusring {
+  outline: auto;
+}
+.btn svg {
+  vertical-align: middle;
+}
+.btn [hidden] {
+  display: none;
+}
+
+.btn {
+  background: #3576cc;
+  background-clip: content-box;
+  border-radius: 20px;
+  box-sizing: border-box;
+  display: block;
+  height: 50px;
+  padding: 0;
+  position: relative;
+  transition: 0.2s;
+  width: 50px;
+}
+
+.btn:hover {
+  background: #fff;
+}
+
+#add-btn:hover{
+  background: rgb(63, 176, 63);
+}
+
+.btn svg {
+  --size: 30px;
+  fill: #fff;
+  display: block;
+  height: var(--size);
+  left: calc(50% - var(--size) / 2);
+  position: absolute;
+  top: calc(50% - var(--size) / 2);
+  width: var(--size);
+}
+
+.btn:hover svg {
+  fill: #3576cc;
+}
+
+#add-btn:hover svg {
+  fill: white;
+}
+
+.btn:before {
+  border: 5px solid #fff;
+  border-radius: 50%;
+  content: "";
+  inset: 1px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: scale(2);
+  transition: 0.2s;
+}
+
+#add-btn::before{
+  border: 5px solid rgb(63, 176, 63);
+  border-radius: 50%;
+  content: "";
+  inset: 1px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: scale(2);
+  transition: 0.2s;
+}
+
+#add-btn:hover::before{
+  opacity: 1;
+  transform: scale(1);
+}
+
+.btn:hover:before {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* ----------------- */
@@ -614,7 +794,7 @@ form .form-group select {
   box-shadow: inset 2px 2px 10px #000;
 }
 
-.delete-icon {
+/* .delete-icon {
   background-color: #286bb3;
   color: white;
   border: none;
@@ -635,6 +815,136 @@ form .form-group select {
 
 .delete-icon:active {
   box-shadow: inset 2px 2px 10px white;
+} */
+
+.del-btn {
+  width: 55px;
+  height: 55px;
+  padding: 12px;
+  border-radius: 20px;
+  background-color: #286bb3;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+  gap: 1px;
+  box-shadow: 10px 10px 10px black;
+}
+
+.svgIcon {
+  width: 20px;
+  transition-duration: 0.3s;
+}
+
+.svgIcon path {
+  fill: white;
+}
+
+.del-btn:hover {
+  width: 100px;
+  border-radius: 20px;
+  transition-duration: 0.3s;
+  background-color: rgb(255, 69, 69);
+  align-items: center;
+  gap: 0;
+}
+
+.del-btn:hover .bin-bottom {
+  width: 50px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+}
+.bin-top {
+  transform-origin: bottom right;
+}
+.del-btn:hover .bin-top {
+  width: 50px;
+  transition-duration: 0.3s;
+  transform: translateY(60%) rotate(160deg);
+}
+.del-btn::before {
+  position: absolute;
+  top: -20px;
+  content: "Delete";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 2px;
+}
+
+.del-btn:hover::before {
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(35px);
+  transition-duration: 0.3s;
+}
+
+.edit-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 20px;
+  background-color: #286bb3;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 10px black;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none !important;
+}
+
+.edit-svgIcon {
+  width: 17px;
+  transition-duration: 0.3s;
+}
+
+.edit-svgIcon path {
+  fill: white;
+}
+
+.edit-btn:hover {
+  width: 100px;
+  border-radius: 20px;
+  transition-duration: 0.3s;
+  background-color: orange;
+  align-items: center;
+}
+
+.edit-btn:hover .edit-svgIcon {
+  width: 20px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+
+.edit-btn::before {
+  display: none;
+  content: "Edit";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 2px;
+}
+
+.edit-btn:hover::before {
+  display: block;
+  padding-right: 10px;
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(0px);
+  transition-duration: 0.3s;
 }
 
 .cancel-btn {
@@ -904,7 +1214,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   flex: 15%;
 }
 
-.habit-data{
+.habit-data {
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -963,7 +1273,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   text-align: center;
 } */
 
-.done-btn-area{
+.done-btn-area {
   flex: 5%;
 }
 
