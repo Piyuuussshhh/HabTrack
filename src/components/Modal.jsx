@@ -52,10 +52,10 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
     <div className="modal">
 
       <div className="close-x-btn">
-      <button class="x-btn">
-        <span class="X"></span>
-        <span class="Y"></span>
-        <div class="close">Close</div>
+      <button className="x-btn">
+        <span className="X"></span>
+        <span className="Y"></span>
+        <div className="close" title={null}></div>
       </button>
 
       </div>

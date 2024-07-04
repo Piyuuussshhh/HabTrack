@@ -323,7 +323,7 @@ h2 {
 .x-btn {
   flex: 10%;
   position: relative;
-  left: 200px;
+  left: 180px;
   width: 50px;
   height: 50px;
   border: none;
@@ -333,7 +333,6 @@ h2 {
 }
 
 .X {
-  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -344,7 +343,6 @@ h2 {
 }
 
 .Y {
-  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -565,46 +563,9 @@ form .form-group select {
 }
 
 /* You cannot style an checkbox, the entirety of reddit and stackoverflow gave up */
-/* But I said nah I'd win and I did*/
+/* But I said nah I'd win and I did* /
 /* Made a fricking new checkbox */
-/* I am Gojo Satoru of CSS*/
-
-/* .task-card input[type="checkbox"] {
-  display: none;
-}
-
-.task-card input[type="checkbox"] + label {
-  flex: 5%;
-  display: inline-block;
-  position: relative;
-}
-
-.task-card input[type="checkbox"] + label:before {
-  content: "";
-  display: inline-block;
-  width: 25px;
-  height: 25px;
-  border: 1px solid #0a0a0a;
-  background-color: white;
-  cursor: pointer;
-}
-
-.task-card input[type="checkbox"]:checked + label:before {
-  background-color: #3576bb;
-  border-color: #000000;
-}
-
-.task-card input[type="checkbox"]:checked + label:after {
-  content: "✔";
-  font-size: 25px;
-  color: #fff;
-  display: block;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-} */
+/* I am Gojo Satoru of CSS */
 
 /* Hide the default checkbox */
 .check-cont input {
@@ -647,13 +608,13 @@ form .form-group select {
 /* When the checkbox is checked, modify the checkmark appearance */
 .check-cont input:checked ~ .checkmark {
   transform: translateY(40px); /* Move down */
-  animation: wipeDown 0.6s ease-in-out forwards; /* Apply wipe animation */
+  animation: wipeDown 0.3s ease-in-out forwards; /* Apply wipe animation */
 }
 
 /* When the checkbox is not checked, modify the checkmark appearance */
 .check-cont input:not(:checked) ~ .checkmark {
   transform: translateY(-40px); /* Move up */
-  animation: wipeUp 0.6s ease-in-out forwards; /* Apply wipe animation */
+  animation: wipeUp 0.3s ease-in-out forwards; /* Apply wipe animation */
 }
 
 /* Keyframes for wipe animations */
@@ -662,7 +623,7 @@ form .form-group select {
     transform: translateY(0); /* Starting position */
   }
   100% {
-    transform: translateY(40px); /* End position */
+    transform: translateY(40px);
   }
 }
 
@@ -955,29 +916,6 @@ form .form-group select {
 .task-btn:active {
   box-shadow: inset 2px 2px 10px #000;
 }
-
-/* .delete-icon {
-  background-color: #286bb3;
-  color: white;
-  border: none;
-  padding: 12px;
-  cursor: pointer;
-  border-radius: 17px;
-  box-shadow: 6px 6px 7px #000;
-  display: flex;
-  align-items: center;
-}
-
-.delete-icon:hover {
-  background: white;
-  color: red;
-  border-radius: 15px;
-  box-shadow: 10px 10px 10px #000;
-}
-
-.delete-icon:active {
-  box-shadow: inset 2px 2px 10px white;
-} */
 
 .del-btn {
   width: 55px;
@@ -1391,15 +1329,16 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
 .text-container2 {
   display: flex;
+  flex: 1 1 80%;
   flex-direction: row;
   margin: 10px;
   align-items: center;
   word-wrap: break-word;
 }
 
-.done-btn-area {
+/* .done-btn-area {
   flex: 5%;
-}
+} */
 
 /* .done-btn {
   background-color: #3576cc;
