@@ -89,7 +89,6 @@ h2 {
 /* ------------------------TOP-MOST LEVEL STYLING---------------------------- */
 /* -------------------------------------------------------------------------- */
 
-
 .toggle-sidebar-btn {
   position: absolute;
   top: 0;
@@ -133,7 +132,7 @@ h2 {
 /* ------------------------------SIDEBAR STYLES------------------------------ */
 /* -------------------------------------------------------------------------- */
 
-.sidebar-button {
+/* .sidebar-button {
   position: fixed;
   top: 7px;
   left: 0;
@@ -155,6 +154,75 @@ h2 {
 
 .sidebar-button:hover::after {
   content: attr("Sidebar");
+} */
+
+.sidebar-button {
+  width: 50px;
+  height: 50px;
+  top: 7px;
+
+  border-radius: 20px;
+  background-color: #286bb3;
+  border: none;
+
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 10px black;
+
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+
+  position: absolute;
+  text-decoration: none !important;
+  z-index: 1;
+}
+
+.sidebar-button svg {
+  width: 25px;
+  color: white;
+  transition-duration: 0.3s;
+}
+
+.sidebar-button:hover {
+  width: 100px;
+  border-radius: 20px;
+  transition-duration: 0.3s;
+  background-color: var(--secondary);
+  align-items: center;
+  filter: brightness(120%);
+}
+
+.sidebar-button:hover svg {
+  width: 20px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+
+.sidebar-button::after {
+  display: none;
+  content: "Menu";
+  padding: 5px;
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 3px;
+}
+
+.sidebar-button:hover::after {
+  display: block;
+  padding-right: 10px;
+  font-size: 15px;
+  padding: 5px;
+  opacity: 1;
+  transform: translateY(0px);
+  transition-duration: 0.3s;
 }
 
 .sidebar .sidebar-list {
@@ -249,7 +317,7 @@ h2 {
   -webkit-backdrop-filter: blur(2px);
 }
 
-.close-x-btn{
+.close-x-btn {
   align-items: end;
 }
 .x-btn {
@@ -287,7 +355,7 @@ h2 {
 }
 
 .close {
-  top:250px;
+  top: 250px;
   display: flex;
   padding: 0.8rem 1.5rem;
   align-items: center;
@@ -321,7 +389,6 @@ h2 {
     opacity: 1;
   }
 }
-
 
 .modal-content {
   background: white;
@@ -502,7 +569,7 @@ form .form-group select {
 /* Made a fricking new checkbox */
 /* I am Gojo Satoru of CSS*/
 
-.task-card input[type="checkbox"] {
+/* .task-card input[type="checkbox"] {
   display: none;
 }
 
@@ -523,7 +590,7 @@ form .form-group select {
 }
 
 .task-card input[type="checkbox"]:checked + label:before {
-  background-color: #3576cc;
+  background-color: #3576bb;
   border-color: #000000;
 }
 
@@ -537,6 +604,101 @@ form .form-group select {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+} */
+
+/* Hide the default checkbox */
+.check-cont input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.check-cont {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  font-size: 20px;
+  user-select: none;
+  border: 2px solid whitesmoke;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 40px;
+  width: 40px;
+  background-color: #2dc38c;
+  border-bottom: 1.5px solid #2dc38c; /* Bottom stroke */
+  box-shadow: 0 0 1px #cef1e4, inset 0 -2.5px 3px #62eab8,
+    inset 0 3px 3px rgba(0, 0, 0, 0.34); /* Inner shadow */
+  border-radius: 8px;
+  transition: transform 0.3s ease-in-out; /* Transition for smooth animation */
+}
+
+/* When the checkbox is checked, modify the checkmark appearance */
+.check-cont input:checked ~ .checkmark {
+  transform: translateY(40px); /* Move down */
+  animation: wipeDown 0.6s ease-in-out forwards; /* Apply wipe animation */
+}
+
+/* When the checkbox is not checked, modify the checkmark appearance */
+.check-cont input:not(:checked) ~ .checkmark {
+  transform: translateY(-40px); /* Move up */
+  animation: wipeUp 0.6s ease-in-out forwards; /* Apply wipe animation */
+}
+
+/* Keyframes for wipe animations */
+@keyframes wipeDown {
+  0% {
+    transform: translateY(0); /* Starting position */
+  }
+  100% {
+    transform: translateY(40px); /* End position */
+  }
+}
+
+@keyframes wipeUp {
+  0% {
+    transform: translateY(40); /* Starting position */
+  }
+  100% {
+    transform: translateY(0px); /* End position */
+  }
+}
+
+/* Create the checkmark/indicator */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.check-cont input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.check-cont .checkmark:before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 9px;
+  width: 11px;
+  height: 19px;
+  align-items: center;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .text-container {
@@ -711,7 +873,7 @@ form .form-group select {
   background: #fff;
 }
 
-#add-btn:hover{
+#add-btn:hover {
   background: rgb(63, 176, 63);
 }
 
@@ -746,7 +908,7 @@ form .form-group select {
   transition: 0.2s;
 }
 
-#add-btn::before{
+#add-btn::before {
   border: 5px solid rgb(63, 176, 63);
   border-radius: 50%;
   content: "";
@@ -758,7 +920,7 @@ form .form-group select {
   transition: 0.2s;
 }
 
-#add-btn:hover::before{
+#add-btn:hover::before {
   opacity: 1;
   transform: scale(1);
 }
@@ -1232,52 +1394,14 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   flex-direction: row;
   margin: 10px;
   align-items: center;
+  word-wrap: break-word;
 }
-
-/* .habits-card input[type="checkbox"] {
-  display: none;
-}
-
-.habits-card input[type="checkbox"] + label {
-  display: inline-block;
-  position: relative;
-  border: none;
-}
-
-.habits-card input[type="checkbox"] + label:before {
-  content: "";
-  display: inline-block;
-  width: 25px;
-  height: 25px;
-  border: none;
-  background-color: white;
-  cursor: pointer;
-  color: black;
-}
-
-.habits-card input[type="checkbox"]:checked + label:before {
-  background-color: #3576cc;
-  border: none;
-}
-
-.habits-card input[type="checkbox"]:checked + label:after {
-  content: "✔";
-  font-size: 25px;
-  background-color: #3576cc;
-  color: #fff;
-  display: block;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-} */
 
 .done-btn-area {
   flex: 5%;
 }
 
-.done-btn {
+/* .done-btn {
   background-color: #3576cc;
   color: white;
   border: none;
@@ -1286,8 +1410,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   display: flex;
   padding: 12px;
   align-items: center;
-  /* height: 100%;
-  width: 100%; */
+ 
 }
 
 .done-btn:hover {
@@ -1298,28 +1421,56 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
 .done-btn:active {
   box-shadow: inset 2px 2px 10px #000;
-}
-
-/* .not-done-btn{
-  background-color: #3576cc;
-  color: white;
-  border: none;
-  border-radius: 17px;
-  box-shadow: 10px 10px 10px black;
-  display: flex;
-  padding: 12px;
-  align-items: center;
-}
-
-.not-done-btn:hover{
-  filter: brightness(120%);
-  background-color: white;
-  color: red;
-}
-
-.not-done-btn:active {
-  box-shadow: inset 2px 2px 10px #000;
 } */
+
+/* Hide the default checkbox */
+.habit-check-cont input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+  display: none;
+  color: white;
+}
+
+.habit-check-cont {
+  --size: 50px;
+  width: var(--size);
+  display: block;
+  height: var(--size);
+  background-color: #191a1e;
+  border-radius: 100%;
+  cursor: pointer;
+  padding: 5px;
+  color: white;
+  box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgb(95 94 94 / 25%),
+    inset 0px 0px 0px #0e0e0e, inset 0px -0px 0px #5f5e5e;
+}
+
+.habit-check-cont .habit-checkmark {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgb(95 94 94 / 25%),
+    inset 0px 0px 0px #0e0e0e, inset 0px -0px 0px #5f5e5e;
+  transition: all ease 0.3s;
+  padding: 8px;
+}
+
+.habit-check-cont .habit-checkmark svg {
+  opacity: 0;
+  transition: all ease 0.3s;
+}
+
+.habit-check-cont input:checked + .habit-checkmark {
+  box-shadow: 0px 0px 0px #0e0e0e, 0px 0px 0px rgb(95 94 94 / 25%),
+    inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px #5f5e5e;
+}
+
+.habit-check-cont input:checked + .habit-checkmark svg {
+  opacity: 1;
+}
 
 .day-type select {
   padding: 10px;

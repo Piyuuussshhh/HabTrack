@@ -16,11 +16,31 @@ const HabitCard = ({ habitName }) => {
   return (
     <div className="habits-card">
       <div className="done-btn-area">
-        <button className="done-btn" title="Done">
+        {/* <button className="done-btn" title="Done">
           <CheckIcon></CheckIcon>
-        </button>
+        </button> */}
+
+        <label class="habit-check-cont">
+          <input type="checkbox"/>
+          <div class="habit-checkmark">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="ionicon"
+              viewBox="0 0 512 512"
+            >
+              <title>Checkmark</title>
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"
+                d="M416 128L192 384l-96-96"
+              ></path>
+            </svg>
+          </div>
+        </label>
       </div>
-      <label></label>
       <div className="habit-data">
         <div className="text-container2">
           <label className="habit-name">{habitName}</label>
@@ -44,7 +64,7 @@ const HabitCard = ({ habitName }) => {
           </button>
         </li>
         <li>
-          {/* I know the button is excessively large but the animation is kinda worth it */}
+          {/* I know the code for button is excessively large but the animation is kinda worth it */}
           <button class="del-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"

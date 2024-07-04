@@ -13,7 +13,7 @@ const Navbar = ({ onAdd }) => {
       </p>
       <ul>
         <li>
-          <button class="btn" title="Set Tasks for Tommorow">
+          <button className="btn" title="Set Tasks for Tommorow">
             <FastForwardIcon>
               </FastForwardIcon>
           </button>
