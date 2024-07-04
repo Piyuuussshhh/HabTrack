@@ -319,8 +319,11 @@ h2 {
 
 .close-x-btn {
   align-items: end;
+  content: none;
 }
+
 .x-btn {
+  content: none;
   flex: 10%;
   position: relative;
   left: 180px;
@@ -333,6 +336,7 @@ h2 {
 }
 
 .X {
+  content: none;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -343,6 +347,7 @@ h2 {
 }
 
 .Y {
+  content: none;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -352,33 +357,18 @@ h2 {
   transform: translateX(-50%) rotate(-45deg);
 }
 
-.close {
-  top: 250px;
-  display: flex;
-  padding: 0.8rem 1.5rem;
-  align-items: center;
-  justify-content: center;
-  transform: translateX(-50%);
-  width: 3em;
-  height: 1.7em;
-  font-size: 12px;
-  background-color: rgb(19, 22, 24);
-  color: rgb(187, 229, 236);
-  border: none;
-  border-radius: 3px;
-  pointer-events: none;
-  opacity: 0;
-}
-
 .x-btn:hover {
+  content: none;
   background-color: rgb(211, 21, 21);
 }
 
 .x-btn:active {
+  content: none;
   background-color: rgb(130, 0, 0);
 }
 
 .x-btn:hover > .close {
+  content: none;
   animation: close 0.2s forwards 0.25s;
 }
 
@@ -1330,6 +1320,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 .text-container2 {
   display: flex;
   flex: 1 1 80%;
+  justify-content: start;
   flex-direction: row;
   margin: 10px;
   align-items: center;

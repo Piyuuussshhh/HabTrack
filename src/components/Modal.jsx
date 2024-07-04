@@ -55,7 +55,6 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
       <button className="x-btn">
         <span className="X"></span>
         <span className="Y"></span>
-        <div className="close" title={null}></div>
       </button>
 
       </div>
