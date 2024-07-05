@@ -8,7 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 const Navbar = ({ onAdd, toggleCompleted }) => {
   return (
     <nav className="nav">
-      <p className="page-title title" style={{ textAlign: "center" }}>
+      <p className="page-title title">
         Tasks
       </p>
       <ul>

@@ -383,6 +383,8 @@ form .form-group select {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   z-index: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-area button {
@@ -403,6 +405,9 @@ form .form-group select {
   padding: 20px;
   border-radius: 5px;
   width: 750px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
   text-align: center;
   background-color: var(--grey);
   z-index: 1;
@@ -410,6 +415,7 @@ form .form-group select {
 
 .completed-modal ul {
   width: 100%;
+  margin: 0;
   padding-left: 30px;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -447,7 +453,7 @@ form .form-group select {
   height: 3rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  /* align-items: center; */
   gap: 2rem;
   padding: 0 1rem;
   border-bottom: 1px solid black;
@@ -464,8 +470,8 @@ form .form-group select {
 .page-title {
   font-size: 1.5rem;
   font-weight: bold;
-  margin: 0 auto;
-  text-align: center;
+  margin: 0;
+  align-items: start;
 }
 
 /* ---- */
@@ -487,6 +493,8 @@ form .form-group select {
 
   margin: 2rem;
   padding: 0 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
 /* You cannot style an checkbox, the entirety of reddit and stackoverflow gave up */
@@ -580,6 +588,58 @@ form .form-group select {
 
 .edit-task-inp::placeholder {
   font-style: italic;
+}
+
+.progress-loader {
+  transform: translate(-50%, -50%);
+}
+
+.progress-loader {
+  position: absolute; /* Add this */
+  bottom: 0; /* Add this */
+  left: 50%;
+  width: 100%;
+  background: rgba(236, 236, 238, 0.253);
+  height: 3px;
+  border-radius: 7px;
+}
+
+.progress {
+  content: '';
+  width: 1px;
+  height: 3px;
+  border-radius: 7px;
+  background: rgb(255, 255, 255);
+  transition: 0.5s;
+  animation: loading1274 1.5s ease infinite;
+}
+
+.task-and-bar {
+  display: end;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@keyframes loading1274 {
+  0% {
+    width: 0%;
+  }
+
+  10% {
+    width: 10%;
+  }
+
+  50% {
+    width: 40%;
+  }
+
+  60% {
+    width: 60%;
+  }
+
+  100% {
+    width: 100%;
+  }
 }
 
 /* ---------- */

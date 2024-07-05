@@ -77,25 +77,30 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
       <div className="completed-modal">
         <h2>Completed Tasks</h2>
         {completedStructure ? (
-          <ul>
-            {completedStructure.map((node) => {
-              console.log("this is the node:" + node);
-              return (
-                <li key={node[0]}>
-                  <div className="completed-task">
-                    <label>{node[1]}</label>
-                    <button
-                      type="button"
-                      className="task-btn"
-                      onClick={() => onUndo(node)}
-                    >
-                      <Undo />
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <div
+            className="completed-task-list"
+            style={{ overflowX: "hidden", overflowY: "auto" }}
+          >
+            <ul>
+              {completedStructure.map((node) => {
+                console.log("this is the node:" + node);
+                return (
+                  <li key={node[0]}>
+                    <div className="completed-task">
+                      <label>{node[1]}</label>
+                      <button
+                        type="button"
+                        className="task-btn"
+                        onClick={() => onUndo(node)}
+                      >
+                        <Undo />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         ) : (
           <p>loading...</p>
         )}

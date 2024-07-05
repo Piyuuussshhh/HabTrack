@@ -25,6 +25,7 @@ const Task = (props) => {
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
+  const [isCompleted, setCompleted] = useState(false);
 
   useEffect(() => {
     if (editingTaskId) {
@@ -95,7 +96,14 @@ const Task = (props) => {
     setEditingTaskId(null);
   }
 
-  function handleCompletion(e) {
+  function sleep(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
+
+  async function handleCompletion(e) {
+    setCompleted(true);
+    await sleep(1500);
+    setCompleted(false);
     const isCompleted = e.target.checked;
     if (isCompleted) {
       // Update database.
@@ -164,6 +172,11 @@ const Task = (props) => {
           </>
         )}
       </ul>
+      {isCompleted && (
+        <div className="progress-loader">
+          <div className="progress"></div>
+        </div>
+      )}
     </div>
   );
 };
