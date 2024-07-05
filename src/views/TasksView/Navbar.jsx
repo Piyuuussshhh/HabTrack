@@ -24,7 +24,7 @@ const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
           </button>
         </li>
         <li>
-          <button className="nav-add-btn" onClick={onAdd} title="Add Task">
+          <button className="nav-add-btn" onClick={() => onAdd("")} title="Add Task">
             <AddIcon fontSize="medium"></AddIcon>
           </button>
         </li>

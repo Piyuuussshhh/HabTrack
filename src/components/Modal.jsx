@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { TASKS_VIEW, TASK_GROUP, TASK, ROOT } from "../Constants";
 
-const Modal = ({ itemType, onAdd, onCancel }) => {
+const Modal = ({ itemType, preselected, onAdd, onCancel }) => {
   const [option, setOption] = useState(TASK);
   const [name, setName] = useState("");
   const [group, setGroup] = useState(ROOT);
@@ -50,15 +50,12 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
 
   return (
     <div className="modal">
-
       <div className="close-x-btn">
-      <button className="x-btn">
-        <span className="X"></span>
-        <span className="Y"></span>
-      </button>
-
+        <button className="x-btn">
+          <span className="X"></span>
+          <span className="Y"></span>
+        </button>
       </div>
-
       <div className="modal-content">
         <h2>Add</h2>
         <div className="tab">
@@ -95,7 +92,11 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
                 <label htmlFor="group">
                   <strong>Group:</strong>
                 </label>
-                <select id="group" onChange={handleGroupChange}>
+                <select
+                  id="group"
+                  onChange={handleGroupChange}
+                  defaultValue={preselected !== "" ? preselected : "/"}
+                >
                   {groups.map((group, idx) => (
                     <option key={idx} value={group}>
                       {group}

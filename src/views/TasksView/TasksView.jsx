@@ -35,6 +35,7 @@ const TasksView = ({isSidebarOpen}) => {
   const [showModal, setModalVisibility] = useState(false);
   const [structure, setStructure] = useState("");
   const [showCompleted, setCompletedTasksVisibility] = useState(false);
+  const [preselectGroup, setPreselectGroup] = useState("");
 
   /*
       Probably should not do this, and just add the task to
@@ -71,7 +72,8 @@ const TasksView = ({isSidebarOpen}) => {
     // FUNCTION FROM RUNNING A BAJILLION TIMES.
   }, []);
 
-  function seeModal() {
+  function seeModal(name) {
+    setPreselectGroup(name);
     setModalVisibility(true);
   }
 
@@ -133,9 +135,9 @@ const TasksView = ({isSidebarOpen}) => {
   };
 
   function closeModal(type) {
-    if (type === "Add") {
+    if (type === "AddModal") {
       setModalVisibility(false);
-    } else if (type === "Completed") {
+    } else if (type === "CompletedModal") {
       setCompletedTasksVisibility(false);
     }
   }
@@ -166,6 +168,7 @@ const TasksView = ({isSidebarOpen}) => {
                     name={structure.name}
                     children={structure.children}
                     onChangeTasksView={onChangeTasksView}
+                    preselectGroup={seeModal}
                   />
                 ) : (
                   <p>loading...</p>
@@ -176,10 +179,10 @@ const TasksView = ({isSidebarOpen}) => {
         </div>
       </div>
       {showModal && (
-        <Modal itemType={TASK} onAdd={add} onCancel={() => closeModal("Add")} />
+        <Modal itemType={TASKS_VIEW} preselected={preselectGroup} onAdd={add} onCancel={() => closeModal("AddModal")} />
       )}
       {showCompleted && (
-        <CompletedTasksModal onChangeTasksView={onChangeTasksView} onCancel={() => closeModal("Completed")} />
+        <CompletedTasksModal onChangeTasksView={onChangeTasksView} onCancel={() => closeModal("CompletedModal")} />
       )}
     </>
   );
