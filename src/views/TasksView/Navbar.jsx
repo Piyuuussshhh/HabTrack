@@ -19,7 +19,7 @@ const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
       </p>
       <ul>
         <li>
-          <button className="btn" title="Set Tasks for Tommorow">
+          <button className="btn" title="Set Tasks for Tomorrow">
             <FastForwardIcon />
           </button>
         </li>
