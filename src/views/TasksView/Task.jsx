@@ -104,18 +104,15 @@ const Task = (props) => {
     setCompleted(true);
     await sleep(1500);
     setCompleted(false);
-    const isCompleted = e.target.checked;
-    if (isCompleted) {
-      // Update database.
-      invoke(TAURI_UPDATE_STATUS_ITEM, {
-        table: TODAY,
-        id: props.id,
-        status: isCompleted,
-      });
+    // Update database.
+    invoke(TAURI_UPDATE_STATUS_ITEM, {
+      table: TODAY,
+      id: props.id,
+      status: true,
+    });
 
-      // Update frontend.
-      updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
-    }
+    // Update frontend.
+    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
   }
 
   return (
@@ -135,8 +132,13 @@ const Task = (props) => {
       <label for="cbtest-60" class="check-box"></label> */}
 
       <label className="check-cont">
-        <input type="checkbox" defaultChecked='false'/>
+        <input
+          type="checkbox"
+          defaultChecked="false"
+          onClick={handleCompletion}
+        />
         <div className="checkmark"></div>
+      </label>
       <div className="text-container">
         {editingTaskId === props.id ? (
           <input
