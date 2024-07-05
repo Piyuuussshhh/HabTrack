@@ -17,9 +17,7 @@ const COMPLETED_TASKS = false;
 const TAURI_FETCH_TASKS_VIEW = "get_tasks_view";
 const TAURI_ADD_ITEM = "add_item";
 const TAURI_DELETE_ITEM = "delete_item";
-const TAURI_EDIT_ITEM = "edit_item";
 const TAURI_UPDATE_ITEM = "update_item";
-const TAURI_UPDATE_STATUS_ITEM = "update_status_item";
 
 export {
   // Table names
@@ -42,7 +40,5 @@ export {
   TAURI_FETCH_TASKS_VIEW,
   TAURI_ADD_ITEM,
   TAURI_DELETE_ITEM,
-  TAURI_EDIT_ITEM,
   TAURI_UPDATE_ITEM,
-  TAURI_UPDATE_STATUS_ITEM,
 };

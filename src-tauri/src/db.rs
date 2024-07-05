@@ -251,9 +251,7 @@ pub mod ops {
                         "SELECT * FROM {table} WHERE is_active=1 OR type='{TASK_GROUP}'"
                     ))?,
                     FetchBasis::Completed => {
-                        conn.prepare(&format!(
-                            "SELECT * FROM {table} WHERE is_active={}", 0u64
-                        ))?
+                        conn.prepare(&format!("SELECT * FROM {table} WHERE is_active={}", 0u64))?
                     }
                     FetchBasis::ByParent(parent_id) => conn.prepare(&format!(
                         "SELECT * FROM {table} WHERE parent_group_id={parent_id}"
@@ -359,10 +357,12 @@ pub mod ops {
 
         use crate::db::{DB_SINGLETON, TASK, TASK_GROUP};
         use rusqlite::{params, Connection, Result};
+        use serde::{Deserialize, Serialize};
 
         use super::{FetchBasis, Type};
 
         #[tauri::command]
+        /// C(R)UD - Reads the database and sends appropriate structure to the frontend.
         pub fn get_tasks_view(table: &str, status: bool) -> String {
             let db = DB_SINGLETON.lock().unwrap();
 
@@ -408,6 +408,7 @@ pub mod ops {
         */
 
         #[tauri::command(rename_all = "snake_case")]
+        // (C)RUD - Adds the specified item to the database.
         pub fn add_item(
             table: &str,
             name: &str,
@@ -445,6 +446,7 @@ pub mod ops {
         }
 
         #[tauri::command(rename_all = "snake_case")]
+        // CRU(D) - Deletes the specified item from the database.
         pub fn delete_item(table: &str, id: u64, item_type: &str) {
             let db = DB_SINGLETON.lock().unwrap();
 
@@ -457,55 +459,24 @@ pub mod ops {
             }
         }
 
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn edit_item(table: &str, name: &str, id: u64) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                let command = format!("UPDATE {table} SET name=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![name, id]) {
-                    Ok(_) => (),
-                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
-                }
-            }
+        #[derive(Serialize, Deserialize, Debug)]
+        pub enum UpdateField {
+            Name(String),
+            Parent(u64),
+            Status(bool),
         }
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn update_item(table: &str, id: u64, new_parent_group_id: u64) {
+        // CR(U)D - Updates the specified item's record in the database.
+        pub fn update_item(table: &str, id: u64, field: UpdateField) {
+            println!("{field:?}");
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
-                let command = format!("UPDATE {table} SET parent_group_id=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![new_parent_group_id, id]) {
-                    Ok(_) => (),
-                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
-                }
-            }
-        }
-
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn update_status_item(table: &str, id: u64, status: bool) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                let is_active = match status {
-                    // the status parameter holds the checked status of associated checkbox.
-                    // true = task completed, therefore is_active = false,
-                    true => 0u64,
-                    // false = task incomplete, therefore is_active = true,
-                    false => 1u64,
-                };
-
-                let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![is_active, id]) {
-                    Ok(_) => (),
-                    Err(err) => panic!(
-                        "[ERROR] could not update status of task: {}",
-                        err.to_string()
-                    ),
+                match field {
+                    UpdateField::Name(name) => update_name(conn, table, &name, id),
+                    UpdateField::Parent(new_parent_group_id) => update_parent(conn, table, id, new_parent_group_id),
+                    UpdateField::Status(status) => update_status(conn, table, id, status),
                 }
             }
         }
@@ -553,6 +524,44 @@ pub mod ops {
                     Err(err) => panic!("[ERROR] Error occurred while deleting group {id}: {err}"),
                 }
             };
+        }
+
+        fn update_name(conn: &Connection, table: &str, name: &str, id: u64) {
+            let command = format!("UPDATE {table} SET name=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![name, id]) {
+                Ok(_) => (),
+                Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+            }
+        }
+
+        fn update_parent(conn: &Connection, table: &str, id: u64, new_parent_group_id: u64) {
+            let command = format!("UPDATE {table} SET parent_group_id=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![new_parent_group_id, id]) {
+                Ok(_) => (),
+                Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+            }
+        }
+
+        fn update_status(conn: &Connection, table: &str, id: u64, status: bool) {
+            let is_active = match status {
+                // the status parameter holds the checked status of associated checkbox.
+                // true = task completed, therefore is_active = false,
+                true => 0u64,
+                // false = task incomplete, therefore is_active = true,
+                false => 1u64,
+            };
+
+            let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![is_active, id]) {
+                Ok(_) => (),
+                Err(err) => panic!(
+                    "[ERROR] could not update status of task: {}",
+                    err.to_string()
+                ),
+            }
         }
     }
 }
