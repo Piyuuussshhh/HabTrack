@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../App.css";
+import Card from "./DailyProgressTracker";
 
 
 const daysInMonth = (month, year) => {
@@ -73,6 +74,15 @@ const featuredWeek = {
 
 const App = () => {
   const taskArray = generateTaskArray(tasks);
+  const [showCard, setShowCard] = useState(false);
+  
+  const openCard = () => {
+    setShowCard(true);
+  };
+
+  const closeCard = () => {
+    setShowCard(false);
+  };
 
   return (
     <div className="streaks-area">
@@ -103,7 +113,9 @@ const App = () => {
                           title={`Completed ${tasksCompleted} / ${totalTasks} tasks on ${month} ${
                             dayIndex + 1
                           }`}
+                          onClick={openCard}
                         ></div>
+                        {showCard && <Card onClose={closeCard} />}
                       </div>
                     )
                   )}
