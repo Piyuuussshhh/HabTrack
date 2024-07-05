@@ -43,13 +43,22 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
     setGroup(e.target.value);
   };
 
-  function handleSubmit(e){
+  function handleSubmit(e) {
     e.preventDefault();
     onAdd(option, name, group);
-  };
+  }
 
   return (
     <div className="modal">
+
+      <div className="close-x-btn">
+      <button className="x-btn">
+        <span className="X"></span>
+        <span className="Y"></span>
+      </button>
+
+      </div>
+
       <div className="modal-content">
         <h2>Add</h2>
         <div className="tab">
@@ -100,7 +109,11 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
             <button className="cancel-btn" type="button" onClick={onCancel}>
               <strong>Cancel</strong>
             </button>
-            <button className="add-btn" type="submit" onClick={(e) => handleSubmit(e)}>
+            <button
+              className="add-btn"
+              type="submit"
+              onClick={(e) => handleSubmit(e)}
+            >
               <strong>Add</strong>
             </button>
           </div>

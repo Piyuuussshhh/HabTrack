@@ -39,22 +39,9 @@ function App() {
   return (
     <>
       <div className="container">
-
-         <motion.button
-          className="sidebar-button"
-          initial={{ rotate: 0 }}
-          // animate={{
-          //   rotate: isSpinning ? 180 : 0,
-          //   transition: {
-          //     duration: 0.2,
-          //     ease: "easeInOut",
-          //   },
-          //}
-
-          onClick={toggleSidebar}
-        >
+        <button className="sidebar-button" onClick={toggleSidebar}>
           <FormatListBulletedIcon></FormatListBulletedIcon>
-        </motion.button>
+        </button>
 
         {showSidebar && (
           <Sidebar
