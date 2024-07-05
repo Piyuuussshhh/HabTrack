@@ -13,17 +13,17 @@ const Navbar = ({ onAdd, toggleCompleted }) => {
       </p>
       <ul>
         <li>
-          <button className="btn">
-            <FastForwardIcon fontSize="medium"></FastForwardIcon>
+          <button className="btn" title="Set Tasks for Tommorow">
+            <FastForwardIcon />
           </button>
         </li>
         <li>
-          <button className="btn" onClick={onAdd}>
+          <button className="nav-add-btn" onClick={onAdd} title="Add Task">
             <AddIcon fontSize="medium"></AddIcon>
           </button>
         </li>
         <li>
-          <button className="btn" onClick={toggleCompleted}>
+          <button className="btn" onClick={toggleCompleted} title='Check Completed Task'>
             <PlaylistAddCheckIcon fontSize="medium"></PlaylistAddCheckIcon>
           </button>
         </li>

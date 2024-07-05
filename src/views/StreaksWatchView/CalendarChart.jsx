@@ -77,27 +77,6 @@ const App = () => {
   return (
     <div className="streaks-area">
       <div className="streaks-container">
-        <div className="featured-week">
-          <div className="featured-week-title">
-          <h2>
-            <center>
-              <strong>Featured Week</strong>
-            </center>
-          </h2>
-          </div>
-          <div className="days">
-            {Object.keys(featuredWeek).map((day, index) => (
-              <div key={index} className="featured-day-container">
-                <div
-                  className="featured-day"
-                  style={{ backgroundColor: featuredWeek[day] }}
-                ></div>
-                <div className="featured-day-number">{day}</div>
-              </div>
-          ))}
-        </div>
-      </div>
-   
 
       <div className="calendar-chart">
         <h1>Task Master Streak</h1>

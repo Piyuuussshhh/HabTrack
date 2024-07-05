@@ -12,25 +12,13 @@ const Sidebar = (props) => {
       setIsVisible(!isVisible);
       setIsSpinning(false);
     }, 200);
-    
-    // props.toggleSidebar();
 
+    // props.toggleSidebar();
   };
 
   return (
     <>
-      <motion.div
-        className="sidebar"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{
-          scale: isVisible ? 1 : 0,
-          opacity: isVisible ? 1 : 0,
-          transition: {
-            duration: 0.2,
-            ease: "easeInOut",
-          },
-        }}
-      >
+      <div className="sidebar">
         <ul className="sidebar-list">
           {props.tabs.map((tab) => {
             return (
@@ -48,10 +36,7 @@ const Sidebar = (props) => {
             );
           })}
         </ul>
-      </motion.div>
-
-     
-      
+      </div>
     </>
   );
 };
