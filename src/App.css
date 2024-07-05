@@ -865,6 +865,9 @@ form .form-group select {
   padding-bottom: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  /* word-break is used to break the word into lines */
+  word-break: break-all;
+  white-space: normal;
 }
 
 .taskgroup-container .taskgroup-container {
@@ -1072,6 +1075,16 @@ form .form-group select {
   align-items: center;
   padding: 12px;
   cursor: pointer;
+}
+
+.task-btn-tg {
+  background: transparent;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border: none;
 }
 
 .task-btn:hover {

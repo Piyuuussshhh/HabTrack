@@ -159,7 +159,10 @@ const Task = (props) => {
       <ul>
         {editingTaskId === props.id ? (
           <li>
-            <button className="task-btn" onClick={handleConfirmEdit}>
+            <button
+              className="task-btn"
+              onClick={editedName !== "" ? handleConfirmEdit : null}
+            >
               <CheckIcon />
             </button>
           </li>
