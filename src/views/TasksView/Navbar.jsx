@@ -19,7 +19,7 @@ const Navbar = ({ onAdd }) => {
           </button>
         </li>
         <li>
-          <button className="btn" id="add-btn" onClick={onAdd} title="Add Task">
+          <button className="nav-add-btn" onClick={onAdd} title="Add Task">
             <AddIcon fontSize="medium"></AddIcon>
           </button>
         </li>

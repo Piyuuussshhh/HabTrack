@@ -1,9 +1,5 @@
 import React from "react";
 import { useState } from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
 import { Button } from "bootstrap";
 
 const HabitCard = ({ habitName }) => {

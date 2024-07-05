@@ -5,7 +5,7 @@ const Navbar = () => {
     return (
         <nav className="nav">
             <p className="page-title title">Habits</p>
-            <button className='btn' id="add-btn"><AddIcon fontSize='medium'></AddIcon></button>
+            <button className='nav-add-btn'><AddIcon fontSize='medium'></AddIcon></button>
         </nav>
     )
 }

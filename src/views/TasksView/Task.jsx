@@ -107,7 +107,7 @@ const Task = (props) => {
       <label for="cbtest-60" class="check-box"></label> */}
 
       <label className="check-cont">
-        <input type="checkbox" />
+        <input type="checkbox" defaultChecked='false'/>
         <div className="checkmark"></div>
       </label>
       <div className="text-container">

@@ -578,6 +578,7 @@ form .form-group select {
   border: 2px solid whitesmoke;
   border-radius: 10px;
   overflow: hidden;
+  min-width: 40px;
 }
 
 /* Create a custom checkbox */
@@ -749,30 +750,6 @@ form .form-group select {
 /* ----------------- */
 /* Buttons on navbar */
 /* ----------------- */
-/* .btn {
-  background: #3576cc;
-  color: white;
-  border: none;
-  padding: 10px;
-  font-size: 1rem;
-  font-family: inherit;
-  cursor: pointer;
-  outline: inherit;
-  border-radius: 15px;
-  box-shadow: 6px 6px 7px black;
-  display: flex;
-  align-items: center;
-}
-
-.btn:hover {
-  filter: brightness(120%);
-  box-shadow: 10px 10px 10px #000;
-}
-
-.btn:active {
-  box-shadow: inset 2px 2px 10px #000;
-} */
-
 .btn,
 .btn *,
 .btn :after,
@@ -879,6 +856,70 @@ form .form-group select {
 .btn:hover:before {
   opacity: 1;
   transform: scale(1);
+}
+
+.nav-add-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 20px;
+  background-color: #286bb3;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 10px black;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none !important;
+}
+
+.nav-add-btn svg {
+  width: 25px;
+  transition-duration: 0.3s;
+}
+
+.nav-add-btn svg path {
+  fill: white;
+}
+
+.nav-add-btn:hover {
+  width: 100px;
+  border-radius: 20px;
+  transition-duration: 0.3s;
+  background-color: green;
+  align-items: center;
+}
+
+.nav-add-btn:hover svg {
+  width: 20px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+
+.nav-add-btn::after {
+  display: none;
+  padding: 7.5px;
+  content: "Add";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 5px;
+}
+
+.nav-add-btn:hover::after{
+  display: block;
+  padding-right: 10px;
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(0px);
+  transition-duration: 0.3s;
 }
 
 /* ----------------- */
@@ -1063,6 +1104,8 @@ form .form-group select {
 .add-btn:hover {
   filter: brightness(120%);
 }
+
+
 
 .MuiMenu-list {
   display: flex;
@@ -1282,7 +1325,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 
 .habits-card {
   height: 150px;
-  width: 80%;
+  width: 800px;
   background-color: var(--grey);
   border: 1px solid black;
   border-radius: 1rem;
@@ -1325,33 +1368,11 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   margin: 10px;
   align-items: center;
   word-wrap: break-word;
+  max-width: 250px;
+  overflow-wrap: break-word; 
+  word-break: break-all; 
+  white-space: normal;
 }
-
-/* .done-btn-area {
-  flex: 5%;
-} */
-
-/* .done-btn {
-  background-color: #3576cc;
-  color: white;
-  border: none;
-  border-radius: 17px;
-  box-shadow: 10px 10px 10px black;
-  display: flex;
-  padding: 12px;
-  align-items: center;
- 
-}
-
-.done-btn:hover {
-  filter: brightness(120%);
-  background-color: white;
-  color: green;
-}
-
-.done-btn:active {
-  box-shadow: inset 2px 2px 10px #000;
-} */
 
 /* Hide the default checkbox */
 .habit-check-cont input {
@@ -1402,6 +1423,12 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   opacity: 1;
 }
 
+.day-type{
+  display: flex;
+  align-items: center;
+  left: 50px;
+  position: relative;
+}
 .day-type select {
   padding: 10px;
   background-color: #3576cc;
