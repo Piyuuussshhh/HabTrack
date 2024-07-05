@@ -13,7 +13,7 @@ import {
   TASKS_VIEW,
   TASK_GROUP,
   TAURI_DELETE_ITEM,
-  TAURI_EDIT_ITEM,
+  TAURI_UPDATE_ITEM,
   TODAY,
 } from "../../Constants";
 import Task from "./Task";
@@ -74,10 +74,10 @@ const TaskGroup = ({
 
   function handleConfirmEdit() {
     // Update name in the database.
-    invoke(TAURI_EDIT_ITEM, {
+    invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
-      name: editedName,
       id: id,
+      field: { Name: editedName },
     });
 
     // Update name on the frontend.

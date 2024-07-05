@@ -29,7 +29,7 @@ const DragDropProvider = ({ children, item }) => {
     invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
       id: droppedItemId,
-      new_parent_group_id: targetId,
+      field: { Parent: targetId },
     });
 
     setStructure((prevStructure) => {

@@ -13,8 +13,7 @@ import {
   TASKS_VIEW,
   TODAY,
   TAURI_DELETE_ITEM,
-  TAURI_EDIT_ITEM,
-  TAURI_UPDATE_STATUS_ITEM,
+  TAURI_UPDATE_ITEM,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
@@ -67,10 +66,10 @@ const Task = (props) => {
 
   function handleConfirmEdit() {
     // Update name in the database.
-    invoke(TAURI_EDIT_ITEM, {
+    invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
-      name: editedName,
       id: props.id,
+      field: { Name: editedName },
     });
 
     // Update name on the frontend.
@@ -105,10 +104,10 @@ const Task = (props) => {
     await sleep(1500);
     setCompleted(false);
     // Update database.
-    invoke(TAURI_UPDATE_STATUS_ITEM, {
+    invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
       id: props.id,
-      status: true,
+      field: { Status: true },
     });
 
     // Update frontend.
