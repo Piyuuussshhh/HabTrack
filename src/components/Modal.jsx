@@ -51,7 +51,7 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
   return (
     <div className="modal">
 
-      <div className="close-x-btn">
+      <div className="close-x-btn" onClick={onCancel}>
       <button className="x-btn">
         <span className="X"></span>
         <span className="Y"></span>

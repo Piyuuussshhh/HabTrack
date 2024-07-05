@@ -1105,8 +1105,6 @@ form .form-group select {
   filter: brightness(120%);
 }
 
-
-
 .MuiMenu-list {
   display: flex;
   flex-direction: column;
@@ -1164,58 +1162,6 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 /* ------------------------------CALENDAR CHART STYLES----------------------- */
 /* -------------------------------------------------------------------------- */
 
-/*The featured week*/
-
-.featured-week {
-  margin-top: 20px;
-  /* margin-left: 100px;
-  margin-right: 100px; */
-  margin-bottom: 40px;
-  border: 1px solid wheat;
-  align-items: center;
-  min-width: 150px;
-}
-
-.featured-week-title {
-  color: wheat;
-  margin-top: 30px;
-}
-
-.featured-week .days {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  margin-top: 10px;
-  margin-left: 5px;
-}
-
-.featured-day-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 50px;
-  margin-top: 30px;
-  margin-bottom: 25px;
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
-.featured-day {
-  background-color: #fff;
-  display: grid;
-  width: 50px;
-  height: 50px;
-  border-radius: 20px;
-  padding: 10px;
-  position: relative;
-}
-
-.featured-day-name {
-  margin-top: 10px;
-  font-size: 20px;
-  text-align: center;
-  color: wheat;
-}
 
 /* CalendarChart */
 .calendar-chart {
