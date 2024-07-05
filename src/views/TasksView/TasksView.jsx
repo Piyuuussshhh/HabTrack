@@ -31,7 +31,7 @@ import CompletedTasksModal from "../../components/CompletedTasksModal";
 
 const NOT_FOUND = -1;
 
-const TasksView = () => {
+const TasksView = ({isSidebarOpen}) => {
   const [showModal, setModalVisibility] = useState(false);
   const [structure, setStructure] = useState("");
   const [showCompleted, setCompletedTasksVisibility] = useState(false);
@@ -151,7 +151,7 @@ const TasksView = () => {
   return (
     <>
       <div className="box">
-        <Navbar onAdd={seeModal} toggleCompleted={toggleCompleted} />
+        <Navbar isSidebarOpen={isSidebarOpen} onAdd={seeModal} toggleCompleted={toggleCompleted} />
         <div className="task-area">
           {/* I don't understand how this works, but it works. */}
           <DragDropProvider item={structure}>

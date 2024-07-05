@@ -5,10 +5,16 @@ import AddIcon from "@mui/icons-material/Add";
 
 // TODO: style this component.
 
-const Navbar = ({ onAdd, toggleCompleted }) => {
+const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
   return (
     <nav className="nav">
-      <p className="page-title title">
+      <p
+        className={
+          isSidebarOpen
+            ? "page-title-sidebar-open title"
+            : "page-title-sidebar-closed title"
+        }
+      >
         Tasks
       </p>
       <ul>
@@ -23,7 +29,11 @@ const Navbar = ({ onAdd, toggleCompleted }) => {
           </button>
         </li>
         <li>
-          <button className="btn" onClick={toggleCompleted} title='Check Completed Task'>
+          <button
+            className="btn"
+            onClick={toggleCompleted}
+            title="Check Completed Task"
+          >
             <PlaylistAddCheckIcon fontSize="medium"></PlaylistAddCheckIcon>
           </button>
         </li>

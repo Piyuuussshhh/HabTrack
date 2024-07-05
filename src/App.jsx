@@ -52,7 +52,7 @@ function App() {
           />
         )}
         <div className="main-area">
-          {tab === TASKS_VIEW && <TasksView />}
+          {tab === TASKS_VIEW && <TasksView isSidebarOpen={showSidebar}/>}
           {tab === HABITS_VIEW && <HabitsView />}
           {tab === STREAKS_VIEW && <StreaksWatchView />}
         </div>
