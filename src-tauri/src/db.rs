@@ -136,9 +136,11 @@ pub mod ops {
         }
     }
 
-    enum FetchBasis {
+    pub enum FetchBasis {
         // Fetch all items.
         All,
+        // Fetch only active or completed tasks.
+        ByStatus(bool),
         // Fetch all items under a common parent.
         ByParent(u64),
     }
@@ -238,50 +240,61 @@ pub mod ops {
             )
         }
 
-        fn fetch_records(
+        pub fn fetch_records(
             &self,
-            conn: &Connection,
             table: &str,
             fetch_basis: FetchBasis,
         ) -> Result<Vec<(u64, String, Type, Option<bool>, Option<u64>)>> {
-            let mut stmt = match fetch_basis {
-                FetchBasis::ByParent(parent_id) => conn.prepare(
-                    format!("SELECT * FROM {table} WHERE parent_group_id={parent_id}").as_str(),
-                )?,
-                FetchBasis::All => conn.prepare(format!("SELECT * FROM {table}").as_str())?,
-            };
-
-            let task_record_iter = stmt.query_map([], |row| {
-                let id: u64 = row.get(0)?;
-                let name: String = row.get(1)?;
-                let type_str: String = row.get(2)?;
-                let is_active: Option<i32> = row.get(3)?;
-                let parent_group_id: Option<u64> = row.get(4)?;
-
-                let is_active = match is_active {
-                    Some(0) => Some(false),
-                    Some(1) => Some(true),
-                    // If for whatever reason, is_active has a value other than 0 or 1, None is set.
-                    Some(_) => None,
-                    None => None,
+            if let Some(conn) = &self.db_conn {
+                let mut stmt = match fetch_basis {
+                    FetchBasis::All => conn.prepare(&format!(
+                        "SELECT * FROM {table} WHERE is_active=1 OR type='{TASK_GROUP}'"
+                    ))?,
+                    FetchBasis::ByStatus(is_active) => {
+                        let is_active = if is_active == true { 1 } else { 0 };
+                        conn.prepare(&format!(
+                            "SELECT * FROM {table} WHERE is_active={is_active}"
+                        ))?
+                    }
+                    FetchBasis::ByParent(parent_id) => conn.prepare(&format!(
+                        "SELECT * FROM {table} WHERE parent_group_id={parent_id}"
+                    ))?,
                 };
 
-                let task_record_type = match type_str.as_str() {
-                    TASK => Type::Task,
-                    TASK_GROUP => Type::TaskGroup,
-                    _ => panic!("Unknown task_record type"),
-                };
+                let task_record_iter = stmt.query_map([], |row| {
+                    let id: u64 = row.get(0)?;
+                    let name: String = row.get(1)?;
+                    let type_str: String = row.get(2)?;
+                    let is_active: Option<i32> = row.get(3)?;
+                    let parent_group_id: Option<u64> = row.get(4)?;
 
-                Ok((id, name, task_record_type, is_active, parent_group_id))
-            })?;
+                    let is_active = match is_active {
+                        Some(0) => Some(false),
+                        Some(1) => Some(true),
+                        // If for whatever reason, is_active has a value other than 0 or 1, None is set.
+                        Some(_) => None,
+                        None => None,
+                    };
 
-            task_record_iter.collect()
+                    let task_record_type = match type_str.as_str() {
+                        TASK => Type::Task,
+                        TASK_GROUP => Type::TaskGroup,
+                        _ => panic!("Unknown task_record type"),
+                    };
+
+                    Ok((id, name, task_record_type, is_active, parent_group_id))
+                })?;
+
+                return task_record_iter.collect();
+            } else {
+                return Err(rusqlite::Error::ExecuteReturnedResults);
+            }
         }
 
         /// Retrieve the data from the db and return it in the nested, expected format.
         pub fn fetch_tasks_view(&self, table: &str) -> Result<TaskRecord> {
-            if let Some(conn) = &self.db_conn {
-                let fetched_records = self.fetch_records(conn, table, FetchBasis::All);
+            if let Some(_) = &self.db_conn {
+                let fetched_records = self.fetch_records(table, FetchBasis::All);
 
                 // Holds the rows mapped by their ids.
                 let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
@@ -351,20 +364,31 @@ pub mod ops {
         use super::{FetchBasis, Type};
 
         #[tauri::command]
-        pub fn get_tasks_view(table: &str) -> String {
+        pub fn get_tasks_view(table: &str, status: bool) -> String {
             let db = DB_SINGLETON.lock().unwrap();
 
-            match db.fetch_tasks_view(table) {
-                Ok(root) => {
-                    let res = serde_json::to_string(&root)
-                        .expect("[ERROR] Cannot parse the root group into JSON.");
+            match status {
+                false => match db.fetch_records(table, FetchBasis::ByStatus(false)) {
+                    Ok(records) => {
+                        return serde_json::to_string(&records)
+                            .expect("[Error] Couldn't return Vec of records");
+                    }
+                    Err(err) => panic!("[Error] Could not fetch completed records: {err}"),
+                },
+                true => {
+                    match db.fetch_tasks_view(table) {
+                        Ok(root) => {
+                            let res = serde_json::to_string(&root)
+                                .expect("[ERROR] Cannot parse the root group into JSON.");
 
-                    return res;
-                }
-                Err(e) => {
-                    // Return a JSON indicating an error occurred
-                    return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
-                    .to_string();
+                            return res;
+                        }
+                        Err(e) => {
+                            // Return a JSON indicating an error occurred
+                            return serde_json::json!({ "error": format!("Failed to fetch records: {}", e) })
+                            .to_string();
+                        }
+                    }
                 }
             }
         }
@@ -385,7 +409,12 @@ pub mod ops {
         */
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn add_item(table: &str, name: &str, parent_group_id: u64, item_type: &str) -> Result<i64, tauri::Error>{
+        pub fn add_item(
+            table: &str,
+            name: &str,
+            parent_group_id: u64,
+            item_type: &str,
+        ) -> Result<i64, tauri::Error> {
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
@@ -394,7 +423,7 @@ pub mod ops {
                 );
 
                 let is_active = match item_type {
-                    TASK => Some(1),
+                    TASK => Some(1u64),
                     TASK_GROUP => None,
                     _ => panic!("invalid type"),
                 };
@@ -424,7 +453,7 @@ pub mod ops {
                 match item_type {
                     TASK => delete_task(conn, table, id),
                     TASK_GROUP => delete_group(&db, conn, table, id),
-                    _ => panic!("invalid type")
+                    _ => panic!("invalid type"),
                 }
             }
         }
@@ -457,6 +486,31 @@ pub mod ops {
             }
         }
 
+        #[tauri::command(rename_all = "snake_case")]
+        pub fn update_status_item(table: &str, id: u64, status: bool) {
+            let db = DB_SINGLETON.lock().unwrap();
+
+            if let Some(conn) = &db.db_conn {
+                let is_active = match status {
+                    // the status parameter holds the checked status of associated checkbox.
+                    // true = task completed, therefore is_active = false,
+                    true => 0u64,
+                    // false = task incomplete, therefore is_active = true,
+                    false => 1u64,
+                };
+
+                let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
+
+                match conn.execute(&command, params![is_active, id]) {
+                    Ok(_) => (),
+                    Err(err) => panic!(
+                        "[ERROR] could not update status of task: {}",
+                        err.to_string()
+                    ),
+                }
+            }
+        }
+
         /* ----------------------------------------------------------------------------- */
         /* -------------------------------HELPER FUNCTIONS------------------------------ */
         /* ----------------------------------------------------------------------------- */
@@ -469,14 +523,9 @@ pub mod ops {
             }
         }
 
-        fn delete_group(
-            db: &MutexGuard<super::Db>,
-            conn: &Connection,
-            table: &str,
-            id: u64,
-        ) {
+        fn delete_group(db: &MutexGuard<super::Db>, conn: &Connection, table: &str, id: u64) {
             // Fetch the children of To-Be-Deleted group.
-            let children = match db.fetch_records(conn, table, FetchBasis::ByParent(id)) {
+            let children = match db.fetch_records(table, FetchBasis::ByParent(id)) {
                 Ok(children) => children,
                 Err(err) => {
                     panic!("[ERROR] Something went wrong while fetching children: {err}")

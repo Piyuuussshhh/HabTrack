@@ -14,6 +14,7 @@ import {
   TODAY,
   TAURI_DELETE_ITEM,
   TAURI_EDIT_ITEM,
+  TAURI_UPDATE_STATUS_ITEM,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
@@ -24,6 +25,7 @@ const Task = (props) => {
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
+  const [isCompleted, setCompleted] = useState(false);
 
   useEffect(() => {
     if (editingTaskId) {
@@ -94,20 +96,47 @@ const Task = (props) => {
     setEditingTaskId(null);
   }
 
+  function sleep(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
+
+  async function handleCompletion(e) {
+    setCompleted(true);
+    await sleep(1500);
+    setCompleted(false);
+    // Update database.
+    invoke(TAURI_UPDATE_STATUS_ITEM, {
+      table: TODAY,
+      id: props.id,
+      status: true,
+    });
+
+    // Update frontend.
+    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+  }
+
   return (
     <div
       className="task-card"
       draggable
       onDragStart={(e) => {
         /* A duplicate of this current task is passed to handleOnDrag*/
-        handleOnDrag(e, { id: props.id, name: props.name, type: TASK });
+        handleOnDrag(e, {
+          id: props.id,
+          name: props.name,
+          type: TASK,
+        });
       }}
     >
       {/* <input type="checkbox" id="cbtest-60" />
       <label for="cbtest-60" class="check-box"></label> */}
 
       <label className="check-cont">
-        <input type="checkbox" defaultChecked='false'/>
+        <input
+          type="checkbox"
+          defaultChecked="false"
+          onClick={handleCompletion}
+        />
         <div className="checkmark"></div>
       </label>
       <div className="text-container">
@@ -187,6 +216,11 @@ const Task = (props) => {
           </>
         )}
       </ul>
+      {isCompleted && (
+        <div className="progress-loader">
+          <div className="progress"></div>
+        </div>
+      )}
     </div>
   );
 };

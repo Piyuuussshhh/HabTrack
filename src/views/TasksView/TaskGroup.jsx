@@ -116,9 +116,11 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
             if (child.type === TASK) {
               return (
                 <Task
-                  name={child.name}
-                  id={child.id}
                   key={child.id}
+                  id={child.id}
+                  name={child.name}
+                  type={TASK}
+                  isActive={child.is_active}
                   onChangeTasksView={onChangeTasksView}
                 />
               );
@@ -128,6 +130,7 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
                   key={child.id}
                   id={child.id}
                   name={child.name}
+                  type={TASK_GROUP}
                   children={child.children}
                   onChangeTasksView={onChangeTasksView}
                 />

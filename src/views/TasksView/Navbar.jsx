@@ -5,17 +5,16 @@ import AddIcon from "@mui/icons-material/Add";
 
 // TODO: style this component.
 
-const Navbar = ({ onAdd }) => {
+const Navbar = ({ onAdd, toggleCompleted }) => {
   return (
     <nav className="nav">
-      <p className="page-title title" style={{ textAlign: "center" }}>
+      <p className="page-title title">
         Tasks
       </p>
       <ul>
         <li>
           <button className="btn" title="Set Tasks for Tommorow">
-            <FastForwardIcon>
-              </FastForwardIcon>
+            <FastForwardIcon />
           </button>
         </li>
         <li>
@@ -24,7 +23,7 @@ const Navbar = ({ onAdd }) => {
           </button>
         </li>
         <li>
-          <button className="btn" title='Check Completed Task'>
+          <button className="btn" onClick={toggleCompleted} title='Check Completed Task'>
             <PlaylistAddCheckIcon fontSize="medium"></PlaylistAddCheckIcon>
           </button>
         </li>
