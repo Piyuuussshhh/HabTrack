@@ -23,7 +23,13 @@ import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import AlertModal from "../../components/AlertModal";
 import { updateFrontend } from "../../utility/UpdateFrontend";
 
-const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
+const TaskGroup = ({
+  id,
+  name,
+  children,
+  onChangeTasksView,
+  preselectGroup,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showAlert, setAlertVisibility] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -91,9 +97,9 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
   function handleMenuItemClick(option) {
     if (option === "Edit") {
       handleEdit();
-    }
-
-    if (option === "Delete Group") {
+    } else if (option === "Add Task") {
+      preselectGroup(name);
+    } else if (option === "Delete Group") {
       setAlertVisibility(true);
     }
 
@@ -216,6 +222,7 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
                   type={TASK_GROUP}
                   children={child.children}
                   onChangeTasksView={onChangeTasksView}
+                  preselectGroup={preselectGroup}
                 />
               );
             }
