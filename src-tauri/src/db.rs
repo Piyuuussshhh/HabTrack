@@ -138,9 +138,9 @@ pub mod ops {
 
     pub enum FetchBasis {
         // Fetch all items.
-        All,
+        Active,
         // Fetch only active or completed tasks.
-        ByStatus(bool),
+        Completed,
         // Fetch all items under a common parent.
         ByParent(u64),
     }
@@ -247,13 +247,12 @@ pub mod ops {
         ) -> Result<Vec<(u64, String, Type, Option<bool>, Option<u64>)>> {
             if let Some(conn) = &self.db_conn {
                 let mut stmt = match fetch_basis {
-                    FetchBasis::All => conn.prepare(&format!(
+                    FetchBasis::Active => conn.prepare(&format!(
                         "SELECT * FROM {table} WHERE is_active=1 OR type='{TASK_GROUP}'"
                     ))?,
-                    FetchBasis::ByStatus(is_active) => {
-                        let is_active = if is_active == true { 1 } else { 0 };
+                    FetchBasis::Completed => {
                         conn.prepare(&format!(
-                            "SELECT * FROM {table} WHERE is_active={is_active}"
+                            "SELECT * FROM {table} WHERE is_active={}", 0u64
                         ))?
                     }
                     FetchBasis::ByParent(parent_id) => conn.prepare(&format!(
@@ -294,7 +293,7 @@ pub mod ops {
         /// Retrieve the data from the db and return it in the nested, expected format.
         pub fn fetch_tasks_view(&self, table: &str) -> Result<TaskRecord> {
             if let Some(_) = &self.db_conn {
-                let fetched_records = self.fetch_records(table, FetchBasis::All);
+                let fetched_records = self.fetch_records(table, FetchBasis::Active);
 
                 // Holds the rows mapped by their ids.
                 let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
@@ -368,7 +367,7 @@ pub mod ops {
             let db = DB_SINGLETON.lock().unwrap();
 
             match status {
-                false => match db.fetch_records(table, FetchBasis::ByStatus(false)) {
+                false => match db.fetch_records(table, FetchBasis::Completed) {
                     Ok(records) => {
                         return serde_json::to_string(&records)
                             .expect("[Error] Couldn't return Vec of records");
