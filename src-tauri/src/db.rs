@@ -11,6 +11,7 @@ const DB_NAME: &str = "database.sqlite";
 const ROOT_GROUP: &str = "/";
 const TASK: &str = "Task";
 const TASK_GROUP: &str = "TaskGroup";
+const TOMORROW: &str = "tomorrow";
 
 // Singleton because we need a single point of access to the db across the app.
 // Mutex because only one process should be able to use the singleton at a time,
@@ -352,7 +353,7 @@ pub mod ops {
         }
     }
 
-    pub mod commands {
+    pub mod crud_commands {
         use std::sync::MutexGuard;
 
         use crate::db::{DB_SINGLETON, TASK, TASK_GROUP};
@@ -475,7 +476,9 @@ pub mod ops {
             if let Some(conn) = &db.db_conn {
                 match field {
                     UpdateField::Name(name) => update_name(conn, table, &name, id),
-                    UpdateField::Parent(new_parent_group_id) => update_parent(conn, table, id, new_parent_group_id),
+                    UpdateField::Parent(new_parent_group_id) => {
+                        update_parent(conn, table, id, new_parent_group_id)
+                    }
                     UpdateField::Status(status) => update_status(conn, table, id, status),
                 }
             }
@@ -561,6 +564,33 @@ pub mod ops {
                     "[ERROR] could not update status of task: {}",
                     err.to_string()
                 ),
+            }
+        }
+    }
+
+    pub mod app_commands {
+        use tauri::Manager;
+
+        use crate::db::TOMORROW;
+
+        #[tauri::command]
+        pub async fn open_tomorrow_window(handle: tauri::AppHandle) {
+            tauri::WindowBuilder::new(
+                &handle,
+                TOMORROW, /* the unique window label */
+                tauri::WindowUrl::App("src/views/TasksView/Tomorrow/index.html".parse().unwrap()),
+            )
+            .title("Tomorrow's Tasks")
+            .inner_size(1000.0, 800.0)
+            .position(100.0, 100.0)
+            .build()
+            .unwrap();
+        }
+
+        #[tauri::command]
+        pub async fn close_tomorrow_window(handle: tauri::AppHandle) {
+            if let Some(window) = handle.get_window(TOMORROW) {
+                window.close().unwrap();
             }
         }
     }

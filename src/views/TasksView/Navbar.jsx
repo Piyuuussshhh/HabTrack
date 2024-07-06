@@ -2,10 +2,21 @@ import React from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import FastForwardIcon from "@mui/icons-material/FastForward";
 import AddIcon from "@mui/icons-material/Add";
+import { invoke } from "@tauri-apps/api";
+import { TAURI_OPEN_TOMORROW_WINDOW } from "../../Constants";
 
 // TODO: style this component.
 
 const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
+  const seeTomorrow = async () => {
+    try {
+      await invoke(TAURI_OPEN_TOMORROW_WINDOW);
+      console.log('Tomorrow window opened');
+    } catch (error) {
+      console.error('Error opening tomorrow window:', error);
+    }
+  };
+
   return (
     <nav className="nav">
       <p
@@ -19,7 +30,7 @@ const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
       </p>
       <ul>
         <li>
-          <button className="btn" title="Set Tasks for Tomorrow">
+          <button className="btn" title="Set Tasks for Tomorrow" onClick={seeTomorrow}>
             <FastForwardIcon />
           </button>
         </li>

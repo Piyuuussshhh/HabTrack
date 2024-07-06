@@ -19,6 +19,9 @@ const TAURI_ADD_ITEM = "add_item";
 const TAURI_DELETE_ITEM = "delete_item";
 const TAURI_UPDATE_ITEM = "update_item";
 
+// New Window.
+const TAURI_OPEN_TOMORROW_WINDOW = "open_tomorrow_window";
+
 export {
   // Table names
   TODAY,
@@ -41,4 +44,7 @@ export {
   TAURI_ADD_ITEM,
   TAURI_DELETE_ITEM,
   TAURI_UPDATE_ITEM,
+
+  // New Window,
+  TAURI_OPEN_TOMORROW_WINDOW,
 };
