@@ -14,14 +14,16 @@ import {
   TODAY,
   TAURI_DELETE_ITEM,
   TAURI_UPDATE_ITEM,
+  TOMORROW_VIEW,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
 
 const Task = (props) => {
+  const view = props.dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
+
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
   const { handleOnDrag } = useContext(DragDropContext);
-
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
   const [isCompleted, setCompleted] = useState(false);
@@ -43,13 +45,13 @@ const Task = (props) => {
 
     // Delete task from the database.
     invoke(TAURI_DELETE_ITEM, {
-      table: TODAY,
+      table: props.dbTable,
       id: props.id,
       item_type: TASK,
     });
 
     // Delete task from the frontend.
-    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+    updateFrontend(removeItem, view, props.onChangeView, props.id);
   };
 
   function handleEdit() {
@@ -67,7 +69,7 @@ const Task = (props) => {
   function handleConfirmEdit() {
     // Update name in the database.
     invoke(TAURI_UPDATE_ITEM, {
-      table: TODAY,
+      table: props.dbTable,
       id: props.id,
       field: { Name: editedName },
     });
@@ -75,8 +77,8 @@ const Task = (props) => {
     // Update name on the frontend.
     updateFrontend(
       updateItem,
-      TASKS_VIEW,
-      props.onChangeTasksView,
+      view,
+      props.onChangeView,
       props.id,
       editedName
     );
@@ -105,13 +107,13 @@ const Task = (props) => {
     setCompleted(false);
     // Update database.
     invoke(TAURI_UPDATE_ITEM, {
-      table: TODAY,
+      table: props.dbTable,
       id: props.id,
       field: { Status: true },
     });
 
     // Update frontend.
-    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+    updateFrontend(removeItem, view, props.onChangeView, props.id);
   }
 
   return (

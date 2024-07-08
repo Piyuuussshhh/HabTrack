@@ -15,6 +15,7 @@ import {
   TAURI_DELETE_ITEM,
   TAURI_UPDATE_ITEM,
   TODAY,
+  TOMORROW_VIEW,
 } from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
@@ -27,9 +28,12 @@ const TaskGroup = ({
   id,
   name,
   children,
-  onChangeTasksView,
+  onChangeView,
   preselectGroup,
+  dbTable
 }) => {
+  const view = dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [showAlert, setAlertVisibility] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -75,13 +79,13 @@ const TaskGroup = ({
   function handleConfirmEdit() {
     // Update name in the database.
     invoke(TAURI_UPDATE_ITEM, {
-      table: TODAY,
+      table: dbTable,
       id: id,
       field: { Name: editedName },
     });
 
     // Update name on the frontend.
-    updateFrontend(updateItem, TASKS_VIEW, onChangeTasksView, id, editedName);
+    updateFrontend(updateItem, view, onChangeView, id, editedName);
 
     setEditingTaskId(null);
   }
@@ -114,13 +118,13 @@ const TaskGroup = ({
   function deleteGroup() {
     // Deleting group from database.
     invoke(TAURI_DELETE_ITEM, {
-      table: TODAY,
+      table: dbTable,
       id: id,
       item_type: TASK_GROUP,
     });
 
     // Deleting group from front-end.
-    updateFrontend(removeItem, TASKS_VIEW, onChangeTasksView, id);
+    updateFrontend(removeItem, view, onChangeView, id);
   }
 
   function onCancel() {
@@ -210,7 +214,8 @@ const TaskGroup = ({
                   name={child.name}
                   type={TASK}
                   isActive={child.is_active}
-                  onChangeTasksView={onChangeTasksView}
+                  onChangeView={onChangeView}
+                  dbTable={dbTable}
                 />
               );
             } else if (child.type === TASK_GROUP) {
@@ -221,8 +226,9 @@ const TaskGroup = ({
                   name={child.name}
                   type={TASK_GROUP}
                   children={child.children}
-                  onChangeTasksView={onChangeTasksView}
+                  onChangeView={onChangeView}
                   preselectGroup={preselectGroup}
+                  dbTable={dbTable}
                 />
               );
             }
