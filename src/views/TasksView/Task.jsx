@@ -177,6 +177,7 @@ const Task = (props) => {
           type="checkbox"
           defaultChecked="false"
           onClick={handleCompletion}
+          disabled={props.dbTable === TODAY ? false : true}
         />
         <div className="checkmark"></div>
       </label>
