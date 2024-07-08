@@ -30,7 +30,8 @@ const TaskGroup = ({
   children,
   onChangeView,
   preselectGroup,
-  dbTable
+  dbTable,
+  taskViewRef,
 }) => {
   const view = dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
 
@@ -216,6 +217,7 @@ const TaskGroup = ({
                   isActive={child.is_active}
                   onChangeView={onChangeView}
                   dbTable={dbTable}
+                  taskViewRef={taskViewRef}
                 />
               );
             } else if (child.type === TASK_GROUP) {
@@ -229,6 +231,7 @@ const TaskGroup = ({
                   onChangeView={onChangeView}
                   preselectGroup={preselectGroup}
                   dbTable={dbTable}
+                  taskViewRef={taskViewRef}
                 />
               );
             }
