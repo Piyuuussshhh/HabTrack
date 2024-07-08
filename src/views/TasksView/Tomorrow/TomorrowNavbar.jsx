@@ -19,7 +19,7 @@ const TomorrowNavbar = ({ onAdd, onDone}) => {
         </li>
         <li>
           <button
-            className="btn"
+            className="done-btn"
             onClick={onDone}
             title="Save"
           >
