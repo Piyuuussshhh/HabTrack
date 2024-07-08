@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { TASKS_VIEW, TASK_GROUP, TASK, ROOT } from "../Constants";
+import { TASK_GROUP, TASK, ROOT } from "../Constants";
 
-const Modal = ({ itemType, preselected, onAdd, onCancel }) => {
+const Modal = ({ view, preselected, onAdd, onCancel }) => {
   const [option, setOption] = useState(TASK);
   const [name, setName] = useState("");
-  const [group, setGroup] = useState(ROOT);
+  const [group, setGroup] = useState(preselected);
   const [groups, setAllGroups] = useState(null);
 
   useEffect(() => {
-    let storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+    let storedView = JSON.parse(sessionStorage.getItem(view));
 
     const extractNames = (obj) => {
       let names = [];
@@ -95,7 +95,7 @@ const Modal = ({ itemType, preselected, onAdd, onCancel }) => {
                 <select
                   id="group"
                   onChange={handleGroupChange}
-                  defaultValue={preselected !== "" ? preselected : "/"}
+                  defaultValue={preselected}
                 >
                   {groups.map((group, idx) => (
                     <option key={idx} value={group}>

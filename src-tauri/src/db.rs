@@ -177,19 +177,39 @@ pub mod ops {
                 parent_group_id stores the ID of the parent group.
             */
             if let Some(conn) = &self.db_conn {
+                // TODAY.
                 conn.execute(
                     "CREATE TABLE IF NOT EXISTS today (
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
                     type TEXT NOT NULL,
                     is_active INTEGER,
-                    parent_group_id INTEGER
+                    parent_group_id INTEGER,
+                    created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
                 )",
                     [],
                 )?;
                 // Only add the root group when the table is created for the first time.
                 conn.execute(
-                    format!("INSERT INTO today (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING").as_str(),
+                    &format!("INSERT INTO today (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING"),
+                    [],
+                )?;
+
+                // TOMORROW.
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS tomorrow (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    is_active INTEGER,
+                    parent_group_id INTEGER,
+                    created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
+                )",
+                    [],
+                )?;
+                // Only add the root group when the table is created for the first time.
+                conn.execute(
+                    &format!("INSERT INTO tomorrow (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING"),
                     [],
                 )?;
             }
@@ -470,7 +490,6 @@ pub mod ops {
         #[tauri::command(rename_all = "snake_case")]
         // CR(U)D - Updates the specified item's record in the database.
         pub fn update_item(table: &str, id: u64, field: UpdateField) {
-            println!("{field:?}");
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
@@ -577,7 +596,7 @@ pub mod ops {
         pub async fn open_tomorrow_window(handle: tauri::AppHandle) {
             tauri::WindowBuilder::new(
                 &handle,
-                TOMORROW, /* the unique window label */
+                TOMORROW,
                 tauri::WindowUrl::App("src/views/TasksView/Tomorrow/index.html".parse().unwrap()),
             )
             .title("Tomorrow's Tasks")

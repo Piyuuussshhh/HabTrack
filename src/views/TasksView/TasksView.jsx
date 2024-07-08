@@ -10,6 +10,7 @@ import {
   TASK_GROUP,
   TAURI_FETCH_TASKS_VIEW,
   TAURI_ADD_ITEM,
+  ROOT,
 } from "../../Constants";
 
 import TaskGroup from "./TaskGroup";
@@ -31,11 +32,11 @@ import CompletedTasksModal from "../../components/CompletedTasksModal";
 
 const NOT_FOUND = -1;
 
-const TasksView = ({isSidebarOpen}) => {
+const TasksView = ({ isSidebarOpen }) => {
   const [showModal, setModalVisibility] = useState(false);
   const [structure, setStructure] = useState("");
   const [showCompleted, setCompletedTasksVisibility] = useState(false);
-  const [preselectGroup, setPreselectGroup] = useState("");
+  const [preselectGroup, setPreselectGroup] = useState(ROOT);
 
   /*
       Probably should not do this, and just add the task to
@@ -153,10 +154,15 @@ const TasksView = ({isSidebarOpen}) => {
   return (
     <>
       <div className="box">
-        <Navbar isSidebarOpen={isSidebarOpen} onAdd={seeModal} toggleCompleted={toggleCompleted} />
+        <Navbar
+          isSidebarOpen={isSidebarOpen}
+          onAdd={seeModal}
+          toggleCompleted={toggleCompleted}
+          onChangeView={onChangeTasksView}
+        />
         <div className="task-area">
           {/* I don't understand how this works, but it works. */}
-          <DragDropProvider item={structure}>
+          <DragDropProvider item={structure} dbTable={TODAY}>
             <DragDropContext.Consumer>
               {/* This structure = initialStructure from DragDropContext.jsx */}
               {/* Null check to ensure structure is populated w contents of db */}
@@ -167,8 +173,9 @@ const TasksView = ({isSidebarOpen}) => {
                     id={structure.id}
                     name={structure.name}
                     children={structure.children}
-                    onChangeTasksView={onChangeTasksView}
+                    onChangeView={onChangeTasksView}
                     preselectGroup={seeModal}
+                    dbTable={TODAY}
                   />
                 ) : (
                   <p>loading...</p>
@@ -179,10 +186,18 @@ const TasksView = ({isSidebarOpen}) => {
         </div>
       </div>
       {showModal && (
-        <Modal itemType={TASKS_VIEW} preselected={preselectGroup} onAdd={add} onCancel={() => closeModal("AddModal")} />
+        <Modal
+          view={TASKS_VIEW}
+          preselected={preselectGroup}
+          onAdd={add}
+          onCancel={() => closeModal("AddModal")}
+        />
       )}
       {showCompleted && (
-        <CompletedTasksModal onChangeTasksView={onChangeTasksView} onCancel={() => closeModal("CompletedModal")} />
+        <CompletedTasksModal
+          onChangeTasksView={onChangeTasksView}
+          onCancel={() => closeModal("CompletedModal")}
+        />
       )}
     </>
   );

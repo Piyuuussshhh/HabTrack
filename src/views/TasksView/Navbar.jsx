@@ -3,7 +3,7 @@ import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import FastForwardIcon from "@mui/icons-material/FastForward";
 import AddIcon from "@mui/icons-material/Add";
 import { invoke } from "@tauri-apps/api";
-import { TAURI_OPEN_TOMORROW_WINDOW } from "../../Constants";
+import { ROOT, TAURI_OPEN_TOMORROW_WINDOW } from "../../Constants";
 
 // TODO: style this component.
 
@@ -35,7 +35,7 @@ const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
           </button>
         </li>
         <li>
-          <button className="nav-add-btn" onClick={() => onAdd("")} title="Add Task">
+          <button className="nav-add-btn" onClick={() => onAdd(ROOT)} title="Add Task">
             <AddIcon fontSize="medium"></AddIcon>
           </button>
         </li>
