@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, ListFlowable, ListItem
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 
 def create_detailed_pdf(file_path, input_data=[]):
     doc = SimpleDocTemplate(file_path, pagesize=letter)
