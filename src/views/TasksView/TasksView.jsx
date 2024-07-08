@@ -32,7 +32,7 @@ import CompletedTasksModal from "../../components/CompletedTasksModal";
 
 const NOT_FOUND = -1;
 
-const TasksView = ({ isSidebarOpen }) => {
+const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
   const [showModal, setModalVisibility] = useState(false);
   const [structure, setStructure] = useState("");
   const [showCompleted, setCompletedTasksVisibility] = useState(false);
@@ -176,6 +176,7 @@ const TasksView = ({ isSidebarOpen }) => {
                     onChangeView={onChangeTasksView}
                     preselectGroup={seeModal}
                     dbTable={TODAY}
+                    taskViewRef={mainAreaRef}
                   />
                 ) : (
                   <p>loading...</p>

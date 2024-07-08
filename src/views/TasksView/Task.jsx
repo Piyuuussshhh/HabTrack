@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { invoke } from "@tauri-apps/api";
 
 // Icon Imports
@@ -27,6 +27,7 @@ const Task = (props) => {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
   const [isCompleted, setCompleted] = useState(false);
+  const [isDragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (editingTaskId) {
@@ -75,13 +76,7 @@ const Task = (props) => {
     });
 
     // Update name on the frontend.
-    updateFrontend(
-      updateItem,
-      view,
-      props.onChangeView,
-      props.id,
-      editedName
-    );
+    updateFrontend(updateItem, view, props.onChangeView, props.id, editedName);
 
     setEditingTaskId(null);
   }
@@ -115,12 +110,55 @@ const Task = (props) => {
     // Update frontend.
     updateFrontend(removeItem, view, props.onChangeView, props.id);
   }
+  const scroll = useCallback(
+    (container, direction) => {
+      if (!isDragging) return;
+
+      if (direction === "left") {
+        container.scrollLeft -= scrollSpeed;
+      } else if (direction === "right") {
+        container.scrollLeft += scrollSpeed;
+      } else if (direction === "up") {
+        container.scrollTop -= scrollSpeed;
+      } else if (direction === "down") {
+        container.scrollTop += scrollSpeed;
+      }
+
+      requestAnimationFrame(() => scroll(container, direction));
+    },
+    [isDragging]
+  );
+
+  const scrollSpeed = 10;
+  const edgeThreshold = 50;
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    if (!props.taskViewRef.current) return;
+
+    const container = props.taskViewRef.current;
+    const { clientX, clientY } = event;
+    const { left, right, top, bottom } = container.getBoundingClientRect();
+
+    if (clientX < left + edgeThreshold) {
+      scroll(container, "left");
+    } else if (clientX > right - edgeThreshold) {
+      scroll(container, "right");
+    }
+
+    if (clientY < top + edgeThreshold) {
+      scroll(container, "up");
+    } else if (clientY > bottom - edgeThreshold) {
+      scroll(container, "down");
+    }
+  };
 
   return (
     <div
       className="task-card"
       draggable
       onDragStart={(e) => {
+        setDragging(true);
         /* A duplicate of this current task is passed to handleOnDrag*/
         handleOnDrag(e, {
           id: props.id,
@@ -128,6 +166,8 @@ const Task = (props) => {
           type: TASK,
         });
       }}
+      onDragOver={(e) => handleDragOver(e)}
+      onDragEnd={() => setDragging(false)}
     >
       {/* <input type="checkbox" id="cbtest-60" />
       <label for="cbtest-60" class="check-box"></label> */}
