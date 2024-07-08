@@ -203,7 +203,7 @@ pub mod ops {
                     name TEXT NOT NULL,
                     type TEXT NOT NULL,
                     is_active INTEGER,
-                    parent_group_id INTEGER,
+                    parent_group_id INTEGER
                 )",
                     [],
                 )?;
@@ -227,7 +227,7 @@ pub mod ops {
         fn migrate_tasks(&self) -> Result<()> {
             if let Some(conn) = &self.db_conn {
                 let today = Local::now().naive_local().date();
-                
+
                 let last_migration_date: Option<String> =
                     match conn
                         .query_row("SELECT MAX(date) FROM migration_log", [], |row| row.get(0))
@@ -243,7 +243,7 @@ pub mod ops {
                     // Migrate tasks
                     conn.execute(
                         &format!("INSERT INTO today (name, type, is_active, parent_group_id)
-                    (SELECT name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}')"),
+                    SELECT name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
                         [],
                     )?;
 
