@@ -90,7 +90,8 @@ pub mod init {
 
 pub mod ops {
     use crate::db::{ROOT_GROUP, TASK, TASK_GROUP};
-    use rusqlite::{Connection, Result};
+    use chrono::Local;
+    use rusqlite::{params, Connection, Result};
     use serde::Serialize;
     use std::{collections::HashMap, path::PathBuf};
 
@@ -162,7 +163,7 @@ pub mod ops {
             self.db_conn = Some(conn);
 
             self.create_tables()?;
-            // self.migrate_tables()?;
+            self.migrate_tasks()?;
 
             Ok(())
         }
@@ -203,7 +204,6 @@ pub mod ops {
                     type TEXT NOT NULL,
                     is_active INTEGER,
                     parent_group_id INTEGER,
-                    created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
                 )",
                     [],
                 )?;
@@ -212,6 +212,59 @@ pub mod ops {
                     &format!("INSERT INTO tomorrow (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING"),
                     [],
                 )?;
+
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS migration_log (
+                        date TEXT PRIMARY KEY
+                    )",
+                    [],
+                )?;
+            }
+
+            Ok(())
+        }
+
+        fn migrate_tasks(&self) -> Result<()> {
+            if let Some(conn) = &self.db_conn {
+                let today = Local::now().naive_local().date();
+                
+                let last_migration_date: Option<String> =
+                    match conn
+                        .query_row("SELECT MAX(date) FROM migration_log", [], |row| row.get(0))
+                    {
+                        Ok(latest_date) => latest_date,
+                        Err(err) => panic!("{err}"),
+                    };
+
+                if last_migration_date != Some(today.to_string()) {
+                    // Delete completed tasks from today.
+                    conn.execute("DELETE FROM today WHERE is_active=0", [])?;
+
+                    // Migrate tasks
+                    conn.execute(
+                        &format!("INSERT INTO today (name, type, is_active, parent_group_id)
+                    (SELECT name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}')"),
+                        [],
+                    )?;
+
+                    // Clear tomorrow's tasks
+                    conn.execute(
+                        &format!("DELETE FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
+                        [],
+                    )?;
+
+                    // Log the migration
+                    conn.execute(
+                        "INSERT INTO migration_log (date) VALUES (?1)",
+                        params![today.to_string()],
+                    )?;
+                } else if last_migration_date == None {
+                    // Log the migration
+                    conn.execute(
+                        "INSERT INTO migration_log (date) VALUES (?1)",
+                        params![today.to_string()],
+                    )?;
+                }
             }
 
             Ok(())
