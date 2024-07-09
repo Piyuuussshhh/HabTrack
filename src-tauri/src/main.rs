@@ -21,12 +21,12 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            ops::commands::get_tasks_view,
-            ops::commands::add_item,
-            ops::commands::delete_item,
-            ops::commands::edit_item,
-            ops::commands::update_item,
-            ops::commands::update_status_item,
+            ops::crud_commands::get_tasks_view,
+            ops::crud_commands::add_item,
+            ops::crud_commands::delete_item,
+            ops::crud_commands::update_item,
+            ops::app_commands::open_tomorrow_window,
+            ops::app_commands::close_tomorrow_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

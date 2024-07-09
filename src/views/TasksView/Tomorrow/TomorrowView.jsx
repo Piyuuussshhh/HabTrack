@@ -1,63 +1,48 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
 import { invoke } from "@tauri-apps/api";
 
+import "../../../App.css";
 import {
-  TODAY,
-  TASK,
-  TASKS_VIEW,
-  ACTIVE_TASKS,
-  TASK_GROUP,
-  TAURI_FETCH_TASKS_VIEW,
-  TAURI_ADD_ITEM,
+  TOMORROW,
   ROOT,
-} from "../../Constants";
-
-import TaskGroup from "./TaskGroup";
-import { DragDropProvider, DragDropContext } from "./DragDropContext";
-import Modal from "../../components/Modal";
-import { addItem } from "../../utility/AddRemoveUpdateItems";
-import { updateFrontend } from "../../utility/UpdateFrontend";
-import CompletedTasksModal from "../../components/CompletedTasksModal";
-
-/*
-    TODO -> ERROR HANDLING.
-            We don't handle errors when the input string in
-            Parent Name in the add item model is not an actual
-            valid parent group.
-
-            Arnav's idea: Instead of a textbox, use a dropdown menu
-            to display the available parent groups.
-*/
+  TASK,
+  TASK_GROUP,
+  TOMORROW_VIEW,
+  TAURI_CLOSE_TOMORROW_WINDOW,
+  TAURI_FETCH_TASKS_VIEW,
+  ACTIVE_TASKS,
+  TAURI_ADD_ITEM,
+} from "../../../Constants";
+import { DragDropProvider, DragDropContext } from "../DragDropContext";
+import TaskGroup from "../TaskGroup";
+import Modal from "../../../components/Modal";
+import { addItem } from "../../../utility/AddRemoveUpdateItems";
+import { updateFrontend } from "../../../utility/UpdateFrontend";
+import TomorrowNavbar from "./TomorrowNavbar";
 
 const NOT_FOUND = -1;
 
-const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
-  const [showModal, setModalVisibility] = useState(false);
-  const [structure, setStructure] = useState("");
-  const [showCompleted, setCompletedTasksVisibility] = useState(false);
+const TomorrowView = () => {
+  const [structure, setStructure] = useState(null);
   const [preselectGroup, setPreselectGroup] = useState(ROOT);
+  const [showModal, setModalVisibility] = useState(false);
 
-  /*
-      Probably should not do this, and just add the task to
-      the JSON object in sessionStorage. SEE TOP TODO.
-  */
   useEffect(() => {
     async function fetchTasks() {
-      const storedView = sessionStorage.getItem(TASKS_VIEW);
+      const storedView = sessionStorage.getItem(TOMORROW_VIEW);
       if (storedView) {
         setStructure(JSON.parse(storedView));
         return;
       }
       try {
         const response = await invoke(TAURI_FETCH_TASKS_VIEW, {
-          table: TODAY,
+          table: TOMORROW,
           status: ACTIVE_TASKS,
         });
         const data = JSON.parse(response);
 
         // Set sessionStorage.
-        sessionStorage.setItem(TASKS_VIEW, response);
+        sessionStorage.setItem(TOMORROW_VIEW, response);
 
         setStructure(data);
       } catch (error) {
@@ -73,10 +58,18 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
     // FUNCTION FROM RUNNING A BAJILLION TIMES.
   }, []);
 
-  function seeModal(name) {
+  const onChangeTomorrowView = () => {
+    setStructure(JSON.parse(sessionStorage.getItem(TOMORROW_VIEW)));
+  };
+
+  const seeModal = (name) => {
     setPreselectGroup(name);
     setModalVisibility(true);
-  }
+  };
+
+  const closeModal = () => {
+    setModalVisibility(false);
+  };
 
   const add = (option, name, parentName) => {
     function getId(node) {
@@ -97,7 +90,7 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
       return res;
     }
 
-    const storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+    const storedView = JSON.parse(sessionStorage.getItem(TOMORROW_VIEW));
     const parentGroupId = getId(storedView);
     if (parentGroupId === NOT_FOUND) {
       // show Error in the modal.
@@ -105,7 +98,7 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
     }
 
     invoke(TAURI_ADD_ITEM, {
-      table: TODAY,
+      table: TOMORROW,
       name: name,
       parent_group_id: parentGroupId,
       item_type: option,
@@ -116,8 +109,8 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
         // Adding the new task to the view without having to fetch again.
         updateFrontend(
           addItem,
-          TASKS_VIEW,
-          onChangeTasksView,
+          TOMORROW_VIEW,
+          onChangeTomorrowView,
           {
             id: id,
             name: name,
@@ -135,34 +128,20 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
     setModalVisibility(false);
   };
 
-  function closeModal(type) {
-    if (type === "AddModal") {
-      setModalVisibility(false);
-    } else if (type === "CompletedModal") {
-      setCompletedTasksVisibility(false);
+  const onDone = async () => {
+    try {
+      await invoke(TAURI_CLOSE_TOMORROW_WINDOW);
+    } catch (e) {
+      console.log(e);
     }
-  }
-
-  function toggleCompleted() {
-    setCompletedTasksVisibility(true);
-  }
-
-  function onChangeTasksView() {
-    setStructure(JSON.parse(sessionStorage.getItem(TASKS_VIEW)));
-  }
+  };
 
   return (
     <>
       <div className="box">
-        <Navbar
-          isSidebarOpen={isSidebarOpen}
-          onAdd={seeModal}
-          toggleCompleted={toggleCompleted}
-          onChangeView={onChangeTasksView}
-        />
+        <TomorrowNavbar onAdd={seeModal} onDone={onDone} />
         <div className="task-area">
-          {/* I don't understand how this works, but it works. */}
-          <DragDropProvider item={structure} dbTable={TODAY}>
+          <DragDropProvider item={structure} dbTable={TOMORROW}>
             <DragDropContext.Consumer>
               {/* This structure = initialStructure from DragDropContext.jsx */}
               {/* Null check to ensure structure is populated w contents of db */}
@@ -173,10 +152,9 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
                     id={structure.id}
                     name={structure.name}
                     children={structure.children}
-                    onChangeView={onChangeTasksView}
+                    onChangeView={onChangeTomorrowView}
                     preselectGroup={seeModal}
-                    dbTable={TODAY}
-                    taskViewRef={mainAreaRef}
+                    dbTable={TOMORROW}
                   />
                 ) : (
                   <p>loading...</p>
@@ -188,20 +166,14 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
       </div>
       {showModal && (
         <Modal
-          view={TASKS_VIEW}
+          view={TOMORROW_VIEW}
           preselected={preselectGroup}
           onAdd={add}
           onCancel={() => closeModal("AddModal")}
-        />
-      )}
-      {showCompleted && (
-        <CompletedTasksModal
-          onChangeTasksView={onChangeTasksView}
-          onCancel={() => closeModal("CompletedModal")}
         />
       )}
     </>
   );
 };
 
-export default TasksView;
+export default TomorrowView;

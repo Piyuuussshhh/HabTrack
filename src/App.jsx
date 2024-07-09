@@ -1,5 +1,5 @@
 // Non-UI stuff.
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // External UI Components
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -28,6 +28,8 @@ function App() {
   const [tab, setTab] = useState(TASKS_VIEW);
   const [showSidebar, setSidebar] = useState(true);
 
+  const mainAreaRef = useRef(null);
+
   function toggleTab(newTab) {
     setTab(newTab);
   }
@@ -51,8 +53,8 @@ function App() {
             toggleSidebar={toggleSidebar}
           />
         )}
-        <div className="main-area">
-          {tab === TASKS_VIEW && <TasksView />}
+        <div className="main-area" ref={mainAreaRef}>
+          {tab === TASKS_VIEW && <TasksView isSidebarOpen={showSidebar} mainAreaRef={mainAreaRef}/>}
           {tab === HABITS_VIEW && <HabitsView />}
           {tab === STREAKS_VIEW && <StreaksWatchView />}
         </div>

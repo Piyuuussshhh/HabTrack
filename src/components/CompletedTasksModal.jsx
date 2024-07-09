@@ -8,10 +8,8 @@ import {
   COMPLETED_TASKS,
   TAURI_FETCH_TASKS_VIEW,
   TODAY,
-  TASK_GROUP,
   TASKS_VIEW,
-  TAURI_UPDATE_STATUS_ITEM,
-  ACTIVE_TASKS,
+  TAURI_UPDATE_ITEM,
 } from "../Constants";
 import { updateFrontend } from "../utility/UpdateFrontend";
 import { addItem } from "../utility/AddRemoveUpdateItems";
@@ -42,10 +40,10 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
 
   const onUndo = (item) => {
     // Update db.
-    invoke(TAURI_UPDATE_STATUS_ITEM, {
+    invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
       id: item[0],
-      status: false,
+      field: { Status: false },
     });
 
     // Update frontend of completed tasks view.

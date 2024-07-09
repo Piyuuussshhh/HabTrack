@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { TASKS_VIEW, TASK_GROUP, TASK, ROOT } from "../Constants";
+import { TASK_GROUP, TASK, ROOT } from "../Constants";
 
-const Modal = ({ itemType, onAdd, onCancel }) => {
+const Modal = ({ view, preselected, onAdd, onCancel }) => {
   const [option, setOption] = useState(TASK);
   const [name, setName] = useState("");
-  const [group, setGroup] = useState(ROOT);
+  const [group, setGroup] = useState(preselected);
   const [groups, setAllGroups] = useState(null);
 
   useEffect(() => {
-    let storedView = JSON.parse(sessionStorage.getItem(TASKS_VIEW));
+    let storedView = JSON.parse(sessionStorage.getItem(view));
 
     const extractNames = (obj) => {
       let names = [];
@@ -50,15 +50,12 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
 
   return (
     <div className="modal">
-
       <div className="close-x-btn">
-      <button className="x-btn">
-        <span className="X"></span>
-        <span className="Y"></span>
-      </button>
-
+        <button className="x-btn">
+          <span className="X"></span>
+          <span className="Y"></span>
+        </button>
       </div>
-
       <div className="modal-content">
         <h2>Add</h2>
         <div className="tab">
@@ -95,7 +92,11 @@ const Modal = ({ itemType, onAdd, onCancel }) => {
                 <label htmlFor="group">
                   <strong>Group:</strong>
                 </label>
-                <select id="group" onChange={handleGroupChange}>
+                <select
+                  id="group"
+                  onChange={handleGroupChange}
+                  defaultValue={preselected}
+                >
                   {groups.map((group, idx) => (
                     <option key={idx} value={group}>
                       {group}

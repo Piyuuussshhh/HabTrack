@@ -598,7 +598,14 @@ form .form-group select {
   gap: 1rem;
 }
 
-.page-title {
+.page-title-sidebar-closed {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 100px;
+  align-items: start;
+}
+
+.page-title-sidebar-open {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
@@ -791,7 +798,7 @@ form .form-group select {
 }
 
 .progress {
-  content: '';
+  content: "";
   width: 1px;
   height: 3px;
   border-radius: 7px;
@@ -858,6 +865,9 @@ form .form-group select {
   padding-bottom: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  /* word-break is used to break the word into lines */
+  word-break: break-all;
+  white-space: normal;
 }
 
 .taskgroup-container .taskgroup-container {
@@ -987,10 +997,10 @@ form .form-group select {
 }
 
 .nav-add-btn {
-  width: 55px;
-  height: 55px;
+  width: 50px;
+  height: 50px;
   border-radius: 20px;
-  background-color: #286bb3;
+  background-color: #3576cc;
   border: none;
   font-weight: 600;
   display: flex;
@@ -1041,7 +1051,7 @@ form .form-group select {
   font-size: 5px;
 }
 
-.nav-add-btn:hover::after{
+.nav-add-btn:hover::after {
   display: block;
   padding-right: 10px;
   font-size: 13px;
@@ -1065,6 +1075,16 @@ form .form-group select {
   align-items: center;
   padding: 12px;
   cursor: pointer;
+}
+
+.task-btn-tg {
+  background: transparent;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border: none;
 }
 
 .task-btn:hover {
@@ -1233,8 +1253,6 @@ form .form-group select {
   filter: brightness(120%);
 }
 
-
-
 .MuiMenu-list {
   display: flex;
   flex-direction: column;
@@ -1252,6 +1270,70 @@ form .form-group select {
 
 .MuiMenuItem-root:hover {
   background-color: var(--bg-color) !important;
+}
+
+.done-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 20px;
+  background-color: #286bb3;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 10px black;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none !important;
+}
+
+.done-btn svg {
+  width: 25px;
+  transition-duration: 0.3s;
+}
+
+.done-btn svg path {
+  fill: white;
+}
+
+.done-btn:hover {
+  width: 100px;
+  border-radius: 20px;
+  transition-duration: 0.3s;
+  background-color: #286bb3;
+  align-items: center;
+}
+
+.done-btn:hover .edit-svgIcon {
+  width: 20px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+
+.done-btn::after {
+  display: none;
+  padding: 7px;
+  content: "Save";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 5px;
+}
+
+.done-btn:hover::after {
+  display: block;
+  padding-right: 10px;
+  font-size: 15px;
+  opacity: 1;
+  transform: translateY(0px);
+  transition-duration: 0.3s;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1497,8 +1579,8 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   align-items: center;
   word-wrap: break-word;
   max-width: 250px;
-  overflow-wrap: break-word; 
-  word-break: break-all; 
+  overflow-wrap: break-word;
+  word-break: break-all;
   white-space: normal;
 }
 
@@ -1551,7 +1633,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   opacity: 1;
 }
 
-.day-type{
+.day-type {
   display: flex;
   align-items: center;
   left: 50px;

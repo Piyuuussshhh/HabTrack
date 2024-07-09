@@ -2,11 +2,17 @@ import React, { createContext, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api";
 
 import { addItem, removeItem } from "../../utility/AddRemoveUpdateItems";
-import { TODAY, TASKS_VIEW, TAURI_UPDATE_ITEM } from "../../Constants";
+import {
+  TASKS_VIEW,
+  TAURI_UPDATE_ITEM,
+  TODAY,
+  TOMORROW_VIEW,
+} from "../../Constants";
+import { updateFrontend } from "../../utility/UpdateFrontend";
 
 const DragDropContext = createContext();
 
-const DragDropProvider = ({ children, item }) => {
+const DragDropProvider = ({ children, item, dbTable }) => {
   const [structure, setStructure] = useState();
   const [draggedItem, setDraggedItem] = useState(null);
 
@@ -27,17 +33,16 @@ const DragDropProvider = ({ children, item }) => {
     const droppedItemId = Number(event.dataTransfer.getData("text/plain"));
 
     invoke(TAURI_UPDATE_ITEM, {
-      table: TODAY,
+      table: dbTable,
       id: droppedItemId,
-      new_parent_group_id: targetId,
+      field: { Parent: targetId },
     });
 
-    setStructure((prevStructure) => {
-      const newStructure = JSON.parse(JSON.stringify(prevStructure));
-      removeItem(droppedItemId, newStructure);
-      addItem(draggedItem, targetId, newStructure);
-      sessionStorage.setItem(TASKS_VIEW, JSON.stringify(newStructure));
-      return newStructure;
+    setStructure(() => {
+      const view = dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
+      updateFrontend(removeItem, view, null, droppedItemId);
+      updateFrontend(addItem, view, null, draggedItem, targetId);
+      return JSON.parse(sessionStorage.getItem(view));
     });
     setDraggedItem(null);
   };

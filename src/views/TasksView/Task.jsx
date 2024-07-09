@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { invoke } from "@tauri-apps/api";
 
 // Icon Imports
@@ -13,19 +13,21 @@ import {
   TASKS_VIEW,
   TODAY,
   TAURI_DELETE_ITEM,
-  TAURI_EDIT_ITEM,
-  TAURI_UPDATE_STATUS_ITEM,
+  TAURI_UPDATE_ITEM,
+  TOMORROW_VIEW,
 } from "../../Constants";
 import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
 
 const Task = (props) => {
+  const view = props.dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
+
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
   const { handleOnDrag } = useContext(DragDropContext);
-
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedName, setEditedName] = useState(null);
   const [isCompleted, setCompleted] = useState(false);
+  const [isDragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (editingTaskId) {
@@ -44,13 +46,13 @@ const Task = (props) => {
 
     // Delete task from the database.
     invoke(TAURI_DELETE_ITEM, {
-      table: TODAY,
+      table: props.dbTable,
       id: props.id,
       item_type: TASK,
     });
 
     // Delete task from the frontend.
-    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+    updateFrontend(removeItem, view, props.onChangeView, props.id);
   };
 
   function handleEdit() {
@@ -67,20 +69,14 @@ const Task = (props) => {
 
   function handleConfirmEdit() {
     // Update name in the database.
-    invoke(TAURI_EDIT_ITEM, {
-      table: TODAY,
-      name: editedName,
+    invoke(TAURI_UPDATE_ITEM, {
+      table: props.dbTable,
       id: props.id,
+      field: { Name: editedName },
     });
 
     // Update name on the frontend.
-    updateFrontend(
-      updateItem,
-      TASKS_VIEW,
-      props.onChangeTasksView,
-      props.id,
-      editedName
-    );
+    updateFrontend(updateItem, view, props.onChangeView, props.id, editedName);
 
     setEditingTaskId(null);
   }
@@ -105,21 +101,64 @@ const Task = (props) => {
     await sleep(1500);
     setCompleted(false);
     // Update database.
-    invoke(TAURI_UPDATE_STATUS_ITEM, {
-      table: TODAY,
+    invoke(TAURI_UPDATE_ITEM, {
+      table: props.dbTable,
       id: props.id,
-      status: true,
+      field: { Status: true },
     });
 
     // Update frontend.
-    updateFrontend(removeItem, TASKS_VIEW, props.onChangeTasksView, props.id);
+    updateFrontend(removeItem, view, props.onChangeView, props.id);
   }
+  const scroll = useCallback(
+    (container, direction) => {
+      if (!isDragging) return;
+
+      if (direction === "left") {
+        container.scrollLeft -= scrollSpeed;
+      } else if (direction === "right") {
+        container.scrollLeft += scrollSpeed;
+      } else if (direction === "up") {
+        container.scrollTop -= scrollSpeed;
+      } else if (direction === "down") {
+        container.scrollTop += scrollSpeed;
+      }
+
+      requestAnimationFrame(() => scroll(container, direction));
+    },
+    [isDragging]
+  );
+
+  const scrollSpeed = 10;
+  const edgeThreshold = 50;
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    if (!props.taskViewRef.current) return;
+
+    const container = props.taskViewRef.current;
+    const { clientX, clientY } = event;
+    const { left, right, top, bottom } = container.getBoundingClientRect();
+
+    if (clientX < left + edgeThreshold) {
+      scroll(container, "left");
+    } else if (clientX > right - edgeThreshold) {
+      scroll(container, "right");
+    }
+
+    if (clientY < top + edgeThreshold) {
+      scroll(container, "up");
+    } else if (clientY > bottom - edgeThreshold) {
+      scroll(container, "down");
+    }
+  };
 
   return (
     <div
       className="task-card"
       draggable
       onDragStart={(e) => {
+        setDragging(true);
         /* A duplicate of this current task is passed to handleOnDrag*/
         handleOnDrag(e, {
           id: props.id,
@@ -127,6 +166,8 @@ const Task = (props) => {
           type: TASK,
         });
       }}
+      onDragOver={(e) => handleDragOver(e)}
+      onDragEnd={() => setDragging(false)}
     >
       {/* <input type="checkbox" id="cbtest-60" />
       <label for="cbtest-60" class="check-box"></label> */}
@@ -136,6 +177,7 @@ const Task = (props) => {
           type="checkbox"
           defaultChecked="false"
           onClick={handleCompletion}
+          disabled={props.dbTable === TODAY ? false : true}
         />
         <div className="checkmark"></div>
       </label>
@@ -159,7 +201,10 @@ const Task = (props) => {
       <ul>
         {editingTaskId === props.id ? (
           <li>
-            <button className="task-btn" onClick={handleConfirmEdit}>
+            <button
+              className="task-btn"
+              onClick={editedName !== "" ? handleConfirmEdit : null}
+            >
               <CheckIcon />
             </button>
           </li>

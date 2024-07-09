@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 
 import { IconButton } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { Menu } from "@mui/material";
 import { MenuItem } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 // import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
@@ -12,20 +13,83 @@ import {
   TASKS_VIEW,
   TASK_GROUP,
   TAURI_DELETE_ITEM,
+  TAURI_UPDATE_ITEM,
   TODAY,
+  TOMORROW_VIEW,
 } from "../../Constants";
 import Task from "./Task";
 import { DragDropContext } from "./DragDropContext";
 import { invoke } from "@tauri-apps/api";
-import { removeItem } from "../../utility/AddRemoveUpdateItems";
+import { removeItem, updateItem } from "../../utility/AddRemoveUpdateItems";
 import AlertModal from "../../components/AlertModal";
 import { updateFrontend } from "../../utility/UpdateFrontend";
 
-const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
+const TaskGroup = ({
+  id,
+  name,
+  children,
+  onChangeView,
+  preselectGroup,
+  dbTable,
+  taskViewRef,
+}) => {
+  const view = dbTable === TODAY ? TASKS_VIEW : TOMORROW_VIEW;
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [showAlert, setAlertVisibility] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editedName, setEditedName] = useState("");
 
   const { handleOnDrop } = useContext(DragDropContext);
+
+  useEffect(() => {
+    if (editingTaskId) {
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [editingTaskId]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      cancelEdit();
+    }
+  };
+
+  function cancelEdit() {
+    setEditedName(null);
+    setEditingTaskId(null);
+  }
+
+  function handleEdit() {
+    if (editingTaskId) {
+      setEditingTaskId(null);
+    } else {
+      setEditingTaskId(id);
+    }
+  }
+
+  function onChange(e) {
+    setEditedName(e.target.value);
+  }
+
+  function handleConfirmEdit() {
+    // Update name in the database.
+    invoke(TAURI_UPDATE_ITEM, {
+      table: dbTable,
+      id: id,
+      field: { Name: editedName },
+    });
+
+    // Update name on the frontend.
+    updateFrontend(updateItem, view, onChangeView, id, editedName);
+
+    setEditingTaskId(null);
+  }
 
   const groupOptions = ["Edit", "Add Task", "Delete Group"];
 
@@ -36,7 +100,11 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
   const open = Boolean(anchorEl);
 
   function handleMenuItemClick(option) {
-    if (option === "Delete Group") {
+    if (option === "Edit") {
+      handleEdit();
+    } else if (option === "Add Task") {
+      preselectGroup(name);
+    } else if (option === "Delete Group") {
       setAlertVisibility(true);
     }
 
@@ -51,13 +119,13 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
   function deleteGroup() {
     // Deleting group from database.
     invoke(TAURI_DELETE_ITEM, {
-      table: TODAY,
+      table: dbTable,
       id: id,
       item_type: TASK_GROUP,
     });
 
     // Deleting group from front-end.
-    updateFrontend(removeItem, TASKS_VIEW, onChangeTasksView, id);
+    updateFrontend(removeItem, view, onChangeView, id);
   }
 
   function onCancel() {
@@ -76,39 +144,65 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
       }}
       onDragOver={(e) => e.preventDefault()}
     >
-      {name !== ROOT && (
-        <div className="group-header">
-          {name !== ROOT && <h3 className="bold">{name}</h3>}
-          <IconButton
-            style={{ color: "white", alignSelf: "start" }}
-            aria-label="more"
-            onClick={handleClick}
-            aria-haspopup="true"
-            aria-controls="long-menu"
+      {editingTaskId === id ? (
+        <div
+          className="edit-items"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <input
+            type="text"
+            className="edit-task-inp bold"
+            onInput={onChange}
+            placeholder="press ESC key to stop editing..."
+            autoFocus
+          />
+          <button
+            className="task-btn-tg"
+            onClick={editedName !== "" ? handleConfirmEdit : null}
           >
-            <MoreVert />
-          </IconButton>
-          {/* Use IconMenu instead for better looks. Add icon -> Add task etc.*/}
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            onClose={handleClose}
-            open={open}
-            MenuListProps={{
-              display: "flex",
-              "flex-direction": "column",
-            }}
-          >
-            {groupOptions.map((option) => (
-              <MenuItem
-                key={option}
-                onClick={() => handleMenuItemClick(option)}
-              >
-                {option}
-              </MenuItem>
-            ))}
-          </Menu>
+            <CheckIcon />
+          </button>
         </div>
+      ) : (
+        <>
+          {name !== ROOT && (
+            <div className="group-header">
+              {name !== ROOT && <h3 className="bold">{name}</h3>}
+              <IconButton
+                style={{ color: "white", alignSelf: "start" }}
+                aria-label="more"
+                onClick={handleClick}
+                aria-haspopup="true"
+                aria-controls="long-menu"
+              >
+                <MoreVert />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                onClose={handleClose}
+                open={open}
+                MenuListProps={{
+                  display: "flex",
+                  "flex-direction": "column",
+                }}
+              >
+                {groupOptions.map((option) => (
+                  <MenuItem
+                    key={option}
+                    onClick={() => handleMenuItemClick(option)}
+                  >
+                    {option}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </div>
+          )}
+        </>
       )}
       {children.length > 0 ? (
         <div className="subtasks-list">
@@ -121,7 +215,9 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
                   name={child.name}
                   type={TASK}
                   isActive={child.is_active}
-                  onChangeTasksView={onChangeTasksView}
+                  onChangeView={onChangeView}
+                  dbTable={dbTable}
+                  taskViewRef={taskViewRef}
                 />
               );
             } else if (child.type === TASK_GROUP) {
@@ -132,7 +228,10 @@ const TaskGroup = ({ id, name, children, onChangeTasksView }) => {
                   name={child.name}
                   type={TASK_GROUP}
                   children={child.children}
-                  onChangeTasksView={onChangeTasksView}
+                  onChangeView={onChangeView}
+                  preselectGroup={preselectGroup}
+                  dbTable={dbTable}
+                  taskViewRef={taskViewRef}
                 />
               );
             }

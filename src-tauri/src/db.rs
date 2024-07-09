@@ -11,6 +11,7 @@ const DB_NAME: &str = "database.sqlite";
 const ROOT_GROUP: &str = "/";
 const TASK: &str = "Task";
 const TASK_GROUP: &str = "TaskGroup";
+const TOMORROW: &str = "tomorrow";
 
 // Singleton because we need a single point of access to the db across the app.
 // Mutex because only one process should be able to use the singleton at a time,
@@ -89,7 +90,9 @@ pub mod init {
 
 pub mod ops {
     use crate::db::{ROOT_GROUP, TASK, TASK_GROUP};
-    use rusqlite::{Connection, Result};
+    use chrono::Local;
+    use core::panic;
+    use rusqlite::{params, Connection, Result};
     use serde::Serialize;
     use std::{collections::HashMap, path::PathBuf};
 
@@ -138,9 +141,9 @@ pub mod ops {
 
     pub enum FetchBasis {
         // Fetch all items.
-        All,
+        Active,
         // Fetch only active or completed tasks.
-        ByStatus(bool),
+        Completed,
         // Fetch all items under a common parent.
         ByParent(u64),
     }
@@ -161,7 +164,7 @@ pub mod ops {
             self.db_conn = Some(conn);
 
             self.create_tables()?;
-            // self.migrate_tables()?;
+            self.migrate_tasks()?;
 
             Ok(())
         }
@@ -176,9 +179,28 @@ pub mod ops {
                 parent_group_id stores the ID of the parent group.
             */
             if let Some(conn) = &self.db_conn {
+                // TODAY.
                 conn.execute(
                     "CREATE TABLE IF NOT EXISTS today (
-                    id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    is_active INTEGER,
+                    parent_group_id INTEGER,
+                    created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
+                )",
+                    [],
+                )?;
+                // Only add the root group when the table is created for the first time.
+                conn.execute(
+                    &format!("INSERT INTO today (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING"),
+                    [],
+                )?;
+
+                // TOMORROW.
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS tomorrow (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     type TEXT NOT NULL,
                     is_active INTEGER,
@@ -188,9 +210,77 @@ pub mod ops {
                 )?;
                 // Only add the root group when the table is created for the first time.
                 conn.execute(
-                    format!("INSERT INTO today (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING").as_str(),
+                    &format!("INSERT INTO tomorrow (id, name, type) VALUES (0, '{ROOT_GROUP}', 'TaskGroup') ON CONFLICT DO NOTHING"),
                     [],
                 )?;
+
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS migration_log (
+                        date TEXT PRIMARY KEY
+                    )",
+                    [],
+                )?;
+            }
+
+            Ok(())
+        }
+
+        fn migrate_tasks(&self) -> Result<()> {
+            if let Some(conn) = &self.db_conn {
+                let today = Local::now().naive_local().date();
+
+                let last_migration_date: Option<String> =
+                    match conn
+                        .query_row("SELECT MAX(date) FROM migration_log", [], |row| row.get(0))
+                    {
+                        Ok(latest_date) => latest_date,
+                        Err(err) => panic!("{err}"),
+                    };
+
+                if last_migration_date != Some(today.to_string()) {
+                    // Delete completed tasks from today.
+                    conn.execute("DELETE FROM today WHERE is_active=0", [])?;
+
+                    let max_id: Option<i64> =
+                        match conn.query_row("SELECT MAX(id) from today", [], |row| row.get(0)) {
+                            Ok(val) => val,
+                            Err(err) => panic!("{err}"),
+                        };
+
+                    // Update ids of all tasks in tomorrow so that uniqueness is maintained.
+                    conn.execute(
+                        "UPDATE tomorrow SET id=id+(?1) WHERE id!=0",
+                        params![max_id],
+                    )?;
+
+                    // Update parent_group_ids of all migrated rows.
+                    conn.execute("UPDATE tomorrow SET parent_group_id=parent_group_id+(?1) WHERE parent_group_id!=0", params![max_id],)?;
+
+                    // Migrate tasks
+                    conn.execute(
+                        &format!("INSERT INTO today (id, name, type, is_active, parent_group_id)
+                    SELECT id, name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
+                        [],
+                    )?;
+
+                    // Clear tomorrow's tasks
+                    conn.execute(
+                        &format!("DELETE FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
+                        [],
+                    )?;
+
+                    // Log the migration
+                    conn.execute(
+                        "INSERT INTO migration_log (date) VALUES (?1)",
+                        params![today.to_string()],
+                    )?;
+                } else if last_migration_date == None {
+                    // Log the migration
+                    conn.execute(
+                        "INSERT INTO migration_log (date) VALUES (?1)",
+                        params![today.to_string()],
+                    )?;
+                }
             }
 
             Ok(())
@@ -200,6 +290,7 @@ pub mod ops {
 
         /// Forms the nested root TaskGroup containing all tasks/groups expected by frontend.
         /// Uses DFS traversal.
+        /// Root [task, group[task, task, group [task]], task]
         fn get_final_structure(
             &self,
             id: u64,
@@ -247,14 +338,11 @@ pub mod ops {
         ) -> Result<Vec<(u64, String, Type, Option<bool>, Option<u64>)>> {
             if let Some(conn) = &self.db_conn {
                 let mut stmt = match fetch_basis {
-                    FetchBasis::All => conn.prepare(&format!(
+                    FetchBasis::Active => conn.prepare(&format!(
                         "SELECT * FROM {table} WHERE is_active=1 OR type='{TASK_GROUP}'"
                     ))?,
-                    FetchBasis::ByStatus(is_active) => {
-                        let is_active = if is_active == true { 1 } else { 0 };
-                        conn.prepare(&format!(
-                            "SELECT * FROM {table} WHERE is_active={is_active}"
-                        ))?
+                    FetchBasis::Completed => {
+                        conn.prepare(&format!("SELECT * FROM {table} WHERE is_active={}", 0u64))?
                     }
                     FetchBasis::ByParent(parent_id) => conn.prepare(&format!(
                         "SELECT * FROM {table} WHERE parent_group_id={parent_id}"
@@ -294,7 +382,7 @@ pub mod ops {
         /// Retrieve the data from the db and return it in the nested, expected format.
         pub fn fetch_tasks_view(&self, table: &str) -> Result<TaskRecord> {
             if let Some(_) = &self.db_conn {
-                let fetched_records = self.fetch_records(table, FetchBasis::All);
+                let fetched_records = self.fetch_records(table, FetchBasis::Active);
 
                 // Holds the rows mapped by their ids.
                 let mut task_records: HashMap<u64, TaskRecord> = HashMap::new();
@@ -355,20 +443,22 @@ pub mod ops {
         }
     }
 
-    pub mod commands {
+    pub mod crud_commands {
         use std::sync::MutexGuard;
 
         use crate::db::{DB_SINGLETON, TASK, TASK_GROUP};
         use rusqlite::{params, Connection, Result};
+        use serde::{Deserialize, Serialize};
 
         use super::{FetchBasis, Type};
 
         #[tauri::command]
+        /// C(R)UD - Reads the database and sends appropriate structure to the frontend.
         pub fn get_tasks_view(table: &str, status: bool) -> String {
             let db = DB_SINGLETON.lock().unwrap();
 
             match status {
-                false => match db.fetch_records(table, FetchBasis::ByStatus(false)) {
+                false => match db.fetch_records(table, FetchBasis::Completed) {
                     Ok(records) => {
                         return serde_json::to_string(&records)
                             .expect("[Error] Couldn't return Vec of records");
@@ -409,6 +499,7 @@ pub mod ops {
         */
 
         #[tauri::command(rename_all = "snake_case")]
+        // (C)RUD - Adds the specified item to the database.
         pub fn add_item(
             table: &str,
             name: &str,
@@ -446,6 +537,7 @@ pub mod ops {
         }
 
         #[tauri::command(rename_all = "snake_case")]
+        // CRU(D) - Deletes the specified item from the database.
         pub fn delete_item(table: &str, id: u64, item_type: &str) {
             let db = DB_SINGLETON.lock().unwrap();
 
@@ -458,55 +550,25 @@ pub mod ops {
             }
         }
 
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn edit_item(table: &str, name: &str, id: u64) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                let command = format!("UPDATE {table} SET name=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![name, id]) {
-                    Ok(_) => (),
-                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
-                }
-            }
+        #[derive(Serialize, Deserialize, Debug)]
+        pub enum UpdateField {
+            Name(String),
+            Parent(u64),
+            Status(bool),
         }
 
         #[tauri::command(rename_all = "snake_case")]
-        pub fn update_item(table: &str, id: u64, new_parent_group_id: u64) {
+        // CR(U)D - Updates the specified item's record in the database.
+        pub fn update_item(table: &str, id: u64, field: UpdateField) {
             let db = DB_SINGLETON.lock().unwrap();
 
             if let Some(conn) = &db.db_conn {
-                let command = format!("UPDATE {table} SET parent_group_id=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![new_parent_group_id, id]) {
-                    Ok(_) => (),
-                    Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
-                }
-            }
-        }
-
-        #[tauri::command(rename_all = "snake_case")]
-        pub fn update_status_item(table: &str, id: u64, status: bool) {
-            let db = DB_SINGLETON.lock().unwrap();
-
-            if let Some(conn) = &db.db_conn {
-                let is_active = match status {
-                    // the status parameter holds the checked status of associated checkbox.
-                    // true = task completed, therefore is_active = false,
-                    true => 0u64,
-                    // false = task incomplete, therefore is_active = true,
-                    false => 1u64,
-                };
-
-                let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
-
-                match conn.execute(&command, params![is_active, id]) {
-                    Ok(_) => (),
-                    Err(err) => panic!(
-                        "[ERROR] could not update status of task: {}",
-                        err.to_string()
-                    ),
+                match field {
+                    UpdateField::Name(name) => update_name(conn, table, &name, id),
+                    UpdateField::Parent(new_parent_group_id) => {
+                        update_parent(conn, table, id, new_parent_group_id)
+                    }
+                    UpdateField::Status(status) => update_status(conn, table, id, status),
                 }
             }
         }
@@ -554,6 +616,71 @@ pub mod ops {
                     Err(err) => panic!("[ERROR] Error occurred while deleting group {id}: {err}"),
                 }
             };
+        }
+
+        fn update_name(conn: &Connection, table: &str, name: &str, id: u64) {
+            let command = format!("UPDATE {table} SET name=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![name, id]) {
+                Ok(_) => (),
+                Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+            }
+        }
+
+        fn update_parent(conn: &Connection, table: &str, id: u64, new_parent_group_id: u64) {
+            let command = format!("UPDATE {table} SET parent_group_id=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![new_parent_group_id, id]) {
+                Ok(_) => (),
+                Err(err) => println!("[ERROR] Could not update task: {}", err.to_string()),
+            }
+        }
+
+        fn update_status(conn: &Connection, table: &str, id: u64, status: bool) {
+            let is_active = match status {
+                // the status parameter holds the checked status of associated checkbox.
+                // true = task completed, therefore is_active = false,
+                true => 0u64,
+                // false = task incomplete, therefore is_active = true,
+                false => 1u64,
+            };
+
+            let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
+
+            match conn.execute(&command, params![is_active, id]) {
+                Ok(_) => (),
+                Err(err) => panic!(
+                    "[ERROR] could not update status of task: {}",
+                    err.to_string()
+                ),
+            }
+        }
+    }
+
+    pub mod app_commands {
+        use tauri::Manager;
+
+        use crate::db::TOMORROW;
+
+        #[tauri::command]
+        pub async fn open_tomorrow_window(handle: tauri::AppHandle) {
+            tauri::WindowBuilder::new(
+                &handle,
+                TOMORROW,
+                tauri::WindowUrl::App("src/views/TasksView/Tomorrow/index.html".parse().unwrap()),
+            )
+            .title("Tomorrow's Tasks")
+            .inner_size(1000.0, 800.0)
+            .position(100.0, 100.0)
+            .build()
+            .unwrap();
+        }
+
+        #[tauri::command]
+        pub async fn close_tomorrow_window(handle: tauri::AppHandle) {
+            if let Some(window) = handle.get_window(TOMORROW) {
+                window.close().unwrap();
+            }
         }
     }
 }
