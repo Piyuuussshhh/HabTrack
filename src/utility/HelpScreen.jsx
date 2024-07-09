@@ -5,11 +5,16 @@ const Help = ({ isHelp, closeHelp }) => {
 
   return (
     <div className="help-screen">
-      <div className="close-x-btn" onClick={closeHelp}>
-        <button className="x-btn">
-          <span className="X"></span>
-          <span className="Y"></span>
+      <div className="hekp-close-x-btn" onClick={closeHelp}>
+        <button className="help-x-btn">
+          <span className="help-X"></span>
+          <span className="help-Y"></span>
         </button>
+      </div>
+
+      <div className="help-modal">
+
+
       </div>
       
       <div className="help-content"></div>
