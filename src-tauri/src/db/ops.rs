@@ -366,6 +366,7 @@ impl Db {
 }
 
 pub mod crud_commands {
+    use core::panic;
     use std::sync::MutexGuard;
 
     use rusqlite::{params, Connection, Result};
@@ -601,5 +602,21 @@ pub mod crud_commands {
         }
 
         all_tasks
+    }
+
+    pub fn get_item(id: u64) -> String {
+        let db = DB_SINGLETON.lock().unwrap();
+        let mut name = String::new();
+
+        if let Some(conn) = &db.db_conn {
+            let res: Option<String> = match conn.query_row("SELECT name FROM today WHERE id=(?1)", params![id], |row| row.get(0)) {
+                Ok(name) => name,
+                Err(err) => panic!("{err}"),
+            };
+
+            name = res.unwrap();
+        }
+
+        name
     }
 }
