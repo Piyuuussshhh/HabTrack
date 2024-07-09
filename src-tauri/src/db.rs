@@ -91,6 +91,7 @@ pub mod init {
 pub mod ops {
     use crate::db::{ROOT_GROUP, TASK, TASK_GROUP};
     use chrono::Local;
+    use core::panic;
     use rusqlite::{params, Connection, Result};
     use serde::Serialize;
     use std::{collections::HashMap, path::PathBuf};
@@ -181,7 +182,7 @@ pub mod ops {
                 // TODAY.
                 conn.execute(
                     "CREATE TABLE IF NOT EXISTS today (
-                    id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     type TEXT NOT NULL,
                     is_active INTEGER,
@@ -199,7 +200,7 @@ pub mod ops {
                 // TOMORROW.
                 conn.execute(
                     "CREATE TABLE IF NOT EXISTS tomorrow (
-                    id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     type TEXT NOT NULL,
                     is_active INTEGER,
@@ -240,10 +241,25 @@ pub mod ops {
                     // Delete completed tasks from today.
                     conn.execute("DELETE FROM today WHERE is_active=0", [])?;
 
+                    let max_id: Option<i64> =
+                        match conn.query_row("SELECT MAX(id) from today", [], |row| row.get(0)) {
+                            Ok(val) => val,
+                            Err(err) => panic!("{err}"),
+                        };
+
+                    // Update ids of all tasks in tomorrow so that uniqueness is maintained.
+                    conn.execute(
+                        "UPDATE tomorrow SET id=id+(?1) WHERE id!=0",
+                        params![max_id],
+                    )?;
+
+                    // Update parent_group_ids of all migrated rows.
+                    conn.execute("UPDATE tomorrow SET parent_group_id=parent_group_id+(?1) WHERE parent_group_id!=0", params![max_id],)?;
+
                     // Migrate tasks
                     conn.execute(
-                        &format!("INSERT INTO today (name, type, is_active, parent_group_id)
-                    SELECT name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
+                        &format!("INSERT INTO today (id, name, type, is_active, parent_group_id)
+                    SELECT id, name, type, is_active, parent_group_id FROM tomorrow WHERE name!='{ROOT_GROUP}'"),
                         [],
                     )?;
 
@@ -274,6 +290,7 @@ pub mod ops {
 
         /// Forms the nested root TaskGroup containing all tasks/groups expected by frontend.
         /// Uses DFS traversal.
+        /// Root [task, group[task, task, group [task]], task]
         fn get_final_structure(
             &self,
             id: u64,
