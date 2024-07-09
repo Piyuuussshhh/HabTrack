@@ -3,7 +3,7 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
-use habtrack::db::{init::DbInitializer, ops, window};
+use habtrack::{db::{init::DbInitializer, ops}, window};
 
 // Start work on database.
 // TODO: Once done, merge with main, and pull changes into FEATURE-add-delete-task.
