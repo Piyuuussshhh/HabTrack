@@ -128,6 +128,89 @@ h2 {
   overflow: scroll;
 }
 
+.faq-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ffe53b;
+  background-image: linear-gradient(147deg, #ffe53b 0%, #ff2525 74%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.151);
+  position: absolute;
+  top: 950px;
+  left: 210px;
+}
+.faq-button svg {
+  height: 1.5em;
+  fill: white;
+}
+.faq-button:hover svg {
+  animation: jello-vertical 0.7s both;
+}
+@keyframes jello-vertical {
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  40% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  50% {
+    transform: scale3d(0.85, 1.15, 1);
+  }
+  65% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  75% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+.tooltip {
+  position: absolute;
+  top: -20px;
+  opacity: 0;
+  background-color: #ffe53b;
+  background-image: linear-gradient(147deg, #ffe53b 0%, #ff2525 74%);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition-duration: 0.2s;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+
+.tooltip::before {
+  position: absolute;
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #ff2525;
+  background-size: 1000%;
+  background-position: center;
+  transform: rotate(45deg);
+  bottom: -15%;
+  transition-duration: 0.3s;
+}
+
+.faq-button:hover .tooltip {
+  top: -40px;
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------------SIDEBAR STYLES------------------------------ */
 /* -------------------------------------------------------------------------- */
@@ -791,7 +874,7 @@ form .form-group select {
 }
 
 .progress {
-  content: '';
+  content: "";
   width: 1px;
   height: 3px;
   border-radius: 7px;
@@ -1041,7 +1124,7 @@ form .form-group select {
   font-size: 5px;
 }
 
-.nav-add-btn:hover::after{
+.nav-add-btn:hover::after {
   display: block;
   padding-right: 10px;
   font-size: 13px;
@@ -1232,8 +1315,6 @@ form .form-group select {
 .add-btn:hover {
   filter: brightness(120%);
 }
-
-
 
 .MuiMenu-list {
   display: flex;
@@ -1497,8 +1578,8 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   align-items: center;
   word-wrap: break-word;
   max-width: 250px;
-  overflow-wrap: break-word; 
-  word-break: break-all; 
+  overflow-wrap: break-word;
+  word-break: break-all;
   white-space: normal;
 }
 
@@ -1551,7 +1632,7 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   opacity: 1;
 }
 
-.day-type{
+.day-type {
   display: flex;
   align-items: center;
   left: 50px;
@@ -1596,4 +1677,24 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
 .day-type select:focus {
   outline: none;
   box-shadow: 10 10 10px black;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------HELP SCREEN--------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+.help-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 100;
 }
