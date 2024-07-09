@@ -22,8 +22,6 @@ pub fn export_to_pdf() {
     let active_tasks_inp: Vec<(String, String)> = get_python_input(&active_tasks);
     let completed_tasks_inp: Vec<(String, String)> = get_python_input(&completed_tasks);
 
-    println!("{active_tasks_inp:?}");
-    println!("{completed_tasks_inp:?}");
 
     let output = Command::new("python3")
         .arg("../scripts/task_view_to_pdf.py")
@@ -36,7 +34,5 @@ pub fn export_to_pdf() {
 
     if !output.status.success() {
         eprintln!("[ERROR]: {}", String::from_utf8_lossy(&output.stderr));
-    } else {
-        println!("shit worked");
-    }
+    } 
 }
