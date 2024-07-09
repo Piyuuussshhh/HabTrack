@@ -4,6 +4,7 @@ use std::sync::Mutex;
 const ROOT_GROUP: &str = "/";
 const TASK: &str = "Task";
 const TASK_GROUP: &str = "TaskGroup";
+const TODAY: &str = "today";
 
 // Singleton because we need a single point of access to the db across the app.
 // Mutex because only one process should be able to use the singleton at a time,
@@ -20,7 +21,7 @@ use rusqlite::{params, Connection, Result};
 use serde::Serialize;
 use std::{collections::HashMap, path::PathBuf};
 
-#[derive(Serialize, Debug, Clone, Copy)]
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(tag = "type")]
 pub enum Type {
     Task,
@@ -370,7 +371,7 @@ pub mod crud_commands {
     use rusqlite::{params, Connection, Result};
     use serde::{Deserialize, Serialize};
 
-    use super::{FetchBasis, Type, DB_SINGLETON, TASK, TASK_GROUP};
+    use super::{FetchBasis, Type, DB_SINGLETON, TASK, TASK_GROUP, TODAY};
 
     #[tauri::command]
     /// C(R)UD - Reads the database and sends appropriate structure to the frontend.
@@ -574,5 +575,31 @@ pub mod crud_commands {
                 err.to_string()
             ),
         }
+    }
+
+    /// C(R)UD - Reads database and gets all tasks' names and their parent_group_ids.
+    pub fn get_all_tasks(fetch_basis: FetchBasis) -> Vec<(u64, String)> {
+        let db = DB_SINGLETON.lock().unwrap();
+        let mut all_tasks: Vec<(u64, String)> = Vec::new();
+
+        match db.fetch_records(TODAY, fetch_basis) {
+            Ok(records) => {
+                all_tasks.extend(
+                    records
+                        .into_iter()
+                        .filter(|(_, _, record_type, _, _)| *record_type != Type::TaskGroup)
+                        .map(|(_, name, _, _, parent_id)| {
+                            if let Some(id) = parent_id {
+                                (id, name)
+                            } else {
+                                panic!("[ERROR] While fetching task names, the task: [{name}] had no parent.");
+                            }
+                        }),
+                );
+            }
+            Err(err) => panic!("{err}"),
+        }
+
+        all_tasks
     }
 }

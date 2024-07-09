@@ -25,6 +25,9 @@ const TAURI_UPDATE_ITEM = "update_item";
 const TAURI_OPEN_TOMORROW_WINDOW = "open_tomorrow_window";
 const TAURI_CLOSE_TOMORROW_WINDOW = "close_tomorrow_window";
 
+// Export.
+const TAURI_EXPORT_TO_PDF = "export_to_pdf";
+
 export {
   // Table names
   TODAY,
@@ -53,4 +56,7 @@ export {
   // New Window,
   TAURI_OPEN_TOMORROW_WINDOW,
   TAURI_CLOSE_TOMORROW_WINDOW,
+
+  // Export
+  TAURI_EXPORT_TO_PDF,
 };
