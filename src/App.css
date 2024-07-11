@@ -1778,7 +1778,59 @@ redudant. Not putting under calendar chart styles for obvious reasons. */
   height: 800px;
 }
 
+.slide h1 {
+  margin-bottom: 40px;
+  text-align: center;
+}
 
+.slide p {
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+
+.welcome-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  font-size: 80px;
+  margin-top: 240px;
+}
+
+.slide img {
+  max-width: 100%;
+  height: auto;
+}
+
+.custom-arrow {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  background: #3576cc;
+  border-radius: 15px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 100;
+  color: var(--secondary);
+}
+
+.custom-arrow svg{
+  fill: white;
+}
+
+.custom-prev {
+  left: -50px;
+  padding-left: 10px;
+}
+
+.custom-next {
+  right: -50px; 
+}
 
 
 
