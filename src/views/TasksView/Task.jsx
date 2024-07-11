@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
 import { invoke } from "@tauri-apps/api";
 
 // Icon Imports
@@ -28,6 +34,7 @@ const Task = (props) => {
   const [editedName, setEditedName] = useState(null);
   const [isCompleted, setCompleted] = useState(false);
   const [isDragging, setDragging] = useState(false);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (editingTaskId) {
@@ -39,6 +46,17 @@ const Task = (props) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
+
+    // editedName needs to be here or else if you
+    // press enter to submit the edited name, it will
+    // update the text with the PREVIOUS value of editedName.
+  }, [editedName]);
+
+  useEffect(() => {
+    if (editingTaskId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
   }, [editingTaskId]);
 
   const handleDelete = (e) => {
@@ -84,6 +102,9 @@ const Task = (props) => {
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
       cancelEdit();
+    }
+    if (e.key === "Enter" && editedName !== "") {
+      handleConfirmEdit();
     }
   };
 
@@ -156,7 +177,7 @@ const Task = (props) => {
   return (
     <div
       className="task-card"
-      draggable
+      draggable={!editingTaskId}
       onDragStart={(e) => {
         setDragging(true);
         /* A duplicate of this current task is passed to handleOnDrag*/
@@ -185,9 +206,11 @@ const Task = (props) => {
         {editingTaskId === props.id ? (
           <input
             type="text"
+            ref={inputRef}
             className="edit-task-inp"
             onInput={onChange}
             placeholder="press ESC key to stop editing..."
+            defaultValue={props.name}
             autoFocus
           />
         ) : (
