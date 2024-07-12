@@ -365,14 +365,16 @@ impl Db {
     }
 }
 
-pub mod crud_commands {
+
     use core::panic;
     use std::sync::MutexGuard;
 
     use rusqlite::{params, Connection, Result};
     use serde::{Deserialize, Serialize};
 
+
     use super::{FetchBasis, Type, DB_SINGLETON, TASK, TASK_GROUP, TODAY};
+    use super::{FetchBasis, Type, DB_SINGLETON, TASK, TASK_GROUP};
 
     #[tauri::command]
     /// C(R)UD - Reads the database and sends appropriate structure to the frontend.
