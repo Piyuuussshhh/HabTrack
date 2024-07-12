@@ -6,10 +6,6 @@ import React, {
   useRef,
 } from "react";
 import { invoke } from "@tauri-apps/api";
-
-// Icon Imports
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 
 // Local Resources
@@ -31,7 +27,7 @@ const Task = (props) => {
   // Adds ID of dragged task to DragEvent datastore and changes state of the DragDropContext.
   const { handleOnDrag } = useContext(DragDropContext);
   const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editedName, setEditedName] = useState(null);
+  const [editedName, setEditedName] = useState(props.name);
   const [isCompleted, setCompleted] = useState(false);
   const [isDragging, setDragging] = useState(false);
   const inputRef = useRef(null);
