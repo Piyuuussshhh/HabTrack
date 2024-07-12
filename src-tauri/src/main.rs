@@ -3,7 +3,7 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
-use habtrack::{db::{init::DbInitializer, ops}, window};
+use habtrack::{db::{init::DbInitializer, ops}, window, export};
 
 // Start work on database.
 // TODO: Once done, merge with main, and pull changes into FEATURE-add-delete-task.
@@ -27,6 +27,7 @@ fn main() {
             ops::crud_commands::update_item,
             window::open_tomorrow_window,
             window::close_tomorrow_window,
+            export::export_to_pdf,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

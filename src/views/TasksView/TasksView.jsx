@@ -11,6 +11,7 @@ import {
   TAURI_FETCH_TASKS_VIEW,
   TAURI_ADD_ITEM,
   ROOT,
+  TAURI_EXPORT_TO_PDF,
 } from "../../Constants";
 
 import TaskGroup from "./TaskGroup";
@@ -151,11 +152,20 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
     setStructure(JSON.parse(sessionStorage.getItem(TASKS_VIEW)));
   }
 
+  const onExport = async () => {
+    try {
+      await invoke(TAURI_EXPORT_TO_PDF);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <>
       <div className="box">
         <Navbar
           isSidebarOpen={isSidebarOpen}
+          onExport={onExport}
           onAdd={seeModal}
           toggleCompleted={toggleCompleted}
           onChangeView={onChangeTasksView}

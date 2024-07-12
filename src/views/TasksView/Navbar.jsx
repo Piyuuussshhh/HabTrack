@@ -2,12 +2,13 @@ import React from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import FastForwardIcon from "@mui/icons-material/FastForward";
 import AddIcon from "@mui/icons-material/Add";
+import { Download } from "@mui/icons-material";
 import { invoke } from "@tauri-apps/api";
 import { ROOT, TAURI_OPEN_TOMORROW_WINDOW } from "../../Constants";
 
 // TODO: style this component.
 
-const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
+const Navbar = ({ isSidebarOpen, onExport, onAdd, toggleCompleted }) => {
   const seeTomorrow = async () => {
     try {
       await invoke(TAURI_OPEN_TOMORROW_WINDOW);
@@ -29,6 +30,11 @@ const Navbar = ({ isSidebarOpen, onAdd, toggleCompleted }) => {
         Tasks
       </p>
       <ul>
+        <li>
+          <button className="btn" title="Export to PDF" onClick={onExport}>
+            <Download />
+          </button>
+        </li>
         <li>
           <button className="btn" title="Set Tasks for Tomorrow" onClick={seeTomorrow}>
             <FastForwardIcon />
