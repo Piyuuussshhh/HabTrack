@@ -1,4 +1,6 @@
-use std::{collections::HashMap, process::Command};
+use headless_chrome::{Browser, LaunchOptions};
+use std::{collections::HashMap, fs::File, io::Write, path::PathBuf};
+use tauri::api::dialog::FileDialogBuilder;
 
 use crate::db::ops::{
     crud_commands::{get_all_tasks, get_item},
@@ -61,6 +63,26 @@ fn generate_ordered_list(map: HashMap<String, Vec<String>>, is_completed: bool) 
     html
 }
 
+fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let browser = Browser::new(LaunchOptions {
+        headless: true,
+        ..Default::default()
+    })?;
+
+    let tab = browser.new_tab()?;
+
+    tab.navigate_to(&format!("data:text/html;charset=utf-8,{}", html))?;
+    tab.wait_until_navigated()?;
+    tab.wait_for_element("body")?;
+
+    let pdf_data = tab.print_to_pdf(None)?;
+
+    let mut file = File::create(pdf_name)?;
+    file.write_all(&pdf_data)?;
+
+    Ok(())
+}
+
 #[tauri::command]
 pub fn export_to_pdf() {
     let active_tasks = get_all_tasks(FetchBasis::Active);
@@ -68,25 +90,6 @@ pub fn export_to_pdf() {
 
     let active_tasks_inp: Vec<(String, String)> = get_python_input(&active_tasks);
     let completed_tasks_inp: Vec<(String, String)> = get_python_input(&completed_tasks);
-
-    let pdf_html = format!(
-        "<!DOCTYPE html>
-         <html lang=\"en\">
-         <head>
-         <meta charset=\"UTF-8\" />
-         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
-         <title>Tasks for Today</title>
-         <body>
-           <h1>Active Tasks</h1>
-           {}
-           <div class=\"page-break\"></div>
-           <h1>Completed Tasks</h1>
-           {}
-         </body>
-         </head>",
-        generate_ordered_list(map_parent_to_tasks(active_tasks_inp), false),
-        generate_ordered_list(map_parent_to_tasks(completed_tasks_inp), true)
-    );
 
     let pdf_css = format!(
         "
@@ -132,16 +135,41 @@ pub fn export_to_pdf() {
         .page-break {{
             page-break-after: always;
         }}
-    "
+        "
     );
 
-    let output = Command::new("python3")
-        .arg("../scripts/task_view_to_pdf.py")
-        .args([pdf_html, pdf_css])
-        .output()
-        .expect("ok the python script idea didn't work");
+    let pdf_html = format!(
+        "<!DOCTYPE html>
+         <html lang=\"en\">
+         <head>
+         <meta charset=\"UTF-8\" />
+         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+         <style>{}</style>
+         <title>Tasks for Today</title>
+         </head>
+         <body>
+           <h1>Active Tasks</h1>
+           {}
+           <div class=\"page-break\"></div>
+           <h1>Completed Tasks</h1>
+           {}
+         </body>
+         </html>",
+        pdf_css,
+        generate_ordered_list(map_parent_to_tasks(active_tasks_inp), false),
+        generate_ordered_list(map_parent_to_tasks(completed_tasks_inp), true)
+    );
 
-    if !output.status.success() {
-        eprintln!("[ERROR]: {}", String::from_utf8_lossy(&output.stderr));
-    }
+    FileDialogBuilder::new()
+        .set_title("Export Tasks to PDF")
+        .add_filter("PDF files", &["pdf"])
+        .set_file_name("Today's Tasks.pdf")
+        .save_file(move |path| {
+            if let Some(path) = path {
+                match generate_pdf(pdf_html, path) {
+                    Ok(_) => (),
+                    Err(err) => println!("{err}"),
+                }
+            }
+        });
 }
