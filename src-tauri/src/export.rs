@@ -63,31 +63,7 @@ fn generate_ordered_list(map: HashMap<String, Vec<String>>, is_completed: bool) 
     html
 }
 
-fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let browser = Browser::new(LaunchOptions {
-        headless: true,
-        ..Default::default()
-    })?;
-
-    let tab = browser.new_tab()?;
-
-    tab.navigate_to(&format!("data:text/html;charset=utf-8,{}", html))?;
-    tab.wait_until_navigated()?;
-    tab.wait_for_element("body")?;
-
-    let pdf_data = tab.print_to_pdf(None)?;
-
-    let mut file = File::create(pdf_name)?;
-    file.write_all(&pdf_data)?;
-
-    Ok(())
-}
-
-#[tauri::command]
-pub fn export_to_pdf() {
-    let active_tasks = get_all_tasks(FetchBasis::Active);
-    let completed_tasks = get_all_tasks(FetchBasis::Completed);
-
+fn generate_html(active_tasks: Vec<(u64, String)>, completed_tasks: Vec<(u64, String)>) -> String {
     let active_tasks_inp: Vec<(String, String)> = get_python_input(&active_tasks);
     let completed_tasks_inp: Vec<(String, String)> = get_python_input(&completed_tasks);
 
@@ -116,11 +92,6 @@ pub fn export_to_pdf() {
             font-weight: bold;
         }}
 
-        input:checked:after {{
-            color: black;
-            content: '✔';
-        }}
-
         .sub-task {{
             display: flex;
             flex-direction: row;
@@ -138,7 +109,7 @@ pub fn export_to_pdf() {
         "
     );
 
-    let pdf_html = format!(
+    format!(
         "<!DOCTYPE html>
          <html lang=\"en\">
          <head>
@@ -158,7 +129,33 @@ pub fn export_to_pdf() {
         pdf_css,
         generate_ordered_list(map_parent_to_tasks(active_tasks_inp), false),
         generate_ordered_list(map_parent_to_tasks(completed_tasks_inp), true)
-    );
+    )
+}
+
+fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let browser = Browser::new(LaunchOptions {
+        headless: true,
+        ..Default::default()
+    })?;
+
+    let tab = browser.new_tab()?;
+
+    tab.navigate_to(&format!("data:text/html;charset=utf-8,{}", html))?;
+    tab.wait_until_navigated()?;
+    tab.wait_for_element("body")?;
+
+    let pdf_data = tab.print_to_pdf(None)?;
+
+    let mut file = File::create(pdf_name)?;
+    file.write_all(&pdf_data)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn export_to_pdf() {
+    let active_tasks = get_all_tasks(FetchBasis::Active);
+    let completed_tasks = get_all_tasks(FetchBasis::Completed);
 
     FileDialogBuilder::new()
         .set_title("Export Tasks to PDF")
@@ -166,7 +163,10 @@ pub fn export_to_pdf() {
         .set_file_name("Today's Tasks.pdf")
         .save_file(move |path| {
             if let Some(path) = path {
-                match generate_pdf(pdf_html, path) {
+                match generate_pdf(
+                    generate_html(active_tasks, completed_tasks),
+                    path
+                ) {
                     Ok(_) => (),
                     Err(err) => println!("{err}"),
                 }

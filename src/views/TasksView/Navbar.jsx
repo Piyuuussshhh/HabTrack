@@ -2,7 +2,8 @@ import React from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import FastForwardIcon from "@mui/icons-material/FastForward";
 import AddIcon from "@mui/icons-material/Add";
-import { Download } from "@mui/icons-material";
+import IosShareIcon from '@mui/icons-material/IosShare';
+
 import { invoke } from "@tauri-apps/api";
 import { ROOT, TAURI_OPEN_TOMORROW_WINDOW } from "../../Constants";
 
@@ -32,7 +33,7 @@ const Navbar = ({ isSidebarOpen, onExport, onAdd, toggleCompleted }) => {
       <ul>
         <li>
           <button className="btn" title="Export to PDF" onClick={onExport}>
-            <Download />
+            <IosShareIcon />
           </button>
         </li>
         <li>
