@@ -2,9 +2,13 @@ name: "test-build-on-push-and-pr"
 
 on:
   push:
-    branches: 
-      - '**'  # This makes the workflow run on pushes to any branch.
+    branches-ignore:
+      - 'main'
   pull_request:
+    branches-ignore:
+      - 'main'
+    branches:
+      - '**'  # This makes the workflow run on pushes to any branch.
 
 # This workflow will build your Tauri app without uploading it anywhere.
 
