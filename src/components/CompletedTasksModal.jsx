@@ -27,6 +27,7 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
           status: COMPLETED_TASKS,
         });
         const data = JSON.parse(response);
+        console.log(JSON.stringify(data));
 
         setCompletedStructure(data);
       } catch (error) {
@@ -42,13 +43,13 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
     // Update db.
     invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
-      id: item[0],
+      id: item.id,
       field: { Status: false },
     });
 
     // Update frontend of completed tasks view.
     setCompletedStructure(
-      completedStructure.filter((child) => child[0] != item[0])
+      completedStructure.filter((child) => child.id != item.id)
     );
     // Update frontend of active tasks view.
     updateFrontend(
@@ -56,12 +57,12 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
       TASKS_VIEW,
       onChangeTasksView,
       {
-        id: item[0],
-        name: item[1],
+        id: item.id,
+        name: item.name,
         type: TASK,
-        parentId: item[item.length - 1],
+        parentId: item.parent_group_id,
       },
-      item[item.length - 1]
+      item.parent_group_id
     );
   };
 
@@ -81,11 +82,11 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
           >
             <ul>
               {completedStructure.map((node) => {
-                console.log("this is the node:" + node);
+                console.log("this is the node:" + JSON.stringify(node));
                 return (
-                  <li key={node[0]}>
+                  <li key={node.id}>
                     <div className="completed-task">
-                      <label>{node[1]}</label>
+                      <label>{node.name}</label>
                       <button
                         type="button"
                         className="task-btn"

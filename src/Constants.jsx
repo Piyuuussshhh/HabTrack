@@ -16,10 +16,10 @@ const TASK = "Task";
 const TASK_GROUP = "TaskGroup";
 const ACTIVE_TASKS = true;
 const COMPLETED_TASKS = false;
-const TAURI_FETCH_TASKS_VIEW = "get_tasks_view";
-const TAURI_ADD_ITEM = "add_item";
-const TAURI_DELETE_ITEM = "delete_item";
-const TAURI_UPDATE_ITEM = "update_item";
+const TAURI_FETCH_TASKS_VIEW = "get_todos";
+const TAURI_ADD_ITEM = "add_todo";
+const TAURI_DELETE_ITEM = "delete_todo";
+const TAURI_UPDATE_ITEM = "update_todo";
 
 // New Window.
 const TAURI_OPEN_TOMORROW_WINDOW = "open_tomorrow_window";

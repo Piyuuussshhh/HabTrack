@@ -32,6 +32,10 @@ const DragDropProvider = ({ children, item, dbTable }) => {
     // basically event.dataTransfer.getData() always returns a string.
     const droppedItemId = Number(event.dataTransfer.getData("text/plain"));
 
+    // There is a redundant command call when the todo is dropped in the
+    // same group of its origin. No update is made, and simply the database
+    // is queried. Fix that.
+
     invoke(TAURI_UPDATE_ITEM, {
       table: dbTable,
       id: droppedItemId,

@@ -1,25 +1,35 @@
 use headless_chrome::{Browser, LaunchOptions};
 use std::{collections::HashMap, fs::File, io::Write, path::PathBuf};
-use tauri::api::dialog::FileDialogBuilder;
+use tauri::{api::dialog::FileDialogBuilder, State};
 
-use crate::db::ops::{
-    crud_commands::{get_all_tasks, get_item},
-    FetchBasis,
+use crate::db::{
+    init::DbConn,
+    todos::{
+        commands::{fetch_todos, TODAY},
+        FetchBasis, Todo, Type,
+    },
 };
 
-fn get_python_input(tasks: &[(u64, String)]) -> Vec<(String, String)> {
-    let mut res: Vec<(String, String)> = Vec::new();
-    for (parent_id, name) in tasks.iter() {
-        let parent_name = get_item(*parent_id);
-        res.push((parent_name, name.clone()));
-    }
-    res
-}
+// Maps a task to its parent group. TC = O(n^2) where n => number of records in todos (all active tasks and all taskgroups).
+fn map_parent_to_tasks(todos: &[Todo]) -> HashMap<String, Vec<String>> {
+    let mut parent_and_task: Vec<(String, String)> = Vec::new();
 
-fn map_parent_to_tasks(task_list: Vec<(String, String)>) -> HashMap<String, Vec<String>> {
+    for todo in todos.iter() {
+        if todo.id == 0 || todo.todo_type == Type::TaskGroup {
+            continue;
+        }
+
+        let pid = todo.parent_group_id.unwrap();
+        for parent_todo in todos.iter() {
+            if parent_todo.id == pid {
+                parent_and_task.push((parent_todo.name.clone(), todo.name.clone()));
+            }
+        }
+    }
+
     let mut res: HashMap<String, Vec<String>> = HashMap::new();
 
-    for (parent, task) in task_list {
+    for (parent, task) in parent_and_task {
         res.entry(parent).or_insert(Vec::new()).push(task);
     }
 
@@ -63,10 +73,7 @@ fn generate_ordered_list(map: HashMap<String, Vec<String>>, is_completed: bool) 
     html
 }
 
-fn generate_html(active_tasks: Vec<(u64, String)>, completed_tasks: Vec<(u64, String)>) -> String {
-    let active_tasks_inp: Vec<(String, String)> = get_python_input(&active_tasks);
-    let completed_tasks_inp: Vec<(String, String)> = get_python_input(&completed_tasks);
-
+fn generate_html(active_tasks: Vec<Todo>, completed_tasks: Vec<Todo>) -> String {
     let pdf_css = format!(
         "
         @import url(\"https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap\");
@@ -127,12 +134,12 @@ fn generate_html(active_tasks: Vec<(u64, String)>, completed_tasks: Vec<(u64, St
          </body>
          </html>",
         pdf_css,
-        generate_ordered_list(map_parent_to_tasks(active_tasks_inp), false),
-        generate_ordered_list(map_parent_to_tasks(completed_tasks_inp), true)
+        generate_ordered_list(map_parent_to_tasks(&active_tasks), false),
+        generate_ordered_list(map_parent_to_tasks(&completed_tasks), true)
     )
 }
 
-fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_pdf(html: String) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let browser = Browser::new(LaunchOptions {
         headless: true,
         ..Default::default()
@@ -146,6 +153,10 @@ fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::erro
 
     let pdf_data = tab.print_to_pdf(None)?;
 
+    Ok(pdf_data)
+}
+
+fn write_pdf(pdf_data: Vec<u8>, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create(pdf_name)?;
     file.write_all(&pdf_data)?;
 
@@ -153,20 +164,38 @@ fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::erro
 }
 
 #[tauri::command]
-pub fn export_to_pdf() {
-    let active_tasks = get_all_tasks(FetchBasis::Active);
-    let completed_tasks = get_all_tasks(FetchBasis::Completed);
+pub fn export_to_pdf(db_conn: State<'_, DbConn>) {
+    let conn = db_conn.lock().unwrap();
+    let active_tasks = match fetch_todos(&conn, TODAY, FetchBasis::Active) {
+        Ok(todos) => todos,
+        Err(_) => return,
+    };
+    let completed_tasks = match fetch_todos(&conn, TODAY, FetchBasis::Completed) {
+        Ok(todos) => todos,
+        Err(_) => return,
+    };
 
     FileDialogBuilder::new()
         .set_title("Export Tasks to PDF")
         .add_filter("PDF files", &["pdf"])
         .set_file_name("Today's Tasks.pdf")
         .save_file(move |path| {
+            /*
+                I love how path above is an Option<PathBuf>. Its because
+                this function will be executed no matter what button the
+                user presses; "Save" or "Cancel".
+                If they press "Cancel": path = None
+                If they press "Save": path = Some(<actual path the user chose>)
+            */
             if let Some(path) = path {
-                match generate_pdf(
-                    generate_html(active_tasks, completed_tasks),
-                    path
-                ) {
+                let pdf = match generate_pdf(generate_html(active_tasks, completed_tasks)) {
+                    Ok(data) => data,
+                    Err(e) => {
+                        println!("[ERROR] Couldn't generate pdf: {e}");
+                        return;
+                    }
+                };
+                match write_pdf(pdf, path) {
                     Ok(_) => (),
                     Err(err) => println!("{err}"),
                 }
