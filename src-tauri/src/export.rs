@@ -1,17 +1,28 @@
 use headless_chrome::{Browser, LaunchOptions};
+use rusqlite::Connection;
 use std::{collections::HashMap, fs::File, io::Write, path::PathBuf};
-use tauri::api::dialog::FileDialogBuilder;
+use tauri::{api::dialog::FileDialogBuilder, State};
 
-use crate::db::ops::{
-    crud_commands::{get_all_tasks, get_item},
-    FetchBasis,
+use crate::db::{
+    init::DbConn,
+    todos::{
+        commands::{fetch_todos, TODAY},
+        FetchBasis, Todo,
+    },
 };
 
-fn get_python_input(tasks: &[(u64, String)]) -> Vec<(String, String)> {
+fn get_python_input(conn: &Connection, todos: &[Todo]) -> Vec<(String, String)> {
     let mut res: Vec<(String, String)> = Vec::new();
-    for (parent_id, name) in tasks.iter() {
-        let parent_name = get_item(*parent_id);
-        res.push((parent_name, name.clone()));
+    for todo in todos.iter() {
+        if todo.id == 0 {
+            continue;
+        }
+        let parent = match fetch_todos(conn, TODAY, FetchBasis::ById(todo.parent_group_id.unwrap()))
+        {
+            Ok(parent_group) => parent_group,
+            Err(e) => panic!("[ERROR] why tf is python is still here: {e}"),
+        };
+        res.push((parent[0].name.clone(), todo.name.clone()));
     }
     res
 }
@@ -63,9 +74,9 @@ fn generate_ordered_list(map: HashMap<String, Vec<String>>, is_completed: bool) 
     html
 }
 
-fn generate_html(active_tasks: Vec<(u64, String)>, completed_tasks: Vec<(u64, String)>) -> String {
-    let active_tasks_inp: Vec<(String, String)> = get_python_input(&active_tasks);
-    let completed_tasks_inp: Vec<(String, String)> = get_python_input(&completed_tasks);
+fn generate_html(conn: &Connection, active_tasks: Vec<Todo>, completed_tasks: Vec<Todo>) -> String {
+    let active_tasks_inp: Vec<(String, String)> = get_python_input(conn, &active_tasks);
+    let completed_tasks_inp: Vec<(String, String)> = get_python_input(conn, &completed_tasks);
 
     let pdf_css = format!(
         "
@@ -132,7 +143,7 @@ fn generate_html(active_tasks: Vec<(u64, String)>, completed_tasks: Vec<(u64, St
     )
 }
 
-fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_pdf(html: String) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let browser = Browser::new(LaunchOptions {
         headless: true,
         ..Default::default()
@@ -146,6 +157,10 @@ fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::erro
 
     let pdf_data = tab.print_to_pdf(None)?;
 
+    Ok(pdf_data)
+}
+
+fn write_pdf(pdf_data: Vec<u8>, pdf_name: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create(pdf_name)?;
     file.write_all(&pdf_data)?;
 
@@ -153,9 +168,26 @@ fn generate_pdf(html: String, pdf_name: PathBuf) -> Result<(), Box<dyn std::erro
 }
 
 #[tauri::command]
-pub fn export_to_pdf() {
-    let active_tasks = get_all_tasks(FetchBasis::Active);
-    let completed_tasks = get_all_tasks(FetchBasis::Completed);
+pub fn export_to_pdf(db_conn: State<'_, DbConn>) {
+    let conn = db_conn.lock().unwrap();
+    let active_tasks = match fetch_todos(&conn, TODAY, FetchBasis::Active) {
+        Ok(todos) => todos,
+        Err(_) => return,
+    };
+    let completed_tasks = match fetch_todos(&conn, TODAY, FetchBasis::Completed) {
+        Ok(todos) => todos,
+        Err(_) => return,
+    };
+
+    // Since we are forming the pdf before we start to save the file, this takes some time
+    // and the app sort of hangs for a period of time before the file dialog shows up.
+    let pdf = match generate_pdf(generate_html(&conn, active_tasks, completed_tasks)) {
+        Ok(data) => data,
+        Err(e) => {
+            println!("[ERROR] Couldn't generate pdf: {e}");
+            return;
+        }
+    };
 
     FileDialogBuilder::new()
         .set_title("Export Tasks to PDF")
@@ -163,10 +195,7 @@ pub fn export_to_pdf() {
         .set_file_name("Today's Tasks.pdf")
         .save_file(move |path| {
             if let Some(path) = path {
-                match generate_pdf(
-                    generate_html(active_tasks, completed_tasks),
-                    path
-                ) {
+                match write_pdf(pdf, path) {
                     Ok(_) => (),
                     Err(err) => println!("{err}"),
                 }

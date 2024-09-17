@@ -109,7 +109,7 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
       table: TODAY,
       name: name,
       parent_group_id: parentGroupId,
-      item_type: option,
+      todo_type: option === TASK ? { type: TASK } : { type: TASK_GROUP },
     })
       .then((id) => {
         let isActive = option === TASK ? true : null;

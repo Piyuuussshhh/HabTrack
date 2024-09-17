@@ -62,7 +62,7 @@ const Task = (props) => {
     invoke(TAURI_DELETE_ITEM, {
       table: props.dbTable,
       id: props.id,
-      item_type: TASK,
+      todo_type: {type: TASK},
     });
 
     // Delete task from the frontend.

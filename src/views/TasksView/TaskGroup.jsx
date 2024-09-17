@@ -121,7 +121,7 @@ const TaskGroup = ({
     invoke(TAURI_DELETE_ITEM, {
       table: dbTable,
       id: id,
-      item_type: TASK_GROUP,
+      todo_type: {type: TASK_GROUP},
     });
 
     // Deleting group from front-end.
