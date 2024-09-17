@@ -21,16 +21,6 @@ import { addItem } from "../../utility/AddRemoveUpdateItems";
 import { updateFrontend } from "../../utility/UpdateFrontend";
 import CompletedTasksModal from "../../components/CompletedTasksModal";
 
-/*
-    TODO -> ERROR HANDLING.
-            We don't handle errors when the input string in
-            Parent Name in the add item model is not an actual
-            valid parent group.
-
-            Arnav's idea: Instead of a textbox, use a dropdown menu
-            to display the available parent groups.
-*/
-
 const NOT_FOUND = -1;
 
 const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
@@ -39,10 +29,6 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
   const [showCompleted, setCompletedTasksVisibility] = useState(false);
   const [preselectGroup, setPreselectGroup] = useState(ROOT);
 
-  /*
-      Probably should not do this, and just add the task to
-      the JSON object in sessionStorage. SEE TOP TODO.
-  */
   useEffect(() => {
     async function fetchTasks() {
       const storedView = sessionStorage.getItem(TASKS_VIEW);
@@ -156,6 +142,7 @@ const TasksView = ({ isSidebarOpen, mainAreaRef }) => {
     try {
       await invoke(TAURI_EXPORT_TO_PDF);
     } catch (e) {
+      // Error handling required.
       console.log(e);
     }
   };

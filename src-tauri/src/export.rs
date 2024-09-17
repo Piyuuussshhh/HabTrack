@@ -11,7 +11,7 @@ use crate::db::{
     },
 };
 
-fn get_python_input(conn: &Connection, todos: &[Todo]) -> Vec<(String, String)> {
+fn get_parent_group_and_todo(conn: &Connection, todos: &[Todo]) -> Vec<(String, String)> {
     let mut res: Vec<(String, String)> = Vec::new();
     for todo in todos.iter() {
         if todo.id == 0 {
@@ -75,8 +75,8 @@ fn generate_ordered_list(map: HashMap<String, Vec<String>>, is_completed: bool) 
 }
 
 fn generate_html(conn: &Connection, active_tasks: Vec<Todo>, completed_tasks: Vec<Todo>) -> String {
-    let active_tasks_inp: Vec<(String, String)> = get_python_input(conn, &active_tasks);
-    let completed_tasks_inp: Vec<(String, String)> = get_python_input(conn, &completed_tasks);
+    let active_tasks_inp: Vec<(String, String)> = get_parent_group_and_todo(conn, &active_tasks);
+    let completed_tasks_inp: Vec<(String, String)> = get_parent_group_and_todo(conn, &completed_tasks);
 
     let pdf_css = format!(
         "
