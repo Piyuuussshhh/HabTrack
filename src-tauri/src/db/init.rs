@@ -11,8 +11,11 @@ pub fn init(path: &str) -> Connection {
         create_db(path);
     }
 
-    // TODO conditional path for diff OS
-    let db_name = format!("{path}/database.sqlite");
+    let db_name = if std::env::consts::OS == "windows" {
+        format!("{}\\database.sqlite", path)
+    } else {
+        format!("{}/database.sqlite", path)
+    };
 
     match Connection::open(db_name) {
         Ok(conn) => conn,
