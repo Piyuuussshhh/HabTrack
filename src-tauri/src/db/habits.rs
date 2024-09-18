@@ -18,6 +18,7 @@ pub struct DayType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "to_delete")]
 pub enum ToDelete {
     All,
     One(u64),
@@ -38,7 +39,7 @@ pub mod commands {
         db_conn: State<'_, DbConn>,
         name: String,
         day_types: Vec<(String, String)>,
-    ) -> (i64, HashMap<String, (i64, String)>) {
+    ) -> (i64, HashMap<String, i64>) {
         let conn = db_conn.lock().unwrap();
 
         let command =
@@ -57,9 +58,9 @@ pub mod commands {
             .map(|(dt_name, color)| {
                 let dt_id = insert_day_type(&conn, id, dt_name.as_str(), &color);
 
-                (dt_name, (dt_id, color))
+                (dt_name, dt_id)
             })
-            .collect::<HashMap<String, (i64, String)>>();
+            .collect::<HashMap<String, i64>>();
 
         (id, day_types_map)
     }

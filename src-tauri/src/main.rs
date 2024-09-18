@@ -5,7 +5,7 @@
 
 use std::sync::{Arc, Mutex};
 
-use habtrack::{db::init, db::todos, window, export};
+use habtrack::{db::init, db::todos, db::habits, window, export};
 use tauri::Manager;
 
 // Start work on database.
@@ -36,6 +36,12 @@ fn main() {
             todos::commands::add_todo,
             todos::commands::delete_todo,
             todos::commands::update_todo,
+            habits::commands::add_habit,
+            habits::commands::add_day_type,
+            habits::commands::fetch_habits,
+            habits::commands::increment_streak,
+            habits::commands::delete_day_type,
+            habits::commands::delete_habit,
             window::open_tomorrow_window,
             window::close_tomorrow_window,
             export::export_to_pdf,
