@@ -176,7 +176,7 @@ pub mod habits {
             [],
         )?;
 
-        // DAY TYPES
+        // HISTORY
         conn.execute(
             "CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -195,7 +195,7 @@ pub mod habits {
     pub fn validate_streaks(conn: &Connection) -> SQLiteResult<()> {
         // Obtain all habit_ids.
         let mut stmt = conn.prepare("SELECT id FROM habits")?;
-        let habits = stmt
+        let all_habits = stmt
             .query_map([], |row| {
                 let id: u64 = row.get(0)?;
                 Ok(id)
@@ -204,7 +204,7 @@ pub mod habits {
             .filter(|id| *id != u64::MAX)
             .collect::<Vec<u64>>();
 
-        if habits.is_empty() {
+        if all_habits.is_empty() {
             return Ok(());
         }
 
@@ -228,7 +228,7 @@ pub mod habits {
             .collect::<HashSet<u64>>();
 
         // Check if all habit_ids are in the set.
-        habits.into_iter().for_each(|id| {
+        all_habits.into_iter().for_each(|id| {
             // If a habit_id is not: set the corresponding habit's streak to 0.
             if !yesterdays_habits.contains(&id) {
                 match conn.execute("UPDATE habits SET streak=0 WHERE id=(?id)", params![id]) {
