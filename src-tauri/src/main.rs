@@ -21,9 +21,9 @@ fn main() {
                 None => panic!("[ERROR] Cannot find data directory on this device!"),
             };
 
-            let conn = init::init(&db_path);
-            init::create_tables(&conn).unwrap();
-            init::migrate_todos(&conn).unwrap();
+            let conn = init::db::init(&db_path);
+            init::todos::create_tables(&conn).unwrap();
+            init::todos::migrate_todos(&conn).unwrap();
 
             app.manage(Arc::new(Mutex::new(conn)));
 
