@@ -161,7 +161,7 @@ pub mod commands {
         }
     }
 
-    /* -------------------------------- Helper Functions -------------------------------- */
+    /* ------------------------------------ Helper Functions ------------------------------------ */
 
     pub fn fetch_todos(conn: &Connection, table: &str, by: FetchBasis) -> SQLiteResult<Vec<Todo>> {
         let mut stmt = match by {
