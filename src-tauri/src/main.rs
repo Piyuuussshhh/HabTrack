@@ -24,6 +24,8 @@ fn main() {
             let conn = init::db::init(&db_path);
             init::todos::create_tables(&conn).unwrap();
             init::todos::migrate_todos(&conn).unwrap();
+            init::habits::create_tables(&conn).unwrap();
+            init::habits::validate_streaks(&conn).unwrap();
 
             app.manage(Arc::new(Mutex::new(conn)));
 

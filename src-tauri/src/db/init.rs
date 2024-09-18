@@ -145,3 +145,99 @@ pub mod todos {
         Ok(())
     }
 }
+
+pub mod habits {
+    use std::collections::HashSet;
+    use chrono::Local;
+    use rusqlite::{params, Connection, Result as SQLiteResult};
+
+    pub fn create_tables(conn: &Connection) -> SQLiteResult<()> {
+        // HABITS
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS habits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            streak INTEGER NOT NULL,
+            highest_streak INTEGER NOT NULL,
+            created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
+        )",
+            [],
+        )?;
+
+        // DAY TYPES
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS day_types (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            habit_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            color TEXT NOT NULL,
+            FOREIGN KEY(habit_id) REFERENCES habits(id)
+        )",
+            [],
+        )?;
+
+        // DAY TYPES
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            habit_id INTEGER NOT NULL,
+            day_type_id INTEGER NOT NULL,
+            date DATE DEFAULT (datetime('now','localtime')) NOT NULL,
+            FOREIGN KEY(habit_id) REFERENCES habits(id),
+            FOREIGN KEY(day_type_id) REFERENCES day_types(id)
+        )",
+            [],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn validate_streaks(conn: &Connection) -> SQLiteResult<()> {
+        // Obtain all habit_ids.
+        let mut stmt = conn.prepare("SELECT id FROM habits")?;
+        let habits = stmt
+            .query_map([], |row| {
+                let id: u64 = row.get(0)?;
+                Ok(id)
+            })?
+            .map(|id_res| if let Ok(id) = id_res { id } else { u64::MAX })
+            .filter(|id| *id != u64::MAX)
+            .collect::<Vec<u64>>();
+
+        if habits.is_empty() {
+            return Ok(());
+        }
+
+        // Obtain all records from yesterday from history.
+        let yesterday = match Local::now().naive_local().date().pred_opt() {
+            Some(date) => date,
+            None => panic!("[ERROR] WTF there was no yesterday?"),
+        };
+        let mut stmt = conn.prepare(&format!(
+            "SELECT habit_id FROM history WHERE date LIKE '{}%'",
+            yesterday.to_string()
+        ))?;
+        // Put all habit_ids from history records into a set.
+        let yesterdays_habits = stmt
+            .query_map([], |row| {
+                let id: u64 = row.get(0)?;
+                Ok(id)
+            })?
+            .map(|id_res| if let Ok(id) = id_res { id } else { u64::MAX })
+            .filter(|id| *id != u64::MAX)
+            .collect::<HashSet<u64>>();
+
+        // Check if all habit_ids are in the set.
+        habits.into_iter().for_each(|id| {
+            // If a habit_id is not: set the corresponding habit's streak to 0.
+            if !yesterdays_habits.contains(&id) {
+                match conn.execute("UPDATE habits SET streak=0 WHERE id=(?id)", params![id]) {
+                    Ok(_) => (),
+                    Err(e) => panic!("[ERROR] Could not reset streak of habit_id {id}: {e}"),
+                }
+            }
+        });
+
+        Ok(())
+    }
+}
