@@ -4,14 +4,9 @@
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
 use std::sync::{Arc, Mutex};
-
-use habtrack::{db::init, db::todos, window, export};
 use tauri::Manager;
 
-// Start work on database.
-// TODO: Once done, merge with main, and pull changes into FEATURE-add-delete-task.
-
-
+use habtrack::{db::init, db::todos, export, window};
 
 fn main() {
     tauri::Builder::default()

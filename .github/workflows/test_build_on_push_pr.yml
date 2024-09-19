@@ -2,11 +2,6 @@ name: "test-build-on-push-and-pr"
 
 on:
   push:
-    branches-ignore:
-      - 'main'
-  pull_request:
-    branches-ignore:
-      - 'main'
     branches:
       - '**'  # This makes the workflow run on pushes to any branch.
 

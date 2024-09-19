@@ -1195,11 +1195,10 @@ dependencies = [
 
 [[package]]
 name = "habtrack"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "headless_chrome",
- "lazy_static",
  "libsqlite3-sys",
  "rusqlite",
  "serde",

@@ -5,15 +5,7 @@ import { resolve } from "path";
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [react()],
-
-  build: {
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, "index.html"),
-        tomorrow: resolve(__dirname, "src/views/TasksView/Tomorrow/index.html"),
-      },
-    },
-  },
+  base: "./",
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -27,5 +19,28 @@ export default defineConfig(async () => ({
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
+  },
+  envPrefix: [
+    "VITE_",
+    "TAURI_PLATFORM",
+    "TAURI_ARCH",
+    "TAURI_FAMILY",
+    "TAURI_PLATFORM_VERSION",
+    "TAURI_PLATFORM_TYPE",
+    "TAURI_DEBUG",
+  ],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        tomorrow: resolve(__dirname, "src/views/TasksView/Tomorrow/index.html"),
+      },
+    },
+    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
+    target: process.env.TAURI_PLATFORM == "windows" ? "chrome105" : "safari13",
+    // don't minify for debug builds
+    minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
+    // produce sourcemaps for debug builds
+    sourcemap: !!process.env.TAURI_DEBUG,
   },
 }));
