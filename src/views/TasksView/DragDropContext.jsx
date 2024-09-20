@@ -40,6 +40,7 @@ const DragDropProvider = ({ children, item, dbTable }) => {
       table: dbTable,
       id: droppedItemId,
       field: { Parent: targetId },
+      h_plus_dt: [null, null],
     });
 
     setStructure(() => {

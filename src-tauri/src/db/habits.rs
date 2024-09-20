@@ -1,5 +1,5 @@
 /*
-    If somehow, the number of habits created by the user crosses (2^32 - 1), my program will crash and burn the entire planet.
+    If somehow, the number of habits created by the user crosses (2^63 - 1), my program will crash and burn the entire planet.
     This is because SQLite stores ROWID as a signed 64 bit integer. But I have OCD and decided to convert the i64 to u64 because
     IDs cannot be negative.
 */
@@ -39,13 +39,22 @@ pub enum ToDelete {
 }
 
 pub mod commands {
-    use std::collections::HashMap;
-
-    use crate::db::{habits::Habit, init::DbConn};
     use rusqlite::{params, Connection};
+    use std::collections::HashMap;
+    use std::sync::Mutex;
     use tauri::State;
 
+    type CompMap = Mutex<HashMap<u64, bool>>;
+
     use super::{DayType, History, ToDelete};
+    use crate::db::{
+        habits::Habit,
+        init::DbConn,
+        todos::{
+            commands::{add_todo, update_status, TASK, TODAY},
+            Type,
+        },
+    };
 
     /// (C)RUD -> Create a habit.
     #[tauri::command(rename_all = "snake_case")]
@@ -137,7 +146,9 @@ pub mod commands {
     pub fn fetch_history(db_conn: State<'_, DbConn>, habit_id: u64) -> String {
         let conn = db_conn.lock().unwrap();
 
-        let mut stmt = conn.prepare("SELECT * FROM history WHERE habit_id=(?1)").expect("[ERROR] Couldn't prepare statement to fetch history of the habit!");
+        let mut stmt = conn
+            .prepare("SELECT * FROM history WHERE habit_id=(?1)")
+            .expect("[ERROR] Couldn't prepare statement to fetch history of the habit!");
         let history = match stmt.query_map([habit_id], |row| {
             let id: u64 = row.get(0)?;
             let habit_id: u64 = row.get(1)?;
@@ -153,7 +164,8 @@ pub mod commands {
             }).collect::<Vec<History>>(),
         };
 
-        serde_json::to_string(&history).expect("[ERROR] Couldn't convert history vector into a JSON object!")
+        serde_json::to_string(&history)
+            .expect("[ERROR] Couldn't convert history vector into a JSON object!")
     }
 
     // Note: This will update the highest_streak value if the streak exceeds it, but
@@ -161,32 +173,29 @@ pub mod commands {
     // in the frontend separately.
     /// CR(U)D -> Increment the streak for a habit.
     #[tauri::command(rename_all = "snake_case")]
-    pub fn increment_streak(db_conn: State<'_, DbConn>, habit_id: u64, dt_id: u64) {
+    pub fn increment_streak(
+        db_conn: State<'_, DbConn>,
+        habit_id: u64,
+        dt_id: u64,
+        todo_id: Option<u64>,
+    ) {
         let conn = db_conn.lock().unwrap();
 
-        // Update streak.
-        match conn.execute(
-            "UPDATE habits SET streak = streak + 1 WHERE id=(?1)",
-            params![habit_id],
-        ) {
-            Ok(_) => (),
-            Err(e) => panic!("[ERROR] Could not increment streak: {e}"),
-        };
-        match conn.execute(
-            "UPDATE habits SET highest_streak = streak WHERE highest_streak < streak",
-            [],
-        ) {
-            Ok(_) => (),
-            Err(e) => panic!("[ERROR] Could not increment streak: {e}"),
-        };
+        // Check if the habit's streak has already been incremented. Else there will be a free-streak-increase glitch. Not to mention my history table will be fucked.
+        /*
+            FIX: Don't check. Instead, don't allow:
+                1. Habits checkbox to be unchecked once it has been checked.
+                2. Completed habit-corresponding tasks to be undone from the completed tasks modal.
+        */
 
-        // Add record in history.
-        let command = format!("INSERT INTO history VALUES (?1, ?2)");
-        let mut stmt = conn
-            .prepare(&command)
-            .expect("[ERROR] Could not prepare insertion into history command.");
-        stmt.insert(params![habit_id, dt_id])
-            .expect("[ERROR] Could not insert into history!");
+        // Mark the habit's associated task as completed, if it exists.
+        if let Some(id) = todo_id {
+            // update_status() calls increment_helper() internally.
+            update_status(&conn, TODAY, id, true, (Some(habit_id), Some(dt_id)));
+        } else {
+            // Increment the streak.
+            increment_helper(&conn, habit_id, dt_id);
+        }
     }
 
     /// CRU(D) -> Delete a single or all day types of a habit.
@@ -210,13 +219,35 @@ pub mod commands {
     }
 
     // TODO Think about implementing default task names based on selected day type if the user does not want to name the task themselves.
-    /// This command creates a task for each habit in habit_id_todo. Returns an array containing ids of all the newly created tasks.
+    /// This command creates a task for each habit in habit_id_todo. Returns an object containing:
+    /// 1. The id of the group 'Habits'.
+    /// 2. An object that maps the newly created task's id with the chosen day type of the habit & the task's name.
     #[tauri::command(rename_all = "snake_case")]
-    pub fn conv_habit_todo(db_conn: State<'_, DbConn>, habit_id_todo: Vec<(u64, String)>) -> Vec<u64> {
-        let conn = db_conn.lock().unwrap();
-        
+    pub fn create_habit_todo(
+        db_conn: State<'_, DbConn>,
+        habit_ids_todos: Vec<(u64, (u64, String))>,
+    ) -> (u64, HashMap<u64, (u64, String)>) {
+        // Create group Habits.
+        let group_id = add_todo(db_conn.clone(), TODAY, "Habits", 0, Type::TaskGroup);
 
-        todo!()
+        // Insert tasks into habits.
+        let conn = db_conn.lock().unwrap();
+
+        let mut habit_todos: HashMap<u64, (u64, String)> = HashMap::new();
+        for (habit_id, (dt_id, todo_name)) in habit_ids_todos {
+            let command = format!("INSERT INTO today (name, type, is_active, parent_group_id, habit_id) VALUES (?1, ?2, ?3, ?4, ?5)");
+            let mut stmt = conn
+                .prepare(&command)
+                .expect("[ERROR] Could not prepare command to insert task into habits group!");
+            let id = match stmt.insert(params![todo_name, TASK, 1, group_id, habit_id]) {
+                Ok(id) => id as u64,
+                Err(e) => panic!("[ERROR] Could not insert task for the habit {habit_id}: {e}"),
+            };
+
+            habit_todos.insert(id, (dt_id, todo_name));
+        }
+
+        (group_id, habit_todos)
     }
 
     /* ------------------------------------ Helper Functions ------------------------------------ */
@@ -257,6 +288,32 @@ pub mod commands {
         };
 
         day_types
+    }
+
+    pub fn increment_helper(conn: &Connection, habit_id: u64, dt_id: u64) {
+        // Update streak.
+        match conn.execute(
+            "UPDATE habits SET streak = streak + 1 WHERE id=(?1)",
+            params![habit_id],
+        ) {
+            Ok(_) => (),
+            Err(e) => panic!("[ERROR] Could not increment streak: {e}"),
+        };
+        match conn.execute(
+            "UPDATE habits SET highest_streak = streak WHERE highest_streak < streak",
+            [],
+        ) {
+            Ok(_) => (),
+            Err(e) => panic!("[ERROR] Could not increment streak: {e}"),
+        };
+
+        // Add record in history.
+        let command = format!("INSERT INTO history (habit_id, day_type_id) VALUES (?1, ?2)");
+        let mut stmt = conn
+            .prepare(&command)
+            .expect("[ERROR] Could not prepare insertion into history command.");
+        stmt.insert(params![habit_id, dt_id])
+            .expect("[ERROR] Could not insert into history!");
     }
 
     fn delete_history(conn: &Connection, habit_id: u64) -> u64 {

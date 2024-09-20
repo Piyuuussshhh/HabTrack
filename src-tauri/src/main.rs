@@ -8,11 +8,6 @@ use std::sync::{Arc, Mutex};
 use habtrack::{db::init, db::todos, db::habits, window, export};
 use tauri::Manager;
 
-// Start work on database.
-// TODO: Once done, merge with main, and pull changes into FEATURE-add-delete-task.
-
-
-
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -42,6 +37,8 @@ fn main() {
             habits::commands::increment_streak,
             habits::commands::delete_day_type,
             habits::commands::delete_habit,
+            habits::commands::fetch_history,
+            habits::commands::create_habit_todo,
             window::open_tomorrow_window,
             window::close_tomorrow_window,
             export::export_to_pdf,

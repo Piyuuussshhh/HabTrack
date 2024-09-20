@@ -62,7 +62,7 @@ const Task = (props) => {
     invoke(TAURI_DELETE_ITEM, {
       table: props.dbTable,
       id: props.id,
-      todo_type: {type: TASK},
+      todo_type: { type: TASK },
     });
 
     // Delete task from the frontend.
@@ -87,6 +87,7 @@ const Task = (props) => {
       table: props.dbTable,
       id: props.id,
       field: { Name: editedName },
+      h_plus_dt: [null, null],
     });
 
     // Update name on the frontend.
@@ -122,10 +123,14 @@ const Task = (props) => {
       table: props.dbTable,
       id: props.id,
       field: { Status: true },
+      h_plus_dt: props.habit_id
+        ? [props.habit_id, props.dt_id]
+        : [null, null],
     });
 
     // Update frontend.
     updateFrontend(removeItem, view, props.onChangeView, props.id);
+    // TODO update the frontend of HabitsView here as well.
   }
   const scroll = useCallback(
     (container, direction) => {

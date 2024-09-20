@@ -55,7 +55,9 @@ pub mod todos {
             type TEXT NOT NULL,
             is_active INTEGER,
             parent_group_id INTEGER,
-            created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL
+            habit_id INTEGER,
+            created_at DATE DEFAULT (datetime('now','localtime')) NOT NULL,
+            FOREIGN KEY(habit_id) REFERENCES habits(id)
         )",
             [],
         )?;

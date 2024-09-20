@@ -41,10 +41,14 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
 
   const onUndo = (item) => {
     // Update db.
+    // Even if a task connected to a habit is undone and redone, the streak will increment only once thanks to CompMap :)
     invoke(TAURI_UPDATE_ITEM, {
       table: TODAY,
       id: item.id,
       field: { Status: false },
+      h_plus_dt: item.habit_id
+        ? [item.habit_id, item.dt_id]
+        : [null, null],
     });
 
     // Update frontend of completed tasks view.
@@ -87,13 +91,14 @@ const CompletedTasksModal = ({ onChangeTasksView, onCancel }) => {
                   <li key={node.id}>
                     <div className="completed-task">
                       <label>{node.name}</label>
-                      <button
+                      {/* Only allow tasks not corresponding to habits to be undone. */}
+                      {node.habit_id === null && <button
                         type="button"
                         className="task-btn"
                         onClick={() => onUndo(node)}
                       >
                         <Undo />
-                      </button>
+                      </button>}
                     </div>
                   </li>
                 );

@@ -1,5 +1,5 @@
 /*
-    If somehow, the number of tasks created by the user crosses (2^32 - 1), my program will crash and burn the entire planet.
+    If somehow, the number of tasks created by the user crosses (2^63 - 1), my program will crash and burn the entire planet.
     This is because SQLite stores ROWID as a signed 64 bit integer. But I have OCD and decided to convert the i64 to u64 because
     IDs cannot be negative.
 */
@@ -47,6 +47,8 @@ pub struct Todo {
     pub parent_group_id: Option<u64>,
     // Optional because tasks have no children.
     pub children: Option<Vec<Todo>>,
+    // Optional because no group & not all tasks are associated to habits.
+    habit_id: Option<u64>,
 }
 
 impl Todo {
@@ -57,6 +59,7 @@ impl Todo {
         is_active: Option<bool>,
         parent_group_id: Option<u64>,
         children: Option<Vec<Todo>>,
+        habit_id: Option<u64>,
     ) -> Self {
         Todo {
             id,
@@ -65,6 +68,7 @@ impl Todo {
             is_active,
             parent_group_id,
             children,
+            habit_id,
         }
     }
 }
@@ -76,12 +80,12 @@ pub mod commands {
     use rusqlite::{params, Connection, Result as SQLiteResult};
     use tauri::State;
 
-    use crate::db::init::DbConn;
+    use crate::db::{habits::commands::increment_helper, init::DbConn};
 
     pub const ROOT_GROUP: &str = "/";
     pub const TODAY: &str = "today";
-    const TASK: &str = "Task";
-    const TASK_GROUP: &str = "TaskGroup";
+    pub const TASK: &str = "Task";
+    pub const TASK_GROUP: &str = "TaskGroup";
 
     #[tauri::command(rename_all = "snake_case")]
     pub fn add_todo(
@@ -146,13 +150,19 @@ pub mod commands {
     }
 
     #[tauri::command(rename_all = "snake_case")]
-    pub fn update_todo(db_conn: State<'_, DbConn>, table: &str, id: u64, field: Field) {
+    pub fn update_todo(
+        db_conn: State<'_, DbConn>,
+        table: &str,
+        id: u64,
+        field: Field,
+        h_plus_dt: (Option<u64>, Option<u64>),
+    ) {
         let conn = db_conn.lock().unwrap();
 
         match field {
             Field::Name(name) => update_name(&conn, table, &name, id),
             Field::Parent(new_pid) => update_parent(&conn, table, id, new_pid),
-            Field::Status(status) => update_status(&conn, table, id, status),
+            Field::Status(status) => update_status(&conn, table, id, status, h_plus_dt),
         }
     }
 
@@ -194,6 +204,7 @@ pub mod commands {
             let type_str: String = row.get(2)?;
             let is_active: Option<i32> = row.get(3)?;
             let parent_group_id: Option<u64> = row.get(4)?;
+            let habit_id: Option<u64> = row.get(5)?;
 
             let is_active = match is_active {
                 Some(0) => Some(false),
@@ -216,6 +227,7 @@ pub mod commands {
                 is_active,
                 parent_group_id,
                 None,
+                habit_id,
             ))
         })?;
 
@@ -263,6 +275,7 @@ pub mod commands {
             None,
             pid,
             Some(final_children),
+            None,
         )
     }
 
@@ -286,6 +299,7 @@ pub mod commands {
                             Type::TaskGroup => Some(vec![]),
                         }
                     },
+                    todo.habit_id,
                 ),
             );
 
@@ -329,7 +343,13 @@ pub mod commands {
         }
     }
 
-    fn update_status(conn: &Connection, table: &str, id: u64, status: bool) {
+    pub fn update_status(
+        conn: &Connection,
+        table: &str,
+        id: u64,
+        status: bool,
+        h_plus_dt: (Option<u64>, Option<u64>),
+    ) {
         let is_active = match status {
             // the status parameter holds the checked status of associated checkbox.
             // true = task completed, therefore is_active = false,
@@ -337,6 +357,15 @@ pub mod commands {
             // false = task incomplete, therefore is_active = true,
             false => 1u64,
         };
+
+        if status {
+            match h_plus_dt {
+                (Some(habit_id), Some(dt_id)) => {
+                    increment_helper(conn, habit_id, dt_id);
+                }
+                _ => (),
+            };
+        }
 
         let command = format!("UPDATE {table} SET is_active=(?1) WHERE id=(?2)");
 
@@ -346,7 +375,7 @@ pub mod commands {
                 "[ERROR] could not update status of task: {}",
                 err.to_string()
             ),
-        }
+        };
     }
 
     fn delete_task(conn: &Connection, table: &str, id: u64) {

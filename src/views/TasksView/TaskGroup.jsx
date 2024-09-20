@@ -83,6 +83,7 @@ const TaskGroup = ({
       table: dbTable,
       id: id,
       field: { Name: editedName },
+      h_plus_dt: [null, null],
     });
 
     // Update name on the frontend.
@@ -218,6 +219,9 @@ const TaskGroup = ({
                   onChangeView={onChangeView}
                   dbTable={dbTable}
                   taskViewRef={taskViewRef}
+                  // TODO Change this when habits is finally implemented.
+                  habit_id={null}
+                  dt_id={null}
                 />
               );
             } else if (child.type === TASK_GROUP) {
