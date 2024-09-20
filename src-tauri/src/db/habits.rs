@@ -41,10 +41,7 @@ pub enum ToDelete {
 pub mod commands {
     use rusqlite::{params, Connection};
     use std::collections::HashMap;
-    use std::sync::Mutex;
     use tauri::State;
-
-    type CompMap = Mutex<HashMap<u64, bool>>;
 
     use super::{DayType, History, ToDelete};
     use crate::db::{
