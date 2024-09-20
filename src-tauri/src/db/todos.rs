@@ -1,3 +1,9 @@
+/*
+    If somehow, the number of tasks created by the user crosses (2^32 - 1), my program will crash and burn the entire planet.
+    This is because SQLite stores ROWID as a signed 64 bit integer. But I have OCD and decided to convert the i64 to u64 because
+    IDs cannot be negative.
+*/
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,7 +90,7 @@ pub mod commands {
         name: &str,
         parent_group_id: u64,
         todo_type: Type,
-    ) -> i64 {
+    ) -> u64 {
         let db_conn = conn.lock().unwrap();
 
         let command = format!(
@@ -109,7 +115,7 @@ pub mod commands {
                 "[ERROR] Error occurred while trying to insert item: {}",
                 err.to_string()
             ),
-            Ok(id) => id,
+            Ok(id) => id as u64,
         }
     }
 

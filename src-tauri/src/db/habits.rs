@@ -1,3 +1,9 @@
+/*
+    If somehow, the number of habits created by the user crosses (2^32 - 1), my program will crash and burn the entire planet.
+    This is because SQLite stores ROWID as a signed 64 bit integer. But I have OCD and decided to convert the i64 to u64 because
+    IDs cannot be negative.
+*/
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -17,6 +23,14 @@ pub struct DayType {
     color: String,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub struct History {
+    id: u64,
+    habit_id: u64,
+    dt_id: u64,
+    date: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "to_delete")]
 pub enum ToDelete {
@@ -31,7 +45,7 @@ pub mod commands {
     use rusqlite::{params, Connection};
     use tauri::State;
 
-    use super::{DayType, ToDelete};
+    use super::{DayType, History, ToDelete};
 
     /// (C)RUD -> Create a habit.
     #[tauri::command(rename_all = "snake_case")]
@@ -39,7 +53,7 @@ pub mod commands {
         db_conn: State<'_, DbConn>,
         name: String,
         day_types: Vec<(String, String)>,
-    ) -> (i64, HashMap<String, i64>) {
+    ) -> (u64, HashMap<String, u64>) {
         let conn = db_conn.lock().unwrap();
 
         let command =
@@ -50,7 +64,7 @@ pub mod commands {
 
         let id = stmt
             .insert(params![name, 0, 0])
-            .expect("[ERROR] Could not insert habit!");
+            .expect("[ERROR] Could not insert habit!") as u64;
 
         // Maps the name of the day_type to its id.
         let day_types_map = day_types
@@ -60,7 +74,7 @@ pub mod commands {
 
                 (dt_name, dt_id)
             })
-            .collect::<HashMap<String, i64>>();
+            .collect::<HashMap<String, u64>>();
 
         (id, day_types_map)
     }
@@ -69,10 +83,10 @@ pub mod commands {
     #[tauri::command(rename_all = "snake_case")]
     pub fn add_day_type(
         db_conn: State<'_, DbConn>,
-        habit_id: i64,
+        habit_id: u64,
         dt_name: String,
         color: String,
-    ) -> i64 {
+    ) -> u64 {
         let conn = db_conn.lock().unwrap();
 
         insert_day_type(&conn, habit_id, &dt_name, &color)
@@ -116,6 +130,30 @@ pub mod commands {
 
         serde_json::to_string(&habits)
             .expect("[ERROR] Could not convert habit vector into a JSON object")
+    }
+
+    // C(R)UD -> Fetch the completion history of a habit.
+    #[tauri::command(rename_all = "snake_case")]
+    pub fn fetch_history(db_conn: State<'_, DbConn>, habit_id: u64) -> String {
+        let conn = db_conn.lock().unwrap();
+
+        let mut stmt = conn.prepare("SELECT * FROM history WHERE habit_id=(?1)").expect("[ERROR] Couldn't prepare statement to fetch history of the habit!");
+        let history = match stmt.query_map([habit_id], |row| {
+            let id: u64 = row.get(0)?;
+            let habit_id: u64 = row.get(1)?;
+            let dt_id: u64 = row.get(2)?;
+            let date: String = row.get(3)?;
+
+            Ok(History {id, habit_id, dt_id, date})
+        }) {
+            Err(e) => panic!("[ERROR] Could not fetch history: {e}"),
+            Ok(iterator) => iterator.filter(|h_res| h_res.is_ok()).map(|h_res| match h_res {
+                Ok(h) => h,
+                Err(e) => panic!("[ERROR] Wtf why is Err() still here? I specifically didn't ask for it: {e}"),
+            }).collect::<Vec<History>>(),
+        };
+
+        serde_json::to_string(&history).expect("[ERROR] Couldn't convert history vector into a JSON object!")
     }
 
     // Note: This will update the highest_streak value if the streak exceeds it, but
@@ -171,16 +209,26 @@ pub mod commands {
             .expect("[ERROR] Could not delete habit!");
     }
 
+    // TODO Think about implementing default task names based on selected day type if the user does not want to name the task themselves.
+    /// This command creates a task for each habit in habit_id_todo. Returns an array containing ids of all the newly created tasks.
+    #[tauri::command(rename_all = "snake_case")]
+    pub fn conv_habit_todo(db_conn: State<'_, DbConn>, habit_id_todo: Vec<(u64, String)>) -> Vec<u64> {
+        let conn = db_conn.lock().unwrap();
+        
+
+        todo!()
+    }
+
     /* ------------------------------------ Helper Functions ------------------------------------ */
 
-    fn insert_day_type(conn: &Connection, habit_id: i64, dt_name: &str, color: &str) -> i64 {
+    fn insert_day_type(conn: &Connection, habit_id: u64, dt_name: &str, color: &str) -> u64 {
         let command = format!("INSERT INTO day_types (habit_id, name, color) VALUES (?1, ?2, ?3)");
         let mut stmt = conn
             .prepare(&command)
             .expect("[ERROR] Could not prepare day type insertion command!");
 
         stmt.insert(params![habit_id, dt_name, color])
-            .expect("[ERROR] Could not insert day type!")
+            .expect("[ERROR] Could not insert day type!") as u64
     }
 
     fn fetch_day_types(conn: &Connection, habit_id: u64) -> Vec<DayType> {
